@@ -25,4 +25,4 @@ jobs:
     - name: Run Expo
       run: |
         npx expo install  # Ensure expo-cli is installed if necessary
-        npx expo start --non-interactive  # Start Expo in non-interactive mode
+        nohup npx expo start --non-interactive & # Start Expo in non-interactive mode
