@@ -7,16 +7,24 @@ on:
 
 jobs:
   expo-start:
-    runs-on: ubuntu-latest
+    runs-on: [KU]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Build Container
+    - name: Build Docker Container
       run: |
-        docker build . -t admin-webpreview
+        docker build . -t admin-webpreview  # Build the Docker image with the tag 'admin-webpreview'
 
-    - name: Run Container
-      run : |
-        docker run -d --name admin-web -p 8082:8081 admin-webpreview
+    - name: Stop Running Container (if exists)
+      run: |
+        docker stop admin-web || true  # Stop the container if it's running, ignore errors if it doesn't exist
+
+    - name: Remove Previous Container (if exists)
+      run: |
+        docker rm admin-web || true  # Remove the container if it exists, ignore errors if it doesn't exist
+
+    - name: Run Docker Container
+      run: |
+        docker run -d --name admin-web -p 8082:8081 admin-webpreview  # Run the new container in detached mode, exposing ports
