@@ -19,4 +19,4 @@ jobs:
 
     - name: Run Container
       run : |
-        docker run -p 8081:8081 admin-webpreview
+        docker run -d -p 8081:8081 admin-webpreview
