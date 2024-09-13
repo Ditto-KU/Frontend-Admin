@@ -17,5 +17,5 @@ jobs:
           docker build . -t test-admin-webpreview  # Build the Docker image with the tag 'admin-webpreview'
       - name: Clean up
         run: |
-          docker image prune
+          docker image prune -a -f
 
