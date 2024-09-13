@@ -3,7 +3,7 @@ name: Run Expo on Test Branch Update
 on:
   push:
     branches:
-      - test  # Trigger action on pushes to the 'test' branch
+      - main
 
 jobs:
   expo-start:
@@ -27,4 +27,4 @@ jobs:
 
     - name: Run Docker Container
       run: |
-        docker run -d --name admin-web -p 8082:8081 admin-webpreview  # Run the new container in detached mode, exposing ports
+        docker run -d --name admin-web -p 19000:8081 admin-webpreview  # Run the new container in detached mode, exposing ports
