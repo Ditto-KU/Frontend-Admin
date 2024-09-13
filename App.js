@@ -25,6 +25,13 @@ import Cafeteria from "./Pages/Cafeteria";
 import Verify from "./Pages/Verify";
 import User from "./Pages/User";
 import ContactSupportDetail from "./Pages/ContactSupportDetail";
+import RestaurantInCafeteria from "./Pages/RestaurantInCaceteria";
+import ReportDetails from "./Pages/ReportDetails";
+import OrderDetail from "./Pages/OrderDetail";
+import UserList from "./components/UserList";
+import VerifyDetail from "./Pages/VerifyDetail";
+import UserDetail from "./Pages/UserDetail";
+import RestaurantDetail from "./Pages/RestaurantDetail";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -38,12 +45,19 @@ export default function App() {
         {/* <Stack.Screen name="Login" component={Login} /> */}
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="ContactSupport" component={ContactSupport} />
-        <Stack.Screen name="ContactSupportDetail" component={ContactSupportDetail} />
         <Stack.Screen name="Report" component={Report} />
         <Stack.Screen name="Order" component={Order} />
         <Stack.Screen name="Cafeteria" component={Cafeteria} />
         <Stack.Screen name="Verify" component={Verify} />
         <Stack.Screen name="User" component={User} />
+        <Stack.Screen name="ContactSupportDetail" component={ContactSupportDetail} />
+        <Stack.Screen name="RestaurantInCafeteria" component={RestaurantInCafeteria} />
+        <Stack.Screen name="ReportDetails" component={ReportDetails} />
+        <Stack.Screen name="OrderDetail" component={OrderDetail} />
+        <Stack.Screen name="UserList" component={UserList} />
+        <Stack.Screen name="VerifyDetail" component={VerifyDetail} />
+        <Stack.Screen name="UserDetail" component={UserDetail} />
+        <Stack.Screen name="RestaurantDetail" component={RestaurantDetail} />
       </Stack.Navigator>
     </NavigationContainer>
     // </ScrollView>
