@@ -3,32 +3,36 @@ import { View, Text, Button, StyleSheet, Modal, TouchableOpacity } from 'react-n
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-export default function CustomDatePickerDropdown() {
+export default function DatePickerDropdown() {
   const [selectedDate, setSelectedDate] = useState('');
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
   const handleDateChange = (date) => {
     const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
     setSelectedDate(formattedDate);
-    setModalVisible(false); // Close the modal after selecting the date
+    setDatePickerVisible(false); // Close the modal after selecting the date
+  };
+
+  const toggleDatePicker = () => {
+    setDatePickerVisible(!isDatePickerVisible);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>วันที่</Text>
+      {/* <Text style={styles.label}>วันที่</Text> */}
 
-      {/* Custom Dropdown */}
+      {/* Date Picker Button */}
       <TouchableOpacity
         style={styles.dropdownButton}
-        onPress={() => setModalVisible(true)}
+        onPress={toggleDatePicker}
       >
         <Text style={styles.dropdownButtonText}>
           {selectedDate ? selectedDate : 'Select Date'}
         </Text>
       </TouchableOpacity>
 
-      {/* Modal for Date Picker */}
-      {isModalVisible && (
+      {/* Conditional rendering of the DatePicker component */}
+      {isDatePickerVisible && (
         <View style={styles.datePickerDropdown}>
           <DatePicker
             selected={selectedDate ? new Date(selectedDate) : null}
@@ -36,8 +40,7 @@ export default function CustomDatePickerDropdown() {
             inline
             dateFormat="yyyy-MM-dd"
           />
-
-          <Button title="Close" onPress={() => setModalVisible(false)} />
+          <Button title="Close" onPress={() => setDatePickerVisible(false)} />
         </View>
       )}
     </View>
@@ -48,8 +51,9 @@ export default function CustomDatePickerDropdown() {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     marginTop: 50,
+    width: '100%',
   },
   label: {
     fontSize: 16,
@@ -57,7 +61,7 @@ const styles = StyleSheet.create({
   },
   dropdownButton: {
     height: 50,
-    width: 250,
+    width: "100%",
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -70,8 +74,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   datePickerDropdown: {
-    position: 'absolute',
-    top: 60, // Position the dropdown below the button
+    marginTop: 10, // Push the DatePicker dropdown below the button
     backgroundColor: '#FFF',
     padding: 10,
     borderWidth: 1,

@@ -385,45 +385,71 @@ export const PageStyle = StyleSheet.create({
     padding: 20,
     backgroundColor: "#f0f0f0", // Light gray background
   },
+  US_innerContainer: {
+    flexDirection: "column",
+    justifyContent: "center", // Center the buttons horizontally
+    alignItems: "center", // Align items vertically inside the container
+    marginTop: "17%",
+  },
+  US_title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
   US_buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
+    justifyContent: "center", // Center the buttons horizontally
+    alignItems: "center", // Align items vertically inside the container
+    marginTop: 20, // Add space between the title and buttons
   },
   US_button: {
     backgroundColor: "#4CAF50", // Green background for buttons
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 5,
+    paddingVertical: 40, // Increase vertical padding to make the button bigger
+    paddingHorizontal: 80, // Increase horizontal padding to make the button wider
+    borderRadius: 10, // Rounded corners
+    marginHorizontal: 10, // Add spacing between buttons
   },
   US_buttonText: {
-      color: "#ffffff", // White text color
-      fontSize: 16,
-      fontWeight: "bold",
-      textAlign: "center",
-    
+    color: "#ffffff", // White text color
+    fontSize: 30, // Bigger font size
+    fontWeight: "bold",
+    textAlign: "center",
   },
+  
+
 
   //Contact Support Detail
-  CSD_Container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#f0f0f0", // Light gray background
-  },
-  CSD_Main: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#f0f0f0", // Light gray background
-    flexDirection: "row",
-  },
-  CSD_OrderDetail: {
-    flex: 1,
-    backgroundColor: "#f0f0f0", // Light gray background
-    flexDirection: "row",
-  },
-  CSD_ChatBox: {
-    flex: 1,
-    backgroundColor: "#f0f0f0", // Light gray background
-    height: "100%"
-  },
+  //Contact Support Detail
+CSD_Container: {
+  padding: 10,
+  backgroundColor: "#f0f0f0", // Light gray background
+  height: "100%", // Full-screen height
+  flexDirection: "row", // Arrange Order Details and Chat Box side by side
+},
+CSD_OrderDetail: {
+  backgroundColor: "#ffffff", // White background for Order Details
+  borderRadius: 10,
+  padding: 20,
+  marginRight: 10, // Space between Order and Chat sections
+  shadowColor: "#ccc",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.8,
+  shadowRadius: 5,
+  width: "70%", // 70% width for Order details
+  height: "100%", // Full height to match the chat box
+},
+CSD_ChatBox: {
+  backgroundColor: "#ffffff", // White background for Chat Box
+  borderRadius: 10,
+  padding: 20,
+  shadowColor: "#ccc",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.8,
+  shadowRadius: 5,
+  width: "30%", // 30% width for Chat box
+  height: "90%", // Full height for consistency
+  marginTop: 55, // Space from the top
+},
+
 });

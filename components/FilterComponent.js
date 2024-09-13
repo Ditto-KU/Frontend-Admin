@@ -1,40 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, Picker, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import Datepicker from "./DatePicker";
+import { View, Text, Picker, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback, ScrollView, Switch } from "react-native";
+import DatePicker from './DatePicker';
 
 export default function FilterComponent({ modalVisible, toggleModal }) {
-  const [selectedDate, setSelectedDate] = useState("");
   const [selectedCanteen, setSelectedCanteen] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
-  const [includeRequester, setIncludeRequester] = useState(false);
-  const [includeWalker, setIncludeWalker] = useState(false);
+  const [includeRequester, setIncludeRequester] = useState(true); // Requester switch state
+  const [includeWalker, setIncludeWalker] = useState(true); // Walker switch state
 
   const handleSubmit = () => {
     const filterData = {
-      date: selectedDate,
       canteen: selectedCanteen,
       restaurant: selectedRestaurant,
       requester: includeRequester ? "included" : "excluded",
       walker: includeWalker ? "included" : "excluded",
     };
-
-    // Send filterData to the backend
-    fetch('YOUR_BACKEND_URL', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(filterData),
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-        toggleModal(); // Close the modal after submitting
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        toggleModal(); // Close the modal even if there's an error
-      });
+    console.log(filterData);
+    toggleModal(); // Close the modal after submission
   };
 
   return (
@@ -48,60 +30,58 @@ export default function FilterComponent({ modalVisible, toggleModal }) {
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => {}}>
             <View style={styles.modalContainer}>
-              {/* Datepicker component */}
-              <Datepicker />
+              <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {/* Date Picker */}
+                <DatePicker />
 
-              <Text>โรงอาหาร</Text>
-              <Picker
-                selectedValue={selectedCanteen}
-                onValueChange={(itemValue) => setSelectedCanteen(itemValue)}
-                style={styles.dropdownPicker}
-              >
-                <Picker.Item label="Select Canteen" value="" />
-                {/* Add your canteen options here */}
-                <Picker.Item label="Canteen A" value="Canteen A" />
-                <Picker.Item label="Canteen B" value="Canteen B" />
-              </Picker>
-
-              <Text>ร้านอาหาร</Text>
-              {selectedCanteen ? (
+                {/* <Text>โรงอาหาร</Text> */}
                 <Picker
-                  selectedValue={selectedRestaurant}
-                  onValueChange={(itemValue) => setSelectedRestaurant(itemValue)}
+                  selectedValue={selectedCanteen}
+                  onValueChange={(itemValue) => setSelectedCanteen(itemValue)}
                   style={styles.dropdownPicker}
                 >
-                  <Picker.Item label="Select Restaurant" value="" />
-                  {/* Add restaurant options here */}
-                  <Picker.Item label="Restaurant 1" value="Restaurant 1" />
-                  <Picker.Item label="Restaurant 2" value="Restaurant 2" />
+                  <Picker.Item label="Select Canteen" value="" />
+                  <Picker.Item label="Canteen A" value="Canteen A" />
+                  <Picker.Item label="Canteen B" value="Canteen B" />
                 </Picker>
-              ) : (
-                <Text style={styles.disabledText}>Please select a canteen first</Text>
-              )}
 
-              {/* Requester Checkbox */}
-              <View style={styles.checkboxContainer}>
-                <Text>Requester</Text>
-                <input
-                  type="checkbox"
-                  checked={includeRequester}
-                  onChange={() => setIncludeRequester(!includeRequester)}
-                />
-              </View>
+                {/* <Text>ร้านอาหาร</Text> */}
+                {selectedCanteen ? (
+                  <Picker
+                    selectedValue={selectedRestaurant}
+                    onValueChange={(itemValue) => setSelectedRestaurant(itemValue)}
+                    style={styles.dropdownPicker}
+                  >
+                    <Picker.Item label="Select Restaurant" value="" />
+                    <Picker.Item label="Restaurant 1" value="Restaurant 1" />
+                    <Picker.Item label="Restaurant 2" value="Restaurant 2" />
+                  </Picker>
+                ) : (
+                  <Text style={styles.disabledText}>Please select a canteen before restaurant</Text>
+                )}
 
-              {/* Walker Checkbox */}
-              <View style={styles.checkboxContainer}>
-                <Text>Walker</Text>
-                <input
-                  type="checkbox"
-                  checked={includeWalker}
-                  onChange={() => setIncludeWalker(!includeWalker)}
-                />
-              </View>
+                {/* Requester Switch */}
+                <View style={styles.switchContainer}>
+                  <Text style={styles.ChooseUserText}>Requester</Text>
+                  <Switch
+                    value={includeRequester}
+                    onValueChange={setIncludeRequester}
+                  />
+                </View>
 
-              <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-                <Text style={{ color: '#fff' }}>Submit</Text>
-              </TouchableOpacity>
+                {/* Walker Switch */}
+                <View style={styles.switchContainer}>
+                  <Text style={styles.ChooseUserText}>Walker</Text>
+                  <Switch
+                    value={includeWalker}
+                    onValueChange={setIncludeWalker}
+                  />
+                </View>
+
+                <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+                  <Text style={styles.SubmitText}>Submit</Text>
+                </TouchableOpacity>
+              </ScrollView>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -114,39 +94,50 @@ export default function FilterComponent({ modalVisible, toggleModal }) {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0)', // Add this to allow clicking outside to close
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end', // Align to the right side of the screen
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Transparent black to dim background
   },
   modalContainer: {
-    width: '30%', // Adjusted to be more usable
-    height: '100%',
+    width: '30%', // Set the width of the filter to 30% of the screen
+    height: '100%', // Full height for the filter modal
     padding: 20,
     backgroundColor: '#FFF',
-    borderTopLeftRadius: 10,
-    borderBottomLeftRadius: 10,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
+  },
+  scrollContainer: {
+    paddingBottom: 20,
   },
   dropdownPicker: {
     height: 50,
     width: '100%',
-    marginBottom: 16,
+    marginTop: 20,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  ChooseUserText: {
+    fontSize: 20,
   },
   submitButton: {
-    marginTop: 16,
+    marginTop: 20,
     backgroundColor: '#007BFF',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
   },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  SubmitText: {
+    color: '#FFF',
+    fontSize: 24,
   },
   disabledText: {
     color: '#999',
     fontStyle: 'italic',
-    marginBottom: 16,
+    marginTop: 16,
+    fontSize: 20,
   },
 });

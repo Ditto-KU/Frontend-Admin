@@ -1,27 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { PieChart } from 'react-minimal-pie-chart'; // Use a web-based pie chart library
+import { useNavigation } from "@react-navigation/native";
 
 export default function ContactSupport_DB() {
-  const supportRequests = [
-    { user: "user: yyyyy", time: "9:42" },
-    { user: "user: yyyyy", time: "9:41" },
-    { user: "user: yyyyy", time: "9:38" },
-    { user: "user: yyyyy", time: "9:38" },
-  ];
+  const [supportRequests, setSupportRequests] = useState([
+    { id: 1, name: "user: xxxxx (requester)", time: "9:41", description: "รายละเอียด" },
+    { id: 2, name: "user: yyyyy (requester)", time: "9:42", description: "รายละเอียด" },
+    { id: 3, name: "user: zzzzz (requester)", time: "9:38", description: "รายละเอียด" },
+    { id: 4, name: "user: aaaaa (requester)", time: "9:38", description: "รายละเอียด" },
+  ]);
 
   const totalRequests = 1230;
   const onprocess = 230;
   const completed = 1000;
+  const navigation = useNavigation();
+  
+  const handleCSPress = (request) => {
+    navigation.navigate("ContactSupportDetail", { request });
+  };
 
   return (
     <View style={styles.container}>
       {/* Support Requests List */}
       <View style={styles.requestList}>
         <Text style={styles.header}>Contact Support</Text>
-        {supportRequests.map((request, index) => (
-          <TouchableOpacity key={index} style={styles.requestContainer}>
-            <Text style={styles.requestText}>{request.user}</Text>
+        {supportRequests.map((request) => (
+          <TouchableOpacity key={request.id} style={styles.requestContainer} onPress={() => handleCSPress(request)}>
+            <Text style={styles.requestText}>{request.name}</Text>
             <Text style={styles.requestTime}>{request.time}</Text>
           </TouchableOpacity>
         ))}
@@ -31,8 +37,8 @@ export default function ContactSupport_DB() {
       <View style={styles.chartContainer}>
         <PieChart
           data={[
-            { title: 'On process', value: onprocess, color: '#FFA500' },
-            { title: 'Complete', value: completed, color: '#008000' },
+            { title: 'On process', value: onprocess, color: "rgb(255, 240, 186)" },
+            { title: 'Complete', value: completed, color: "rgb(144, 238, 144)" },
           ]}
           radius={50} // Increased the radius to make the chart larger
           lineWidth={25} // Adjusted line width for better visibility
@@ -46,12 +52,12 @@ export default function ContactSupport_DB() {
         <Text style={styles.totalText}>All requests: {totalRequests}</Text>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#FFA500' }]} />
+            <View style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]} />
             <Text style={styles.legendText}>On process: {onprocess}</Text>
             
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#008000' }]} />
+            <View style={[styles.legendColor, { backgroundColor: "rgb(144, 238, 144)" }]} />
             <Text style={styles.legendText}>Complete: {completed}</Text>
           </View>
         </View>
@@ -120,7 +126,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   totalText: {
-    fontSize: 16,
+    fontSize: 24,
     marginTop: 10,
     fontWeight: "bold",
   },

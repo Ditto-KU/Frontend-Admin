@@ -52,7 +52,7 @@ export default function SideBar() {
         >
           <View style={ComponentStyle.sidebarIconAndText}>
             <Image
-              source={require("../Image/ReportIcon.png")}
+              source={require("../Image/ContactSupportIcon.png")}
               style={ComponentStyle.sidebarIcon}
               resizeMode="cover"
             />

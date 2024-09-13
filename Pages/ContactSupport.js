@@ -19,15 +19,13 @@ export default function ContactSupport() {
   const [requesterData, setRequesterData] = useState([
     {
       id: 1,
-      name: "user: xxxxx (requester)",
+      name: "user: xxxxx",
       time: "9:41",
-      description: "รายละเอียด",
     },
     {
       id: 2,
-      name: "user: xxxxx (requester)",
+      name: "user: xxxxx",
       time: "9:41",
-      description: "รายละเอียด",
     },
     // Add more requester data here
   ]);
@@ -35,39 +33,38 @@ export default function ContactSupport() {
   const [walkerData, setWalkerData] = useState([
     {
       id: 1,
-      name: "user: yyyyy (walker)",
+      name: "user: yyyyy",
       time: "9:41",
-      description: "lorem ipsum",
     },
     {
       id: 2,
-      name: "user: yyyyy (walker)",
+      name: "user: yyyyy",
       time: "9:41",
-      description: "lorem ipsum",
     },
     // Add more walker data here
   ]);
 
   // This function will navigate to the ContactSupportDetail page and pass the selected item's details.
-  const handleReportPress = (report) => {
+  const handleCSPress = (report) => {
     navigation.navigate("ContactSupportDetail", { report });
   };
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleReportPress(item)}>
-      <View style={styles.CS_listItem}>
-        <View style={{ flexDirection: "column" }}>
-          <Text>{item.name}</Text>
-          <Text>{item.description}</Text>
-        </View>
-        <Text>{item.time}</Text>
-      </View>
-    </TouchableOpacity>
-  );
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => handleCSPress(item)}>
+      <View style={styles.CS_listItem}>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={[styles.CS_listText, { fontWeight: "600" }]}>
+            {item.name}
+          </Text>
+        </View>
+        <Text style={styles.CS_listTime}>{item.time}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.CS_container}>
@@ -147,10 +144,11 @@ const styles = StyleSheet.create({
   CS_searchInput: {
     flex: 1,
     height: 40,
+    fontSize: 16,
     borderWidth: 1,
     borderColor: "#ccc",
     paddingHorizontal: 8,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: "#FFFFFF",
   },
   CS_content: {
@@ -163,7 +161,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   CS_columnTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
   },
@@ -190,5 +188,17 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     resizeMode: "cover",
+  },
+  CS_listText: {
+    fontSize: 22,
+    marginVertical: 10,
+  },
+  CS_listTime: {
+    fontSize: 16,
+    color: "#777",
+    alignSelf: "center",
+  },
+  CS_requesterList: {
+    paddingBottom: 20,
   },
 });

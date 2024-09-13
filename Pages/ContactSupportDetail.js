@@ -12,18 +12,15 @@ import {
 } from "react-native";
 import { PageStyle } from "../Style/PageStyle";
 import { useState } from "react";
-import OrderDetail from "../components/OrderDetail";
+import OrderDetail from "./OrderDetail";
 import Header from "../components/Header";
 import ChatBox from "../components/ChatBox";
 
 export default function ContactSupportDetail() {
   return (
-    <ScrollView style={PageStyle.CSD_Container}>
-      <Header />
-      <View style={PageStyle.CSD_Main}>
-        <OrderDetail style={PageStyle.CSD_OrderDetail} />
-        <ChatBox style={PageStyle.CSD_ChatBox} />
-      </View>
-    </ScrollView>
+    <View style={PageStyle.CSD_Container}>
+      <OrderDetail style={PageStyle.CSD_OrderDetail} />
+      <ChatBox style={PageStyle.CSD_ChatBox} />
+    </View>
   );
 }

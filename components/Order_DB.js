@@ -1,62 +1,82 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library like in ContactSupport_DB
+import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
+import { useNavigation } from "@react-navigation/native";
 
 export default function Order_DB() {
-  const orderData = [
-    { user: "user: yyyyy", time: "9:42" },
-    { user: "user: yyyyy", time: "9:41" },
-    { user: "user: yyyyy", time: "9:38" },
-    { user: "user: yyyyy", time: "9:38" },
-  ];
+  const navigation = useNavigation();
 
+  // Sample order data
+  const orderData = [
+    { orderid: 1, user: "user: yyyyy", time: "9:42", status: "ongoing" },
+    { orderid: 2, user: "user: yyyyy", time: "9:41", status: "complete" },
+    { orderid: 3, user: "user: yyyyy", time: "9:38", status: "cancel" },
+    { orderid: 4, user: "user: yyyyy", time: "9:38", status: "ongoing" },
+  ];
+  
   const totalOrders = 1234;
   const ongoing = 230;
   const complete = 1000;
   const cancel = 4;
+
+  // Function to handle order detail navigation
+  const gotoOrderDetail = (order) => {
+    navigation.navigate("OrderDetail", { orderid: order.orderid });
+  };
 
   return (
     <View style={styles.container}>
       {/* Order List */}
       <View style={styles.orderList}>
         <Text style={styles.header}>Order</Text>
-        {orderData.map((order, index) => (
-          <TouchableOpacity key={index} style={styles.orderContainer}>
-            <Text style={styles.orderText}>{order.user}</Text>
-            <Text style={styles.orderTime}>{order.time}</Text>
-          </TouchableOpacity>
-        ))}
+        {orderData.map((order, index) => {
+          let backgroundColor = "#FFF"; // Default background
+          if (order.status === "complete") backgroundColor = "rgb(144, 238, 144)"; // Softer Green
+          else if (order.status === "ongoing") backgroundColor = "rgb(255, 240, 186)"; // Softer Yellow
+          else if (order.status === "cancel") backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
+
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[styles.orderContainer, { backgroundColor }]}
+              onPress={() => gotoOrderDetail(order)}
+            >
+              <Text style={styles.orderText}>{order.user}</Text>
+              <Text style={styles.orderTime}>{order.time}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Pie Chart and Stats */}
       <View style={styles.chartContainer}>
         <PieChart
           data={[
-            { title: "On going", value: ongoing, color: "#FFA500" },
-            { title: "Complete", value: complete, color: "#008000" },
-            { title: "Cancel", value: cancel, color: "#FF0000" },
+            { title: "On going", value: ongoing, color: "rgb(255, 240, 186)" }, // Softer Yellow
+            { title: "Complete", value: complete, color: "rgb(144, 238, 144)" }, // Softer Green
+            { title: "Cancel", value: cancel, color: "rgb(255, 182, 193)" }, // Softer Red/Pink
           ]}
-          radius={50} // Increase the radius to make the chart larger
-          lineWidth={25} // Adjust the line width for better visibility
+          radius={50} // Size of the pie chart
+          lineWidth={25} // Line thickness
           label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
           labelStyle={{
             fontSize: "8px",
             fill: "#000",
           }}
-          style={{ height: 200 }} // Increase chart height to fit better
+          style={{ height: 200 }} // Pie chart height
         />
         <Text style={styles.totalText}>All orders: {totalOrders}</Text>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: "#FFA500" }]} />
-            <Text style={styles.legendText}>On going: {ongoing}</Text>
+            <View style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]} />
+            <Text style={styles.legendText}>Ongoing: {ongoing}</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: "#008000" }]} />
+            <View style={[styles.legendColor, { backgroundColor: "rgb(144, 238, 144)" }]} />
             <Text style={styles.legendText}>Complete: {complete}</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: "#FF0000" }]} />
+            <View style={[styles.legendColor, { backgroundColor: "rgb(255, 182, 193)" }]} />
             <Text style={styles.legendText}>Cancel: {cancel}</Text>
           </View>
         </View>
@@ -68,16 +88,15 @@ export default function Order_DB() {
 // Styles
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row", // Side by side layout
+    flexDirection: "row",
     justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fafbfc",
     borderRadius: 10,
-    width: "100%", // Ensure it takes full width of the parent
-    height: "100%", // Ensure it takes full height of the parent
-    flex: 1, // Use flex to allow container to fill available space
-
-    shadowColor: '#000',
+    width: "100%",
+    height: "100%",
+    flex: 1,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -86,7 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "flex-start",
     padding: 10,
-    flexBasis: "50%", // Use flexBasis for width allocation
+    flexBasis: "50%",
     borderRadius: 10,
   },
   header: {
@@ -99,7 +118,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 15,
     marginBottom: 10,
-    backgroundColor: "#FFF",
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -117,7 +135,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     flexDirection: "column",
     alignItems: "center",
-    flexBasis: "50%", // Use flexBasis for width allocation
+    flexBasis: "50%",
     borderRadius: 10,
     marginTop: 30,
   },
@@ -141,5 +159,5 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 20,
-  }
+  },
 });
