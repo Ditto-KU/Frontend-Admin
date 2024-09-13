@@ -15,7 +15,7 @@ jobs:
 
     - name: Build Docker Container
       run: |
-        docker build . -t admin-webpreview  # Build the Docker image with the tag 'admin-webpreview'
+        docker build . -t admin-web
 
     - name: Stop Running Container (if exists)
       run: |
