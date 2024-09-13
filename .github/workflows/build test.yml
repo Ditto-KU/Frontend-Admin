@@ -11,11 +11,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-    
-      - name: Build Docker Container
-        run: |
-          docker build . -t test-admin-webpreview  # Build the Docker image with the tag 'admin-webpreview'
+      
       - name: Clean up
         run: |
           docker image prune -a -f
+
+      - name: Build Docker Container
+        run: |
+          docker build . -t test-admin-webpreview  # Build the Docker image with the tag 'admin-webpreview'
 
