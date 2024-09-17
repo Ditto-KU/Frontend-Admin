@@ -17,7 +17,7 @@ export default function Order_DB() {
       try {
         const headersList = {
           Accept: "*/*",
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MjMzNzgyLCJleHAiOjE3MzQ4NzM3ODJ9.a3IpDKNgy9IbssNMJJyF4hXlNzDF325YYqlBc9OOUtU",
+          // Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MjMzNzgyLCJleHAiOjE3MzQ4NzM3ODJ9.a3IpDKNgy9IbssNMJJyF4hXlNzDF325YYqlBc9OOUtU",
         };
 
         const response = await fetch("https://ku-man.runnakjeen.com/admin/order", {

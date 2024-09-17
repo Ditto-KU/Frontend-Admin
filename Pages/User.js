@@ -19,8 +19,8 @@ export default function User() {
       try {
         let headersList = {
           Accept: "*/*",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MzkyMTM0LCJleHAiOjE3MzUwMzIxMzR9.WcM8k4JqIzxXOG8WQVUFDDoqULV1jz2WH0Xy0_HbcrY",
+          // Authorization:
+          //   "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MzkyMTM0LCJleHAiOjE3MzUwMzIxMzR9.WcM8k4JqIzxXOG8WQVUFDDoqULV1jz2WH0Xy0_HbcrY",
         };
 
         // Walker API request
