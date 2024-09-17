@@ -1,39 +1,83 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
 import { useNavigation } from "@react-navigation/native";
 
 export default function Order_DB() {
   const navigation = useNavigation();
 
-  // Sample order data
-  const orderData = [
-    { orderid: 1, user: "user: yyyyy", time: "9:42", status: "ongoing" },
-    { orderid: 2, user: "user: yyyyy", time: "9:41", status: "complete" },
-    { orderid: 3, user: "user: yyyyy", time: "9:38", status: "cancel" },
-    { orderid: 4, user: "user: yyyyy", time: "9:38", status: "ongoing" },
-  ];
+  // State variables
+  const [orderData, setOrderData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  const totalOrders = 1234;
-  const ongoing = 230;
-  const complete = 1000;
-  const cancel = 4;
+  // Fetch order data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const headersList = {
+          Accept: "*/*",
+          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MjMzNzgyLCJleHAiOjE3MzQ4NzM3ODJ9.a3IpDKNgy9IbssNMJJyF4hXlNzDF325YYqlBc9OOUtU",
+        };
+
+        const response = await fetch("https://ku-man.runnakjeen.com/admin/order", {
+          method: "GET",
+          headers: headersList,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setOrderData(data); // Set order data
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Order stats calculation for Pie Chart
+  const totalOrders = orderData.length;
+  const ongoing = orderData.filter(order => order.orderStatus === "Pending").length;
+  const complete = orderData.filter(order => order.orderStatus === "Completed").length;
+  const cancel = orderData.filter(order => order.orderStatus === "Cancelled").length;
 
   // Function to handle order detail navigation
   const gotoOrderDetail = (order) => {
-    navigation.navigate("OrderDetail", { orderid: order.orderid });
-  };
+    navigation.navigate("OrderDetail", { order: order });
+  };  
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Orders...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       {/* Order List */}
       <View style={styles.orderList}>
-        <Text style={styles.header}>Order</Text>
+        <Text style={styles.header}>Orders</Text>
         {orderData.map((order, index) => {
           let backgroundColor = "#FFF"; // Default background
-          if (order.status === "complete") backgroundColor = "rgb(144, 238, 144)"; // Softer Green
-          else if (order.status === "ongoing") backgroundColor = "rgb(255, 240, 186)"; // Softer Yellow
-          else if (order.status === "cancel") backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
+          if (order.orderStatus === "Completed") backgroundColor = "rgb(144, 238, 144)"; // Softer Green
+          else if (order.orderStatus === "Pending") backgroundColor = "rgb(255, 240, 186)"; // Softer Yellow
+          else if (order.orderStatus === "Cancelled") backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
 
           return (
             <TouchableOpacity
@@ -41,8 +85,9 @@ export default function Order_DB() {
               style={[styles.orderContainer, { backgroundColor }]}
               onPress={() => gotoOrderDetail(order)}
             >
-              <Text style={styles.orderText}>{order.user}</Text>
-              <Text style={styles.orderTime}>{order.time}</Text>
+              {/* <Text style={styles.orderText}>{order.requester.username}</Text> */}
+              <Text style={styles.orderTime}>Order ID: {order.orderId}</Text>
+              {/* <Text style={styles.orderTime}>Time: {order.time}</Text> */}
             </TouchableOpacity>
           );
         })}
@@ -52,9 +97,9 @@ export default function Order_DB() {
       <View style={styles.chartContainer}>
         <PieChart
           data={[
-            { title: "On going", value: ongoing, color: "rgb(255, 240, 186)" }, // Softer Yellow
-            { title: "Complete", value: complete, color: "rgb(144, 238, 144)" }, // Softer Green
-            { title: "Cancel", value: cancel, color: "rgb(255, 182, 193)" }, // Softer Red/Pink
+            { title: "Pending", value: ongoing, color: "rgb(255, 240, 186)" }, // Softer Yellow
+            { title: "Completed", value: complete, color: "rgb(144, 238, 144)" }, // Softer Green
+            { title: "Cancelled", value: cancel, color: "rgb(255, 182, 193)" }, // Softer Pink
           ]}
           radius={50} // Size of the pie chart
           lineWidth={25} // Line thickness
@@ -69,15 +114,15 @@ export default function Order_DB() {
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]} />
-            <Text style={styles.legendText}>Ongoing: {ongoing}</Text>
+            <Text style={styles.legendText}>Pending: {ongoing}</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendColor, { backgroundColor: "rgb(144, 238, 144)" }]} />
-            <Text style={styles.legendText}>Complete: {complete}</Text>
+            <Text style={styles.legendText}>Completed: {complete}</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendColor, { backgroundColor: "rgb(255, 182, 193)" }]} />
-            <Text style={styles.legendText}>Cancel: {cancel}</Text>
+            <Text style={styles.legendText}>Cancelled: {cancel}</Text>
           </View>
         </View>
       </View>
@@ -159,5 +204,10 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

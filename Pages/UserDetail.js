@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import Header from '../components/Header'; // Import Header component
+import React from "react";
+import { View, Text, Image, StyleSheet } from "react-native";
+import { useRoute } from "@react-navigation/native";
+import Header from "../components/Header"; // Import Header component
 
 export default function UserDetail() {
   const route = useRoute();
@@ -14,38 +14,61 @@ export default function UserDetail() {
 
       {/* User General Information */}
       <View style={styles.userInfoContainer}>
-        <Text style={styles.userId}>UserID: {user.id}</Text>
-        <Text style={styles.userName}>Name: {user.name}</Text>
-        <Text style={styles.userPhone}>Phone: {user.tel || 'N/A'}</Text>
+        <Text style={styles.userId}>UserID: {user.id || "N/A"}</Text>
+        <Text style={styles.userName}>Name: {user.username || "N/A"}</Text>
+        <Text style={styles.userPhone}>Phone: {user.phoneNumber || "N/A"}</Text>
       </View>
 
       {/* Conditional rendering based on userType */}
-      {userType === 'walker' ? (
+      {userType === "walker" ? (
         <View style={styles.walkerContainer}>
           {/* Display face photo for walkers */}
           <View style={styles.facePhotoContainer}>
             <Text style={styles.sectionTitle}>Face Photo</Text>
             <Image
-              source={{ uri: user.facePhoto }} // Assuming user.facePhoto is a valid URL
+              source={{
+                uri: user.profilePicture
+                  ? user.profilePicture
+                  : "https://via.placeholder.com/150",
+              }} // Display profile picture or a placeholder
               style={styles.facePhoto}
             />
           </View>
-          
+
           {/* Display bank account for walkers */}
           <View style={styles.bankInfoContainer}>
-            <Text style={styles.userInfo}>Bank Account:</Text>
-            <Text style={styles.userInfoValue}>{user.bankAccount || 'Not provided'}</Text>
+            <Text style={styles.sectionTitle}>Bank Account</Text>
+            <Text style={styles.userInfo}>
+              Account Name: {user.bankAccountName || "Not provided"}
+            </Text>
+            <Text style={styles.userInfo}>
+              Account No: {user.bankAccountNo || "Not provided"}
+            </Text>
           </View>
         </View>
       ) : (
         <View style={styles.requesterContainer}>
           {/* Display address for requesters */}
           <Text style={styles.sectionTitle}>Address</Text>
-          <Text style={styles.userInfo}>{user.address || 'N/A'}</Text>
+          {user.address && user.address.length > 0 ? (
+            user.address.map((addr, index) => (
+              <View key={index} style={styles.addressContainer}>
+                <Text style={styles.userInfo}>Name: {addr.name}</Text>
+                <Text style={styles.userInfo}>Detail: {addr.detail}</Text>
+                <Text style={styles.userInfo}>
+                  Latitude: {addr.latitude}, Longitude: {addr.longitude}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.userInfo}>No address available</Text>
+          )}
 
-          {/* Display frequency of order for requesters */}
+          {/* Display order frequency */}
           <Text style={styles.sectionTitle}>Order Frequency</Text>
-          <Text style={styles.userInfo}>{user.orderFrequency || 0} orders</Text>
+          <Text style={styles.userInfo}>
+            {user.orderFrequency || 0} orders
+          </Text>
         </View>
       )}
     </View>
@@ -55,81 +78,72 @@ export default function UserDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: '1%',
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
+    padding: 16,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
   },
   userInfoContainer: {
-    alignItems: 'flex-start',
-    width: '100%',
-    maxWidth: 1200,
+    alignItems: "flex-start",
+    width: "100%",
+    paddingHorizontal: 16,
+    marginBottom: 20,
   },
   userId: {
-    fontSize: '1.5vw',
-    fontWeight: 'bold',
-    color: '#555',
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#555",
   },
   userName: {
-    fontSize: '2vw',
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#333",
     marginTop: 5,
   },
   userPhone: {
-    fontSize: '1.5vw',
-    color: '#666',
+    fontSize: 16,
+    color: "#666",
     marginTop: 5,
   },
   sectionTitle: {
-    fontSize: '1.8vw',
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 10,
-    // marginTop: 20,
-    color: '#000',
-    textAlign: 'center',
+    color: "#000",
   },
   facePhotoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 30,
   },
   facePhoto: {
-    width: '15vw',
-    height: '15vw',
-    borderRadius: '50%',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     borderWidth: 2,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     marginBottom: 20,
   },
   bankInfoContainer: {
-    alignItems: 'center',
+    alignItems: "flex-start",
     marginTop: 20,
   },
   userInfo: {
-    fontSize: '1.5vw',
-    color: '#333',
-    textAlign: "center",
+    fontSize: 16,
+    color: "#333",
     marginBottom: 5,
   },
-  userInfoValue: {
-    fontSize: '1.5vw',
-    fontWeight: '600',
-    color: '#000',
-    textAlign: 'center',
-  },
   walkerContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    maxWidth: 1200,
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 16,
     marginTop: 20,
   },
   requesterContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    width: '100%',
-    maxWidth: 1200,
+    alignItems: "flex-start",
+    width: "100%",
+    paddingHorizontal: 16,
     marginTop: 30,
+  },
+  addressContainer: {
+    marginBottom: 15,
   },
 });

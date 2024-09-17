@@ -1,28 +1,99 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
 
 export default function Verify() {
   const navigation = useNavigation();
 
-  // Sample user data
-  const [userData] = useState([
-    { id: 1, name: "Walker User 1", time: "11:00 AM"},
-    { id: 2, name: "Walker User 2", time: "10:00 AM" },
-  ]);
+  // State for API data, loading, and error
+  const [verifyUser, setVerifyUser] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MTk4ODU2LCJleHAiOjE3MzQ4Mzg4NTZ9.JT_q3Emt2wiIKAGr4p76pkuZTBjD_rh6abPiHYm8f7s",
+        };
+
+        let response = await fetch(
+          "https://ku-man.runnakjeen.com/admin/verify",
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          const filteredData = data.filter((user) => user.status === false);
+          setVerifyUser(filteredData);
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message); // Display the error message in UI
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   const handleUserPress = (user) => {
-    navigation.navigate('VerifyDetail', { user });
+    navigation.navigate("VerifyDetail", { user });
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleUserPress(item)}>
       <View style={styles.VE_listItem}>
         <View style={{ flexDirection: "column" }}>
-          <Text style={styles.VE_textName}>{item.name}</Text>
+          <Text style={styles.VE_textName}>Username: {item.username}</Text>
+          {/* <Text>Email: {item.email}</Text>
+          <Text>Phone: {item.phoneNumber}</Text>
+          <Text>Bank Account Name: {item.bankAccountName}</Text>
+          <Text>Bank Account No: {item.bankAccountNo}</Text>
+          <Text>Status: {item.status ? "Verified" : "Not Verified"}</Text> */}
         </View>
-        <Text style={styles.VE_textTime}>{item.time}</Text>
+        <Text style={styles.VE_textTime}>
+          Registered At: {new Date(item.registerAt).toLocaleString()}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -34,9 +105,9 @@ export default function Verify() {
         <Text style={styles.VE_title}>User Verification</Text>
       </View>
       <FlatList
-        data={userData}
+        data={verifyUser}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.email} // Unique key based on email
         contentContainerStyle={styles.VE_userList}
       />
     </View>
@@ -76,13 +147,23 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   VE_textName: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
-    margin: 10,
   },
   VE_textTime: {
     fontSize: 16,
     color: "#555",
     marginTop: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    color: "red",
   },
 });

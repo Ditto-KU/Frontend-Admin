@@ -1,37 +1,105 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Verify_DB() {
   const navigation = useNavigation();
 
-  // Initialize user data with useState
-  const [verifyUser, setVerifyUser] = useState([
-    { userid: 1, username: "Walker User 1", time: "9:42" },
-    { userid: 2, username: "Walker User 2", time: "9:41" },
-    { userid: 3, username: "Walker User 3", time: "9:38" },
-    { userid: 4, username: "Walker User 4", time: "9:38" },
-  ]);
+  // Initialize state for verifyUser, loading, and error
+  const [verifyUser, setVerifyUser] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Navigate to VerifyDetail and pass the selected user's id
+  // Fetch data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MTk4ODU2LCJleHAiOjE3MzQ4Mzg4NTZ9.JT_q3Emt2wiIKAGr4p76pkuZTBjD_rh6abPiHYm8f7s",
+        };
+
+        let response = await fetch(
+          "https://ku-man.runnakjeen.com/admin/verify",
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+
+          // Filter out walkers whose status is true
+          const filteredData = data.filter((user) => user.status === false);
+
+          setVerifyUser(filteredData);
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message); // Display the error message in UI
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const gotoVerifydetail = (user) => {
     navigation.navigate("VerifyDetail", { user });
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Verify new walker</Text>
+      <Text style={styles.header}>Verify New Walkers</Text>
       {/* Loop through the user data */}
-      {verifyUser.map((user, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.reportContainer}
-          onPress={() => gotoVerifydetail(user)} // Pass the user's ID to the function
-        >
-          <Text style={styles.reportText}>user: {user.userid} : {user.username}</Text>
-          <Text style={styles.reportTime}>{user.time}</Text>
-        </TouchableOpacity>
-      ))}
+      {verifyUser.length > 0 ? (
+        verifyUser.map((user, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.reportContainer}
+            onPress={() => gotoVerifydetail(user)} // Pass the user's data to the function
+          >
+            <Text style={styles.reportText}>
+              Username: {user.username ?? "N/A"}
+            </Text>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <Text>No data available</Text>
+      )}
     </View>
   );
 }
@@ -53,8 +121,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   reportContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column", // Changed to column for vertical layout
+    justifyContent: "flex-start",
     padding: 15,
     marginBottom: 10,
     backgroundColor: "#FFF",
@@ -64,13 +132,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    width: "48%",
+    width: "45%", // Ensure the report container takes the full width
   },
   reportText: {
     fontSize: 16,
+    marginBottom: 5,
   },
-  reportTime: {
-    fontSize: 14,
-    color: "#000",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    color: "red",
   },
 });

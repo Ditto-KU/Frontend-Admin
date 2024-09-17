@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 import Head from "../components/Header";
 import { PageStyle } from "../Style/PageStyle";
@@ -7,21 +7,87 @@ import { PageStyle } from "../Style/PageStyle";
 export default function User() {
   const navigation = useNavigation(); // Initialize navigation
 
-  // Sample data for walkers and requesters
-  const walkers = [
-    { id: 1, name: "Walker John Doe", time: "10:00 AM" },
-    { id: 2, name: "Walker Jane Smith", time: "11:00 AM" },
-  ];
+  // State for walkers and requesters data, loading state, and error handling
+  const [walkers, setWalkers] = useState([]);
+  const [requesters, setRequesters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const requesters = [
-    { id: 1, name: "Requester Alice", time: "9:00 AM" },
-    { id: 2, name: "Requester Bob", time: "10:30 AM" },
-  ];
+  // Fetch data for walkers and requesters
+  useEffect(() => {
+    const fetchWalkersAndRequesters = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MzkyMTM0LCJleHAiOjE3MzUwMzIxMzR9.WcM8k4JqIzxXOG8WQVUFDDoqULV1jz2WH0Xy0_HbcrY",
+        };
+
+        // Walker API request
+        let walkerResponse = await fetch("https://ku-man.runnakjeen.com/admin/walker", {
+          method: "GET",
+          headers: headersList,
+        });
+        if (!walkerResponse.ok) {
+          throw new Error(`Error fetching walkers: ${walkerResponse.status}`);
+        }
+        let walkersData = await walkerResponse.json();
+        setWalkers(walkersData);
+
+        // Requester API request
+        let requesterResponse = await fetch("https://ku-man.runnakjeen.com/admin/requester", {
+          method: "GET",
+          headers: headersList,
+        });
+        if (!requesterResponse.ok) {
+          throw new Error(`Error fetching requesters: ${requesterResponse.status}`);
+        }
+        let requestersData = await requesterResponse.json();
+        setRequesters(requestersData);
+
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWalkersAndRequesters();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={PageStyle.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading data...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={PageStyle.errorContainer}>
+        <Text style={PageStyle.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   // Navigate to UserList page with walker data
   const handleWalkerPress = () => {
     navigation.navigate("UserList", {
-      users: walkers,  // Passing walker data
+      users: walkers.map((walker) => ({
+        id: walker.walkerId,
+        username: walker.username,
+        email: walker.email,
+        phoneNumber: walker.phoneNumber,
+        profilePicture: walker.profilePicture,
+        bankAccountName: walker.bankAccountName,
+        bankAccountNo: walker.bankAccountNo,
+        status: walker.status,
+        registerAt: walker.registerAt,
+        verifyAt: walker.verifyAt,
+      })), // Passing walker data in the format expected by UserList
       userType: "walker", // Pass user type as 'Walker'
     });
   };
@@ -29,7 +95,16 @@ export default function User() {
   // Navigate to UserList page with requester data
   const handleRequesterPress = () => {
     navigation.navigate("UserList", {
-      users: requesters,  // Passing requester data
+      users: requesters.map((requester) => ({
+        id: requester.requesterId,
+        username: requester.username,
+        email: requester.email,
+        phoneNumber: requester.phoneNumber,
+        profilePicture: requester.profilePicture,
+        firstName: requester.firstName,
+        lastName: requester.lastName,
+        address: requester.address,
+      })), // Passing requester data in the format expected by UserList
       userType: "requester", // Pass user type as 'Requester'
     });
   };

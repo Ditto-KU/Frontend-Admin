@@ -8,12 +8,16 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import Header from "../components/Header"; // Assuming you have a Header component
+import Header from "../components/Header";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation for navigation
 
 export default function RestaurantDetail() {
+  const navigation = useNavigation(); // Initialize navigation
+
   // States for toggling restaurant and menu items
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
   const [menuItems, setMenuItems] = useState([
+    // Sample menu items
     {
       name: "มัสมั่นแกงแก้วตา",
       isAvailable: true,
@@ -38,42 +42,7 @@ export default function RestaurantDetail() {
       price: "80 THB",
       image: "image-url-here",
     },
-    {
-      name: "กากหมู",
-      isAvailable: false,
-      price: "70 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ข้าวมันไก่",
-      isAvailable: true,
-      price: "50 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ข้าวผัด",
-      isAvailable: true,
-      price: "60 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ผัดไทย",
-      isAvailable: true,
-      price: "70 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ส้มตำ",
-      isAvailable: true,
-      price: "40 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ก๋วยเตี๋ยวเรือ",
-      isAvailable: true,
-      price: "55 THB",
-      image: "image-url-here",
-    },
+    // Add more menu items as needed
   ]);
 
   // Function to toggle restaurant open/close
@@ -86,6 +55,12 @@ export default function RestaurantDetail() {
     const newMenuItems = [...menuItems];
     newMenuItems[index].isAvailable = !newMenuItems[index].isAvailable;
     setMenuItems(newMenuItems);
+  };
+
+  // Function to navigate to the Order History screen
+  const navigateToOrderHistory = () => {
+    // You can pass restaurant-specific data like restaurantId or order data here
+    navigation.navigate("OrderHistory", { restaurantId: 1 }); // Example: passing restaurantId
   };
 
   return (
@@ -152,8 +127,8 @@ export default function RestaurantDetail() {
         </View>
       </View>
 
-      {/* Button for history */}
-      <TouchableOpacity style={styles.historyButton}>
+      {/* Button for Order History */}
+      <TouchableOpacity style={styles.historyButton} onPress={navigateToOrderHistory}>
         <Text style={styles.historyButtonText}>ประวัติการทำอาหาร</Text>
       </TouchableOpacity>
     </View>
