@@ -16,11 +16,11 @@ export default function VerifyDetail() {
   const navigation = useNavigation();
   const { user } = route.params; // Destructure passed user data
   const [modalVisible, setModalVisible] = useState(false);
-  const [result, setResult] = useState(""); // To store Pass/Unpass result
+  const [result, setResult] = useState(null); // To store Pass/Unpass result (true/false)
 
-  // Function to handle confirmation after approving or disapproving
+  // Function to handle confirmation for both true (pass) and false (fail)
   const handleConfirm = (status) => {
-    setResult(status ? "ผ่าน" : "ไม่ผ่าน"); // Set the status (pass/unpass)
+    setResult(status); // Set the status (pass/unpass)
     setModalVisible(true); // Open the modal for confirmation
   };
 
@@ -28,16 +28,18 @@ export default function VerifyDetail() {
   const sendResultToBackend = async () => {
     try {
       // Prepare the updated user data based on the result
-      const updatedUser = { ...user, status: result === "ผ่าน" ? true : false };
+      const updatedUser = {
+        walkerId: user.walkerId, // Correct way to assign walkerId
+        status: result, // Pass or Fail result sent to the backend
+      };
 
       // Make an API call to update the user status in the backend
       const response = await fetch(
-        `https://ku-man.runnakjeen.com/admin/verify/${user.id}`,
+        `https://ku-man.runnakjeen.com/admin/verify`,
         {
           method: "POST", // Assuming the update method is POST
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer <your-token>", // Add the appropriate token here
           },
           body: JSON.stringify(updatedUser),
         }
@@ -48,7 +50,7 @@ export default function VerifyDetail() {
       }
 
       // Alert success and remove the user from the list
-      Alert.alert(`User has been ${result}`);
+      Alert.alert(`User status has been updated to: ${result ? "ผ่าน" : "ไม่ผ่าน"}`);
       
       setModalVisible(false);
       navigation.goBack(); // Go back to the previous screen
@@ -89,23 +91,23 @@ export default function VerifyDetail() {
         </View>
         <View style={styles.userInfoContainer}>
           <Text style={styles.userInfoLabel}>บัญชีรับเงิน: </Text>
-          <Text style={styles.userInfo}>{user.bankAccountName}</Text>
+          <Text style={styles.userInfo}>{user.bankAccountName || "N/A"}</Text> {/* Check for missing data */}
         </View>
         <View style={styles.userInfoContainer}>
           <Text style={styles.userInfoLabel}>เลขที่บัญชี: </Text>
-          <Text style={styles.userInfo}>{user.bankAccountNo}</Text>
+          <Text style={styles.userInfo}>{user.bankAccountNo || "N/A"}</Text> {/* Check for missing data */}
         </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.unpassButton}
-            onPress={() => handleConfirm(false)}
+            onPress={() => handleConfirm(false)} // Trigger modal for "Fail"
           >
             <Text style={styles.buttonText}>ไม่ผ่าน</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.passButton}
-            onPress={() => handleConfirm(true)}
+            onPress={() => handleConfirm(true)} // Trigger modal for "Pass"
           >
             <Text style={styles.buttonText}>ผ่าน</Text>
           </TouchableOpacity>
@@ -121,7 +123,7 @@ export default function VerifyDetail() {
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalText}>
-                {`คุณยืนยันที่จะให้ user คนนี้ ${result}?`}
+                {`คุณยืนยันที่จะให้ user คนนี้ ${result ? "ผ่าน" : "ไม่ผ่าน"}?`}
               </Text>
               <TouchableOpacity
                 style={styles.confirmButton}
@@ -136,6 +138,7 @@ export default function VerifyDetail() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
