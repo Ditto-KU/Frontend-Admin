@@ -8,6 +8,9 @@ export default function LineGraph() {
   const [requesterData, setRequesterData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const graphWidth = Dimensions.get("screen").width*0.35
+  const graphHeight = Dimensions.get("screen").height*0.30
+
   useEffect(() => {
     // Mock fetch API call (replace with your actual API URL)
     fetch('https://your-api-url.com/activity-data') // Replace with your actual API endpoint
@@ -52,8 +55,8 @@ export default function LineGraph() {
           ],
           legend: ['Walker', 'Requester'],
         }}
-        width={750} // Dynamic width minus padding
-        height={250} // Fixed height for the chart
+        width={graphWidth} // Dynamic width minus padding
+        height={graphHeight} // Fixed height for the chart
         yAxisLabel=""
         yAxisSuffix=""
         yAxisInterval={1}

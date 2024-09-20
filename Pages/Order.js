@@ -8,7 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-  FlatList,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
@@ -128,22 +128,6 @@ export default function Order() {
     }
   };
 
-  // Render each item for FlatList
-  const renderOrderItem = ({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.orderContainer,
-        { backgroundColor: getBackgroundColor(item.orderStatus) },
-      ]}
-      onPress={() => gotoOrderDetail(item)}
-    >
-      <Text style={[styles.orderText, { fontWeight: "600" }]}>
-        Order ID: {item.orderId}
-      </Text>
-      <Text style={styles.orderText}>{item.orderStatus}</Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.OR_container}>
       <Header />
@@ -166,14 +150,24 @@ export default function Order() {
         </View>
       </View>
 
-      {/* Order List using FlatList */}
-      <FlatList
-        data={orderData}
-        keyExtractor={(item) => item.orderId.toString()}
-        renderItem={renderOrderItem}
-        contentContainerStyle={styles.orderList}
-        style={{ flex: 1 }}  
-      />
+      {/* Order List using ScrollView and map */}
+      <ScrollView style={styles.orderList}>
+        {orderData.map((order, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.orderContainer,
+              { backgroundColor: getBackgroundColor(order.orderStatus) },
+            ]}
+            onPress={() => gotoOrderDetail(order)}
+          >
+            <Text style={[styles.orderText, { fontWeight: "600" }]}>
+              Order ID: {order.orderId}
+            </Text>
+            <Text style={styles.orderText}>{order.orderStatus}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       <FilterComponent modalVisible={modalVisible} toggleModal={toggleModal} />
     </View>
@@ -233,6 +227,7 @@ const styles = StyleSheet.create({
   },
   orderList: {
     padding: 10,
+    flex: 1,
   },
   orderContainer: {
     padding: 15,
