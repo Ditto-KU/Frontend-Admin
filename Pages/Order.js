@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
 import FilterComponent from "../components/FilterComponent";
 
@@ -10,7 +20,15 @@ export default function Order() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  
+
+  const gotoOrderDetail = (order) => {
+    navigation.navigate("OrderDetail", { order: order });
+  };
+
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
+  };
+
   // Fetch order data from the API
   useEffect(() => {
     const fetchData = async () => {
@@ -19,10 +37,13 @@ export default function Order() {
           Accept: "*/*",
         };
 
-        const response = await fetch("https://ku-man.runnakjeen.com/admin/order", {
-          method: "GET",
-          headers: headersList,
-        });
+        const response = await fetch(
+          "https://ku-man-api.vimforlanie.com/admin/order",
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -33,7 +54,13 @@ export default function Order() {
           const data = await response.json();
 
           const sortedData = data.sort((a, b) => {
-            const statusOrder = { "waitingAdmin": 1, "inProgress": 2, "lookingForWalker": 3, "completed": 4, "cancelled": 5 };
+            const statusOrder = {
+              waitingAdmin: 1,
+              inProgress: 2,
+              lookingForWalker: 3,
+              completed: 4,
+              cancelled: 5,
+            };
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
           setOrderData(sortedData); // Set order data
@@ -48,17 +75,14 @@ export default function Order() {
         setLoading(false);
       }
     };
-    
-    fetchData();
-  }, []);
-  
-  const gotoOrderDetail = (order) => {
-    navigation.navigate('OrderDetail', { order: order });
-  };
 
-  const toggleModal = () => {
-    setModalVisible(!modalVisible);
-  };
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
   // Loading state
   if (loading) {
     return (
@@ -86,6 +110,39 @@ export default function Order() {
     );
   }
 
+  // Function to set background color based on order status
+  const getBackgroundColor = (status) => {
+    switch (status) {
+      case "inProgress":
+        return "rgb(255, 240, 186)"; // Softer Yellow
+      case "completed":
+        return "rgb(144, 238, 144)"; // Softer Green
+      case "cancelled":
+        return "rgb(255, 182, 193)"; // Softer Pink
+      case "lookingForWalker":
+        return "rgb(211, 211, 211)"; // Softer Gray
+      case "waitingAdmin":
+        return "rgb(255, 222, 173)"; // Softer Peach
+      default:
+        return "#FFF";
+    }
+  };
+
+  // Render each item for FlatList
+  const renderOrderItem = ({ item }) => (
+    <TouchableOpacity
+      style={[
+        styles.orderContainer,
+        { backgroundColor: getBackgroundColor(item.orderStatus) },
+      ]}
+      onPress={() => gotoOrderDetail(item)}
+    >
+      <Text style={[styles.orderText, { fontWeight: "600" }]}>
+        Order ID: {item.orderId}
+      </Text>
+      <Text style={styles.orderText}>{item.orderStatus}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.OR_container}>
@@ -93,9 +150,9 @@ export default function Order() {
       <View style={styles.OR_header}>
         <Text style={styles.OR_title}>Order List</Text>
         <View style={styles.OR_searchContainer}>
-          <TextInput 
-            style={styles.OR_searchInput} 
-            placeholder="Search Orders" 
+          <TextInput
+            style={styles.OR_searchInput}
+            placeholder="Search Orders"
           />
           <TouchableOpacity
             onPress={toggleModal} // Toggle filter modal
@@ -109,29 +166,14 @@ export default function Order() {
         </View>
       </View>
 
-      {/* Order List using map() */}
-      <View style={styles.orderList}>
-        <Text style={styles.header}>Orders</Text>
-        {orderData.map((order, index) => {
-          let backgroundColor = "#FFF"; // Default background
-          if (order.orderStatus === "inProgress") backgroundColor = "rgb(255, 240, 186)"; // Softer Yellow
-          else if (order.orderStatus === "completed") backgroundColor = "rgb(144, 238, 144)"; // Softer Green
-          else if (order.orderStatus === "cancelled") backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
-          else if (order.orderStatus === "lookingForWalker") backgroundColor = "rgb(211, 211, 211)"; // Softer Gray
-          else if (order.orderStatus === "waitingAdmin") backgroundColor = "rgb(255, 222, 173)"; // Softer Peach
-
-          return (
-            <TouchableOpacity
-              key={index}
-              style={[styles.orderContainer, { backgroundColor }]}
-              onPress={() => gotoOrderDetail(order)}
-            >
-              <Text style={[styles.orderText,{fontWeight: 600}]}>Order ID: {order.orderId}</Text>
-              <Text style={styles.orderText}>{order.orderStatus}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {/* Order List using FlatList */}
+      <FlatList
+        data={orderData}
+        keyExtractor={(item) => item.orderId.toString()}
+        renderItem={renderOrderItem}
+        contentContainerStyle={styles.orderList}
+        style={{ flex: 1 }}  
+      />
 
       <FilterComponent modalVisible={modalVisible} toggleModal={toggleModal} />
     </View>

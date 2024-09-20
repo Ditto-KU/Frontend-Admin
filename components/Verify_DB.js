@@ -5,29 +5,26 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Verify_DB() {
   const navigation = useNavigation();
 
-  // Initialize state for verifyUser, loading, and error
   const [verifyUser, setVerifyUser] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
         let headersList = {
           Accept: "*/*",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MTk4ODU2LCJleHAiOjE3MzQ4Mzg4NTZ9.JT_q3Emt2wiIKAGr4p76pkuZTBjD_rh6abPiHYm8f7s",
         };
 
         let response = await fetch(
-          "https://ku-man.runnakjeen.com/admin/verify",
+          "https://ku-man-api.vimforlanie.com/admin/verify",
           {
             method: "GET",
             headers: headersList,
@@ -42,7 +39,6 @@ export default function Verify_DB() {
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
 
-          // Filter out walkers whose status is true
           const filteredData = data.filter((user) => user.status === false);
 
           setVerifyUser(filteredData);
@@ -51,13 +47,15 @@ export default function Verify_DB() {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError(error.message); // Display the error message in UI
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    const intervalId = setInterval(fetchData, 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const gotoVerifydetail = (user) => {
@@ -84,22 +82,23 @@ export default function Verify_DB() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Verify New Walkers</Text>
-      {/* Loop through the user data */}
-      {verifyUser.length > 0 ? (
-        verifyUser.map((user, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.reportContainer}
-            onPress={() => gotoVerifydetail(user)} // Pass the user's data to the function
-          >
-            <Text style={styles.reportText}>
-              Username: {user.username ?? "N/A"}
-            </Text>
-          </TouchableOpacity>
-        ))
-      ) : (
-        <Text>No data available</Text>
-      )}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {verifyUser.length > 0 ? (
+          verifyUser.map((user, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.reportContainer}
+              onPress={() => gotoVerifydetail(user)}
+            >
+              <Text style={styles.reportText}>
+                User: {user.username ?? "N/A"}
+              </Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text>No data available</Text>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -109,19 +108,24 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fafbfc",
     borderRadius: 10,
-    width: "100%", // Set to full width for better presentation
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    height: "100%",
+    width: "50%",
+  },
+  scrollContent: {
+    justifyContent: "flex-start",
+    paddingBottom: 20,
   },
   header: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
   },
   reportContainer: {
-    flexDirection: "column", // Changed to column for vertical layout
+    flexDirection: "column",
     justifyContent: "flex-start",
     padding: 15,
     marginBottom: 10,
@@ -132,7 +136,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    width: "45%", // Ensure the report container takes the full width
+    width: "100%", // Ensure the report container takes the full width
   },
   reportText: {
     fontSize: 16,
@@ -147,6 +151,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    color: "red",
   },
 });

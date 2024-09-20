@@ -1,15 +1,72 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import navigation hook
 import Head from "../components/Header";
 
 export default function Cafeteria() {
   const navigation = useNavigation(); // Hook to access navigation
+  const [canteens, setCanteens] = useState([]); // State to hold fetched canteen data
+  const [loading, setLoading] = useState(true); // State to handle loading
+  const [error, setError] = useState(null); // State to handle errors
 
   // Function to handle button press and navigate to RestaurantInCafeteria screen
-  const handleCafeteriaPress = (cafeteriaName) => {
-    navigation.navigate("RestaurantInCafeteria", { cafeteriaName }); // Navigate and pass cafeteria name
+  const handleCafeteriaPress = (canteenId, cafeteriaName) => {
+    navigation.navigate("RestaurantInCafeteria", { canteenId, cafeteriaName }); // Navigate and pass canteenId and name
   };
+
+  // Fetch canteen data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let headersList = {
+          "Accept": "*/*"
+        };
+
+        let response = await fetch("https://ku-man-api.vimforlanie.com/admin/canteen", { 
+          method: "GET",
+          headers: headersList
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json(); // Parse the response to JSON
+        setCanteens(data); // Set the canteen data to the state
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false); // Stop loading after fetching the data
+      }
+    };
+
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array to run the effect only once on component mount
+
+  // Render loading state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Cafeterias...</Text>
+      </View>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.CA_container}>
@@ -17,32 +74,17 @@ export default function Cafeteria() {
       <View style={styles.CA_header}>
         <Text style={styles.CA_title}>Cafeteria List</Text>
       </View>
-      {/* Cafeteria Buttons in Column */}
+      {/* Cafeteria Buttons in Column, dynamically rendered from fetched data */}
       <View style={styles.CA_column}>
-        <TouchableOpacity
-          style={styles.CA_button}
-          onPress={() => handleCafeteriaPress("โรงอาหารกลาง1(บาร์ใหม่)")}
-        >
-          <Text style={styles.CA_buttonText}>โรงอาหารกลาง1(บาร์ใหม่)</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.CA_button}
-          onPress={() => handleCafeteriaPress("โรงอาหารกลาง2(บาร์ใหม่กว่า)")}
-        >
-          <Text style={styles.CA_buttonText}>โรงอาหารกลาง2(บาร์ใหม่กว่า)</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.CA_button}
-          onPress={() => handleCafeteriaPress("โรงอาหารคณะวิศวกรรมศาสตร์(บาร์วิศวะ)")}
-        >
-          <Text style={styles.CA_buttonText}>โรงอาหารคณะวิศวกรรมศาสตร์(บาร์วิศวะ)</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.CA_button}
-          onPress={() => handleCafeteriaPress("โรงอาหารคณะวิทยาศาสตร์(บาร์วิทย์)")}
-        >
-          <Text style={styles.CA_buttonText}>โรงอาหารคณะวิทยาศาสตร์(บาร์วิทย์)</Text>
-        </TouchableOpacity>
+        {canteens.map((canteen) => (
+          <TouchableOpacity
+            key={canteen.canteenId} // Unique key for each button
+            style={styles.CA_button}
+            onPress={() => handleCafeteriaPress(canteen.canteenId, canteen.name)} // Pass canteenId and name
+          >
+            <Text style={styles.CA_buttonText}>{canteen.name}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
@@ -90,8 +132,12 @@ const styles = StyleSheet.create({
   },
   CA_buttonText: {
     fontSize: 24, // Increased font size for better readability
-    // fontWeight: "bold", // Bolder font for emphasis
     color: "#444", // Soft color for the text
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

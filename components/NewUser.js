@@ -39,16 +39,18 @@ export default function NewUser() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fafbfc',
-    padding: 20,
     borderRadius: 10,
-    marginVertical: 10,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     justifyContent: 'center',
-    width: '99%', // Adjust width to fit the container
+    width: '96%', // Adjust width to fit the container
+    padding: 10,
+    height: "30%",
+    marginTop: 10,
+    marginLeft: 10,
   },
   title: {
     fontSize: 20,

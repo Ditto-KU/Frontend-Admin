@@ -26,16 +26,77 @@ export default function VerifyDetail() {
 
   // Function to send data to backend and remove user
   const sendResultToBackend = async () => {
+    if (result === false) {
+      // If the result is "unpass" (false), send an email and delete the user
+      await sendEmailNotification();
+      await deleteUserFromBackend();
+    } else {
+      // If the result is "pass", just update the user status
+      await updateUserStatus();
+    }
+    setModalVisible(false);
+  };
+
+  // Function to send email notification when "ไม่ผ่าน"
+  const sendEmailNotification = async () => {
     try {
-      // Prepare the updated user data based on the result
+      const response = await fetch(
+        "https://ku-man-api.vimforlanie.com/admin/send-email", // Change to your backend email API
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user.email, // Send to user's email
+            subject: "Your Verification Status",
+            message: "Your verification has failed.", // Customize this message
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send email notification");
+      }
+
+      Alert.alert("Success", "An email has been sent to the user.");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  // Function to delete the user from the backend
+  const deleteUserFromBackend = async () => {
+    try {
+      const response = await fetch(
+        `https://ku-man-api.vimforlanie.com/admin/delete-user/${user.walkerId}`, // Assuming there's a DELETE endpoint for users
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete user");
+      }
+
+      Alert.alert("Success", "User has been removed.");
+      setModalVisible(false);
+      navigation.goBack(); // Go back to the previous screen after deletion
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  // Function to update the user's status to pass/unpass
+  const updateUserStatus = async () => {
+    try {
       const updatedUser = {
-        walkerId: user.walkerId, // Correct way to assign walkerId
-        status: result, // Pass or Fail result sent to the backend
+        walkerId: user.walkerId,
+        status: result, // true for pass, false for unpass
       };
 
-      // Make an API call to update the user status in the backend
       const response = await fetch(
-        `https://ku-man.runnakjeen.com/admin/verify`,
+        "https://ku-man-api.vimforlanie.com/admin/verify",
         {
           method: "POST", // Assuming the update method is POST
           headers: {
@@ -49,9 +110,10 @@ export default function VerifyDetail() {
         throw new Error("Failed to update user status");
       }
 
-      // Alert success and remove the user from the list
-      Alert.alert(`User status has been updated to: ${result ? "ผ่าน" : "ไม่ผ่าน"}`);
-      
+      Alert.alert(
+        `User status has been updated to: ${result ? "ผ่าน" : "ไม่ผ่าน"}`
+      );
+
       setModalVisible(false);
       navigation.goBack(); // Go back to the previous screen
     } catch (error) {
@@ -74,7 +136,7 @@ export default function VerifyDetail() {
             style={styles.image}
           />
         </View>
-        
+
         {/* Display user details */}
         <Text style={styles.userInfoTitle}>User Details</Text>
         <View style={styles.userInfoContainer}>
@@ -91,11 +153,17 @@ export default function VerifyDetail() {
         </View>
         <View style={styles.userInfoContainer}>
           <Text style={styles.userInfoLabel}>บัญชีรับเงิน: </Text>
-          <Text style={styles.userInfo}>{user.bankAccountName || "N/A"}</Text> {/* Check for missing data */}
+          <Text style={styles.userInfo}>
+            {user.bankAccountName || "N/A"}
+          </Text>{" "}
+          {/* Check for missing data */}
         </View>
         <View style={styles.userInfoContainer}>
           <Text style={styles.userInfoLabel}>เลขที่บัญชี: </Text>
-          <Text style={styles.userInfo}>{user.bankAccountNo || "N/A"}</Text> {/* Check for missing data */}
+          <Text style={styles.userInfo}>
+            {user.bankAccountNo || "N/A"}
+          </Text>{" "}
+          {/* Check for missing data */}
         </View>
 
         <View style={styles.buttonContainer}>
@@ -118,7 +186,7 @@ export default function VerifyDetail() {
           transparent={true}
           visible={modalVisible}
           animationType="fade"
-          onRequestClose={() => setModalVisible(false)}
+          onRequestClose={() => setModalVisible(false)} // This will allow closing modal on back press on Android
         >
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
@@ -138,7 +206,6 @@ export default function VerifyDetail() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

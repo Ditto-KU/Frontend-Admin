@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
@@ -24,12 +24,10 @@ export default function Verify() {
       try {
         let headersList = {
           Accept: "*/*",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MTk4ODU2LCJleHAiOjE3MzQ4Mzg4NTZ9.JT_q3Emt2wiIKAGr4p76pkuZTBjD_rh6abPiHYm8f7s",
         };
 
         let response = await fetch(
-          "https://ku-man.runnakjeen.com/admin/verify",
+          "https://ku-man-api.vimforlanie.com/admin/verify",
           {
             method: "GET",
             headers: headersList,
@@ -56,7 +54,11 @@ export default function Verify() {
       }
     };
 
-    fetchData();
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
@@ -80,43 +82,36 @@ export default function Verify() {
     navigation.navigate("VerifyDetail", { user });
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleUserPress(item)}>
-      <View style={styles.VE_listItem}>
-        <View style={{ flexDirection: "column" }}>
-          <Text style={styles.VE_textName}>Username: {item.username}</Text>
-          {/* <Text>Email: {item.email}</Text>
-          <Text>Phone: {item.phoneNumber}</Text>
-          <Text>Bank Account Name: {item.bankAccountName}</Text>
-          <Text>Bank Account No: {item.bankAccountNo}</Text>
-          <Text>Status: {item.status ? "Verified" : "Not Verified"}</Text> */}
-        </View>
-        <Text style={styles.VE_textTime}>
-          Registered At: {new Date(item.registerAt).toLocaleString()}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.VE_container}>
+      {/* Ensure Header has a defined height */}
       <Header />
       <View style={styles.VE_header}>
         <Text style={styles.VE_title}>User Verification</Text>
       </View>
-      <FlatList
-        data={verifyUser}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.email} // Unique key based on email
-        contentContainerStyle={styles.VE_userList}
-      />
+
+      {/* Wrapping the content in a ScrollView */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {verifyUser.map((item, index) => (
+          <TouchableOpacity key={index} onPress={() => handleUserPress(item)}>
+            <View style={styles.VE_listItem}>
+              <Text style={styles.VE_textName}>
+                Username: {item.username}
+              </Text>
+              <Text style={styles.VE_textTime}>
+                Registered At: {new Date(item.registerAt).toLocaleString()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   VE_container: {
-    flex: 1,
+    flex: 1, // Allow the view to take full height for scrolling
     padding: 16,
     backgroundColor: "#F5F5F5",
   },
@@ -136,7 +131,7 @@ const styles = StyleSheet.create({
   VE_listItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 15,
+    padding: 20,
     marginBottom: 10,
     backgroundColor: "#FFF",
     borderRadius: 10,
@@ -145,6 +140,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    width: "100%",
   },
   VE_textName: {
     fontSize: 20,
@@ -164,6 +160,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    color: "red",
+  },
+  scrollContent: {
+    flexGrow: 1, // Ensures ScrollView content grows properly
+    paddingBottom: 30, // Optional: to give some space at the bottom
   },
 });

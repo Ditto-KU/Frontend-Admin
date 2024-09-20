@@ -19,12 +19,10 @@ export default function User() {
       try {
         let headersList = {
           Accept: "*/*",
-          // Authorization:
-          //   "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiIwIiwiaWF0IjoxNzI2MzkyMTM0LCJleHAiOjE3MzUwMzIxMzR9.WcM8k4JqIzxXOG8WQVUFDDoqULV1jz2WH0Xy0_HbcrY",
         };
 
         // Walker API request
-        let walkerResponse = await fetch("https://ku-man.runnakjeen.com/admin/walker", {
+        let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walker", {
           method: "GET",
           headers: headersList,
         });
@@ -35,7 +33,7 @@ export default function User() {
         setWalkers(walkersData);
 
         // Requester API request
-        let requesterResponse = await fetch("https://ku-man.runnakjeen.com/admin/requester", {
+        let requesterResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/requester", {
           method: "GET",
           headers: headersList,
         });
@@ -53,12 +51,16 @@ export default function User() {
       }
     };
 
-    fetchWalkersAndRequesters();
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchWalkersAndRequesters, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
     return (
-      <View style={PageStyle.loadingContainer}>
+      <View style={PageStyle.US_loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
         <Text>Loading data...</Text>
       </View>
@@ -67,7 +69,7 @@ export default function User() {
 
   if (error) {
     return (
-      <View style={PageStyle.errorContainer}>
+      <View style={PageStyle.US_loadingContainer}>
         <Text style={PageStyle.errorText}>Error: {error}</Text>
       </View>
     );

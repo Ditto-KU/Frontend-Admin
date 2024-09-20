@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   userInfoContainer: {
-    alignItems: "flex-start",
+    alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 20,
@@ -135,13 +135,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
-    marginTop: 20,
+    marginTop: 50,
   },
   requesterContainer: {
-    alignItems: "flex-start",
+    alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
-    marginTop: 30,
+    marginTop: 50,
   },
   addressContainer: {
     marginBottom: 15,

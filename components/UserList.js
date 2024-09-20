@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Head from "../components/Header"; // Assuming you have a Header component
 
@@ -16,18 +22,26 @@ export default function UserList() {
   };
 
   // Function to render each user item in the list
+
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleUserPress(item)} style={styles.userItem}>
-      <Text style={styles.userName}>{item.name}</Text>
-      <Text style={styles.userTime}>Time: {item.time}</Text>
-      <Text style={styles.userType}>{userType}</Text>
+    <TouchableOpacity
+      onPress={() => handleUserPress(item)}
+      style={styles.userItem}
+    >
+      <Text style={styles.userName}>{item.username}</Text>
+
+      <Text>
+        User: {userType === "walker" ? item.walkerId : item.requesterId}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
       <Head /> {/* Header component */}
-      <Text style={styles.title}>{userType === 'requester' ? "Requester List" : "Walker List"}</Text>
+      <Text style={styles.title}>
+        {userType === "requester" ? "Requester List" : "Walker List"}
+      </Text>
       <FlatList
         data={users} // Users passed from previous screen
         renderItem={renderItem} // Function to render each user

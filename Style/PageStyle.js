@@ -58,8 +58,7 @@ export const PageStyle = StyleSheet.create({
 
   //Main
   M_main: {
-    backgroundColor: "#FFFFFF",
-    flex: 1,
+    backgroundColor: "#fff",
     padding: 10,
     width: "100%",
     height: "100%",
@@ -68,103 +67,106 @@ export const PageStyle = StyleSheet.create({
     justifyContent: "space-between", // Align items to the left along the main axis
   },
   M_sidebar: {
-    backgroundColor: "red",
-    flex: 1,
+    backgroundColor: "#fff",
     width: "15%",
-    height: "100%",
-    minHeight: "97.5vh",
+    height: "100%",  // Full height, remove minHeight
     borderRadius: 10,
     justifyContent: "space-between",
-    margin: 10,
+    marginRight: 10,
   },
   M_container_DB: {
     backgroundColor: "#fff",
     flexDirection: "column",
     width: "85%",
-    height: "100%",
+    // height: "100%",
   },
   M_containerUp_DB: {
     paddingHorizontal: 10,
     borderRadius: 10,
+    padding: 10,
+    // backgroundColor: "red",
     backgroundColor: "#fff",
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    height: "45%",
+    // justifyContent: "space-between",
+    // width: "100%",
+    height: "12%",
   },
   M_CS_DB: {
     width: "50%", // Adjusted to accommodate margin
     height: "100%",
     backgroundColor: "#fff",
     borderRadius: 10,
-    // marginRight: "0.7%", // This creates spacing between M_report_DB and M_verify_DB
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   M_order_DB: {
-    width: "50%", // Adjusted to fit within the container
+    padding: 5,
+    borderRadius: 10,
+    width: "50%",
     height: "100%",
     backgroundColor: "#fff",
-    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },  
   M_containerDown_DB: {
-    paddingHorizontal: 10,
-    paddingTop: 10,
     borderRadius: 10,
-    width: "100%",
-    height: "55%",
+    // width: "100%",
+    height: "12%",
     backgroundColor: "#fff",
+    // backgroundColor: "yellow",
     flexDirection: "row",
     justifyContent: "space-between",
   },
   M_BLcontent_DB: {
-    width: "49.5%", //-0.5 for margin
+    width: "50%",
     height: "100%",
+    // backgroundColor: "gray",
     backgroundColor: "#fff",
     borderRadius: 10,
     flexDirection: "row",
-  },
-  M_UserGraph_DB: {
-    width: "50%",
-    height: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-  },
-  M_BLcontentL_DB: {
-    padding: 5,
-    borderRadius: 10,
-    width: "50%",
-    height: "100%",
-    backgroundColor: "#fff",
-  },
-  M_BLcontentL_Rest_DB: {
-    padding: 5,
-    borderRadius: 10,
-    width: "100%",
-    height: "33%",
-    backgroundColor: "#fff",
-  },
-  M_BLcontentL_Income_DB: {
-    padding: 5,
-    borderRadius: 10,
-    width: "100%",
-    height: "33%",
-    backgroundColor: "#fff",
-  },
-  M_BLcontentL_NewUser_DB: {
-    padding: 5,
-    borderRadius: 10,
-    width: "100%",
-    height: "33%",
-    backgroundColor: "#fff",
   },
   M_Verify_DB: {
     padding: 5,
     borderRadius: 10,
+    // width: "50%",
+    // height: "100%",
+    // backgroundColor: "purple",
+    backgroundColor: "#fff",
+  },
+  M_UserGraph_DB: {
     width: "50%",
     height: "100%",
+    // backgroundColor: "orange",
     backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-between",
+    borderRadius: 10,
   },
+  M_BLcontentL_DB: {
+    borderRadius: 10,
+    width: "50%",
+    // backgroundColor: "pink",
+    backgroundColor: "#fff",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+  },
+  M_BLcontentL_Rest_DB: {
+    borderRadius: 10,
+    width: "100%",
+    height: "30%",
+    backgroundColor: "#fff",
+  },
+  M_BLcontentL_Income_DB: {
+    borderRadius: 10,
+    width: "100%",
+    height: "30%",
+    backgroundColor: "#fff",
+  },
+  M_BLcontentL_NewUser_DB: {
+    borderRadius: 10,
+    width: "100%",
+    height: "30%",
+    backgroundColor: "#fff",
+  },
+  
   
   //Contact Support
   CS_container: {
@@ -415,6 +417,11 @@ export const PageStyle = StyleSheet.create({
     fontSize: 30, // Bigger font size
     fontWeight: "bold",
     textAlign: "center",
+  },
+  US_loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   
 

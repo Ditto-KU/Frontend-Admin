@@ -1,69 +1,107 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import the navigation hook
 import Head from "../components/Header";
 
 export default function RestaurantInCafeteria({ route }) {
-  const { cafeteriaName } = route.params;
+  const { canteenId, cafeteriaName } = route.params; // Retrieve canteenId and name from params
   const navigation = useNavigation(); // Access the navigation object
 
   // Initialize state to hold restaurant data
   const [restaurantList, setRestaurantList] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
-  // Sample data for restaurants, with each cafeteria mapped to its list of restaurants
-  const restaurantData = {
-    "โรงอาหารกลาง1(บาร์ใหม่)": [
-      { id: 1, name: "ร้านอาหาร A1" },
-      { id: 2, name: "ร้านอาหาร B1" },
-      { id: 3, name: "ร้านอาหาร C1" },
-    ],
-    "โรงอาหารกลาง2(บาร์ใหม่กว่า)": [
-      { id: 1, name: "ร้านอาหาร A2" },
-      { id: 2, name: "ร้านอาหาร B2" },
-      { id: 3, name: "ร้านอาหาร C2" },
-    ],
-    "โรงอาหารคณะวิศวกรรมศาสตร์(บาร์วิศวะ)": [
-      { id: 1, name: "ร้านอาหาร A3" },
-      { id: 2, name: "ร้านอาหาร B3" },
-      { id: 3, name: "ร้านอาหาร C3" },
-    ],
-    "โรงอาหารคณะวิทยาศาสตร์(บาร์วิทย์)": [
-      { id: 1, name: "ร้านอาหาร A4" },
-      { id: 2, name: "ร้านอาหาร B4" },
-      { id: 3, name: "ร้านอาหาร C4" },
-    ],
-  };
-
-  // Set restaurant list based on selected cafeteria
+  // Fetch restaurant data based on canteenId
   useEffect(() => {
-    const selectedRestaurantList = restaurantData[cafeteriaName] || [];
-    setRestaurantList(selectedRestaurantList); // Update state with restaurant data
-  }, [cafeteriaName]); // This effect will run whenever the cafeteriaName changes
+    const fetchRestaurants = async () => {
+      console.log(`Fetching restaurants for canteenId: ${canteenId}`); // Debugging log
+
+      try {
+        let headersList = {
+          "Accept": "*/*",
+        };
+
+        let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${canteenId}`, { 
+          method: "GET",
+          headers: headersList,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json(); // Parse the response to JSON
+        console.log('Fetched restaurant data:', data); // Debugging log
+        setRestaurantList(data); // Update state with restaurant data
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message); // Handle error
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false); // Stop loading after fetching the data
+      }
+    };
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchRestaurants, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [canteenId]); // Fetch data when the canteenId changes
 
   // Handle navigation to RestaurantDetails
-  const handleRestaurantPress = (restaurantName) => {
-    navigation.navigate('RestaurantDetail', { restaurantName });
+  const handleRestaurantPress = (shopId) => {
+    navigation.navigate('RestaurantDetail', { shopId });
   };
 
   const renderRestaurant = ({ item }) => (
-    <TouchableOpacity onPress={() => handleRestaurantPress(item.name)}>
+    <TouchableOpacity onPress={() => handleRestaurantPress(item.shopId)}>
       <View style={styles.OR_listItem}>
-        <Text style={styles.OR_listText}>{item.name}</Text>
+        <Text style={styles.OR_listText}>{item.shopName}</Text>
+        <Text style={styles.OR_listSubText}>Tel: {item.tel}</Text>
+        <Text style={styles.OR_listSubText}>Shop Number: {item.shopNumber}</Text>
       </View>
     </TouchableOpacity>
   );
+
+  // Render loading or error state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Restaurants...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  // If restaurantList is empty, display a message
+  if (restaurantList.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>No restaurants available for {cafeteriaName}.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.OR_container}>
       <Head />
       <View style={styles.OR_header}>
-        <Text style={styles.OR_title}>{cafeteriaName}</Text>
+        <Text style={styles.OR_title}>{cafeteriaName}</Text> {/* Display canteen name */}
       </View>
       <View style={styles.OR_content}>
         <FlatList
           data={restaurantList}
           renderItem={renderRestaurant}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.shopId.toString()}
         />
       </View>
     </View>
@@ -99,8 +137,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   OR_listItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    justifyContent: "flex-start",
     padding: 15,
     marginBottom: 10,
     backgroundColor: "#FFF",
@@ -114,5 +152,14 @@ const styles = StyleSheet.create({
   OR_listText: {
     fontSize: 24,
     margin: 10,
+  },
+  OR_listSubText: {
+    fontSize: 16,
+    color: "#666",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

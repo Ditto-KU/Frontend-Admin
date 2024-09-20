@@ -43,15 +43,17 @@ export default function OpenRestaurant() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fafbfc',
-    padding: 20,
     borderRadius: 10,
-    marginVertical: 10,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    width: '99%', // Adjust width to fit the container
+    justifyContent: 'center',
+    width: '96%', // Adjust width to fit the container
+    padding: 10,
+    height: "30%",
+    marginLeft: 10,
   },
   text: {
     fontSize: 20,
