@@ -32,6 +32,8 @@ import UserList from "./components/UserList";
 import VerifyDetail from "./Pages/VerifyDetail";
 import UserDetail from "./Pages/UserDetail";
 import RestaurantDetail from "./Pages/RestaurantDetail";
+import OrderHistory from "./Pages/OrderHistory";
+import OrderHistoryDetail from "./Pages/OrderHistoryDetail";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -41,8 +43,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator  screenOptions={{ headerShown: false }}>
         {/* Define your screens here */}
-        {/* <Stack.Screen name="KU-MAN" component={Title} /> */}
-        {/* <Stack.Screen name="Login" component={Login} /> */}
+        <Stack.Screen name="KU-MAN" component={Title} />
+        <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="ContactSupport" component={ContactSupport} />
         <Stack.Screen name="Report" component={Report} />
@@ -58,6 +60,8 @@ export default function App() {
         <Stack.Screen name="VerifyDetail" component={VerifyDetail} />
         <Stack.Screen name="UserDetail" component={UserDetail} />
         <Stack.Screen name="RestaurantDetail" component={RestaurantDetail} />
+        <Stack.Screen name="OrderHistory" component={OrderHistory} />
+        <Stack.Screen name="OrderHistoryDetail" component={OrderHistoryDetail} />
       </Stack.Navigator>
     </NavigationContainer>
     // </ScrollView>

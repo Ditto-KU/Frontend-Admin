@@ -1,51 +1,117 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
 
 export default function Verify() {
   const navigation = useNavigation();
 
-  // Sample user data
-  const [userData] = useState([
-    { id: 1, name: "Walker User 1", time: "11:00 AM"},
-    { id: 2, name: "Walker User 2", time: "10:00 AM" },
-  ]);
+  // State for API data, loading, and error
+  const [verifyUser, setVerifyUser] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+        };
+
+        let response = await fetch(
+          "https://ku-man-api.vimforlanie.com/admin/verify",
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          const filteredData = data.filter((user) => user.status === false);
+          setVerifyUser(filteredData);
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message); // Display the error message in UI
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   const handleUserPress = (user) => {
-    navigation.navigate('VerifyDetail', { user });
+    navigation.navigate("VerifyDetail", { user });
   };
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleUserPress(item)}>
-      <View style={styles.VE_listItem}>
-        <View style={{ flexDirection: "column" }}>
-          <Text style={styles.VE_textName}>{item.name}</Text>
-        </View>
-        <Text style={styles.VE_textTime}>{item.time}</Text>
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.VE_container}>
+      {/* Ensure Header has a defined height */}
       <Header />
       <View style={styles.VE_header}>
         <Text style={styles.VE_title}>User Verification</Text>
       </View>
-      <FlatList
-        data={userData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.VE_userList}
-      />
+
+      {/* Wrapping the content in a ScrollView */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {verifyUser.map((item, index) => (
+          <TouchableOpacity key={index} onPress={() => handleUserPress(item)}>
+            <View style={styles.VE_listItem}>
+              <Text style={styles.VE_textName}>
+                Username: {item.username}
+              </Text>
+              <Text style={styles.VE_textTime}>
+                Registered At: {new Date(item.registerAt).toLocaleString()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   VE_container: {
-    flex: 1,
+    flex: 1, // Allow the view to take full height for scrolling
     padding: 16,
     backgroundColor: "#F5F5F5",
   },
@@ -65,7 +131,7 @@ const styles = StyleSheet.create({
   VE_listItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 15,
+    padding: 20,
     marginBottom: 10,
     backgroundColor: "#FFF",
     borderRadius: 10,
@@ -74,15 +140,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    width: "100%",
   },
   VE_textName: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
-    margin: 10,
   },
   VE_textTime: {
     fontSize: 16,
     color: "#555",
     marginTop: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContent: {
+    flexGrow: 1, // Ensures ScrollView content grows properly
+    paddingBottom: 30, // Optional: to give some space at the bottom
   },
 });

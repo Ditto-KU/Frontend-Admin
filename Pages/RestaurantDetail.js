@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,75 +7,25 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Alert
 } from "react-native";
-import Header from "../components/Header"; // Assuming you have a Header component
+import Header from "../components/Header";
+import { useNavigation, useRoute } from "@react-navigation/native"; // Import useNavigation and useRoute
 
 export default function RestaurantDetail() {
-  // States for toggling restaurant and menu items
-  const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
-  const [menuItems, setMenuItems] = useState([
-    {
-      name: "มัสมั่นแกงแก้วตา",
-      isAvailable: true,
-      price: "100 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ยำใหญ่ใส่สารพัด",
-      isAvailable: true,
-      price: "120 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ต้มหมก",
-      isAvailable: true,
-      price: "90 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ไส้หมู",
-      isAvailable: false,
-      price: "80 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "กากหมู",
-      isAvailable: false,
-      price: "70 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ข้าวมันไก่",
-      isAvailable: true,
-      price: "50 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ข้าวผัด",
-      isAvailable: true,
-      price: "60 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ผัดไทย",
-      isAvailable: true,
-      price: "70 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ส้มตำ",
-      isAvailable: true,
-      price: "40 THB",
-      image: "image-url-here",
-    },
-    {
-      name: "ก๋วยเตี๋ยวเรือ",
-      isAvailable: true,
-      price: "55 THB",
-      image: "image-url-here",
-    },
-  ]);
+  const navigation = useNavigation(); // Initialize navigation
+  const route = useRoute(); // Get the route to access passed parameters
+  const { shopId } = route.params; // Retrieve the shopId passed from the previous screen
 
+  // States for toggling restaurant, menu items, and shop info
+  const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
+  const [menuItems, setMenuItems] = useState([]);
+  const [shopInfo, setShopInfo] = useState(null); // State for storing shop info
+  const [loading, setLoading] = useState(true); // Loading state for menu
+  const [shopLoading, setShopLoading] = useState(true); // Loading state for shop info
+  const [error, setError] = useState(null); // Error state
+  
   // Function to toggle restaurant open/close
   const toggleRestaurantStatus = () => {
     setIsRestaurantOpen(!isRestaurantOpen);
@@ -84,9 +34,100 @@ export default function RestaurantDetail() {
   // Function to toggle menu item availability
   const toggleMenuItem = (index) => {
     const newMenuItems = [...menuItems];
-    newMenuItems[index].isAvailable = !newMenuItems[index].isAvailable;
+    newMenuItems[index].status = !newMenuItems[index].status;
     setMenuItems(newMenuItems);
   };
+
+  // Function to navigate to the Order History screen
+  const navigateToOrderHistory = () => {
+    navigation.navigate("OrderHistory", { restaurantId: shopId }); // Pass shopId to OrderHistory
+  };
+  // Function to fetch menu items from the API
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+        };
+
+        let response = await fetch(
+          `https://ku-man-api.vimforlanie.com/admin/canteen/shop/menu?shopId=${shopId}`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        let data = await response.json(); // Parse response as JSON
+        setMenuItems(data); // Update state with the fetched menu items
+        setLoading(false); // Stop loading
+      } catch (error) {
+        console.error("Error fetching menu items:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+        setLoading(false); // Stop loading even if there is an error
+      }
+    };
+
+    fetchMenuItems();
+  }, [shopId]); // Fetch the menu items when the component mounts and shopId is available
+
+  // Function to fetch shop information from the API
+  useEffect(() => {
+    const fetchShopInfo = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+        };
+
+        let response = await fetch(
+          `https://ku-man-api.vimforlanie.com/admin/canteen/shop/info?shopId=${shopId}`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        let data = await response.json(); // Parse response as JSON
+        setShopInfo(data); // Update state with the fetched shop info
+        setShopLoading(false); // Stop loading
+      } catch (error) {
+        console.error("Error fetching shop info:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+        setShopLoading(false); // Stop loading even if there is an error
+      }
+    };
+
+    fetchShopInfo();
+  }, [shopId]); // Fetch the shop info when the component mounts and shopId is available
+
+
+  // Render loading or error state for the shop info
+  if (shopLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Shop Info...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -94,7 +135,7 @@ export default function RestaurantDetail() {
       <Header />
 
       {/* Restaurant Name */}
-      <Text style={styles.restaurantName}>ร้านที่ 1</Text>
+      <Text style={styles.restaurantName}>{shopInfo?.shopName || 'ร้านที่ 1'}</Text>
 
       <View style={styles.mainContainer}>
         {/* Left Section: Restaurant Status */}
@@ -120,17 +161,20 @@ export default function RestaurantDetail() {
           <Text style={styles.menuTitle}>เมนู</Text>
           <ScrollView style={{ flexGrow: 1 }}>
             {menuItems.map((item, index) => (
-              <View key={index} style={styles.menuItem}>
-                <Image source={{ uri: item.image }} style={styles.menuImage} />
+              <View key={item.menuId} style={styles.menuItem}>
+                <Image
+                  source={{ uri: item.picture || "https://via.placeholder.com/60" }} // Use placeholder if no image
+                  style={styles.menuImage}
+                />
                 <View style={styles.menuDetails}>
                   <Text style={styles.menuName}>{item.name}</Text>
-                  <Text style={styles.menuPrice}>{item.price}</Text>
+                  <Text style={styles.menuPrice}>{item.price} THB</Text>
                 </View>
                 <View style={styles.switchContainer}>
                   <Switch
-                    value={item.isAvailable}
+                    value={item.status}
                     onValueChange={() => toggleMenuItem(index)}
-                    thumbColor={item.isAvailable ? "#34C759" : "#f4f3f4"}
+                    thumbColor={item.status ? "#34C759" : "#f4f3f4"}
                     trackColor={{ false: "#767577", true: "#81b0ff" }}
                   />
                 </View>
@@ -143,17 +187,20 @@ export default function RestaurantDetail() {
         <View style={styles.detailsContainer}>
           <Text style={styles.detailsTitle}>รายละเอียด</Text>
           <View style={styles.detailsTextContainer}>
-            <Text style={styles.detailsText}>Username: ร้านชื่อดัง</Text>
-            <Text style={styles.detailsText}>ชื่อร้าน: ร้านอร่อยเด็ด</Text>
-            <Text style={styles.detailsText}>เบอร์โทรศัพท์: 123456789</Text>
-            <Text style={styles.detailsText}>โรงอาหาร: โรงอาหารกลาง</Text>
-            <Text style={styles.detailsText}>หมายเลขร้าน: 10</Text>
+            <Text style={styles.detailsText}>Username: {shopInfo?.username || 'N/A'}</Text>
+            <Text style={styles.detailsText}>ชื่อร้าน: {shopInfo?.shopName || 'N/A'}</Text>
+            <Text style={styles.detailsText}>เบอร์โทรศัพท์: {shopInfo?.tel || 'N/A'}</Text>
+            <Text style={styles.detailsText}>โรงอาหาร: {shopInfo?.canteenId || 'N/A'}</Text>
+            <Text style={styles.detailsText}>หมายเลขร้าน: {shopInfo?.shopNumber || 'N/A'}</Text>
           </View>
         </View>
       </View>
 
-      {/* Button for history */}
-      <TouchableOpacity style={styles.historyButton}>
+      {/* Button for Order History */}
+      <TouchableOpacity
+        style={styles.historyButton}
+        onPress={navigateToOrderHistory}
+      >
         <Text style={styles.historyButtonText}>ประวัติการทำอาหาร</Text>
       </TouchableOpacity>
     </View>

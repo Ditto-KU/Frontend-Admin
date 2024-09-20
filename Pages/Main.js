@@ -29,7 +29,6 @@ import Report from "./Report";
 export default function App() {
 
   return (
-    <ScrollView>
       <View style={PageStyle.M_main}>
         <Sidebar style={PageStyle.M_sidebar} />
         <View style={PageStyle.M_container_DB}>
@@ -50,6 +49,5 @@ export default function App() {
           </View>
         </View>
       </View>
-    </ScrollView>
   );
 }

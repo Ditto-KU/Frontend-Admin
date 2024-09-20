@@ -6,37 +6,19 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Modal,
-  TextInput,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Assuming use of Expo for icon management
-import { useRoute } from "@react-navigation/native"; // To get the passed order data
+import { Ionicons } from "@expo/vector-icons";
+import { useRoute, useNavigation } from "@react-navigation/native"; // Added navigation for report
 import Header from "../components/Header";
 
-export default function OrderDetail() {
-  // Use route to get the passed order object
+export default function OrderHistoryDetail() {
   const route = useRoute();
+  const navigation = useNavigation(); // Initialize navigation
   const { order } = route.params; // Destructure the passed 'order' from the previous screen
 
-  // Modal and cancellation state
-  const [modalVisible, setModalVisible] = useState(false);
-  const [reason, setReason] = useState(""); // For storing the cancellation reason
-
-  // Handlers for modal actions
-  const handleCancelOrder = () => {
-    setModalVisible(true);
-  };
-
-  const handleApprove = () => {
-    // Handle approve logic for cancellation (possibly an API call)
-    console.log("Order Approved for Cancellation:", reason);
-    setModalVisible(false);
-  };
-
-  const handleDisapprove = () => {
-    // Handle disapprove logic for cancellation
-    console.log("Order Disapproved for Cancellation");
-    setModalVisible(false);
+  // Handler for navigating to the report page
+  const handleReport = () => {
+    navigation.navigate("ReportDetail", { orderId: order.orderId });
   };
 
   return (
@@ -119,16 +101,6 @@ export default function OrderDetail() {
               </View>
             </View>
           </View>
-
-          <View style={styles.LeftDown}>
-            {/* Cancel Button at the bottom */}
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleCancelOrder}
-            >
-              <Text style={styles.cancelButtonText}>Cancel order</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <View style={styles.rightColumn}>
@@ -144,40 +116,10 @@ export default function OrderDetail() {
           </View>
         </View>
 
-        {/* Modal for cancel order */}
-        <Modal
-          transparent={true}
-          animationType="fade"
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Cancel Order</Text>
-              <Text>Reason:</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter reason for cancellation"
-                value={reason}
-                onChangeText={setReason}
-              />
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={styles.approveButton}
-                  onPress={handleApprove}
-                >
-                  <Text style={styles.buttonText}>Approve</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.disapproveButton}
-                  onPress={handleDisapprove}
-                >
-                  <Text style={styles.buttonText}>Disapprove</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        {/* Add Report Button */}
+        <TouchableOpacity style={styles.reportButton} onPress={handleReport}>
+          <Text style={styles.reportButtonText}>Report Issue</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -221,10 +163,6 @@ const styles = StyleSheet.create({
   LeftRight: {
     flex: 1,
     paddingLeft: 10,
-  },
-  LeftDown: {
-    alignItems: "center",
-    justifyContent: "flex-end",
   },
   rightColumn: {
     width: "35%",
@@ -298,65 +236,17 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
   },
-  cancelButton: {
+  reportButton: {
     paddingVertical: 15,
     backgroundColor: "#f44336",
     borderRadius: 5,
     alignSelf: "center",
     paddingHorizontal: 60,
+    marginTop: 20,
   },
-  cancelButtonText: {
+  reportButtonText: {
     color: "#fff",
     textAlign: "center",
-    fontWeight: "bold",
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    width: 300,
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  textInput: {
-    width: "100%",
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  approveButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  disapproveButton: {
-    backgroundColor: "#f44336",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "#fff",
     fontWeight: "bold",
   },
 });
