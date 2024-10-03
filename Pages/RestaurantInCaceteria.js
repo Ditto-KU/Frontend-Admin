@@ -11,11 +11,7 @@ export default function RestaurantInCafeteria({ route }) {
   const [restaurantList, setRestaurantList] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
-  
-  // Handle navigation to RestaurantDetails
-  const handleRestaurantPress = (shopId) => {
-    navigation.navigate('RestaurantDetail', { shopId });
-  };
+
   // Fetch restaurant data based on canteenId
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -53,6 +49,10 @@ export default function RestaurantInCafeteria({ route }) {
     return () => clearInterval(intervalId);
   }, [canteenId]); // Fetch data when the canteenId changes
 
+  // Handle navigation to RestaurantDetails
+  const handleRestaurantPress = (shopId) => {
+    navigation.navigate('RestaurantDetail', { shopId });
+  };
 
   const renderRestaurant = ({ item }) => (
     <TouchableOpacity onPress={() => handleRestaurantPress(item.shopId)}>
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   OR_listItem: {
     flexDirection: "column",
     justifyContent: "flex-start",
-    padding: 10,
+    padding: 15,
     marginBottom: 10,
     backgroundColor: "#FFF",
     borderRadius: 10,

@@ -39,10 +39,6 @@ export default function OrderDetail() {
     setModalVisible(false);
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
   return (
     <View style={styles.container}>
       <Header />
@@ -153,17 +149,10 @@ export default function OrderDetail() {
           transparent={true}
           animationType="fade"
           visible={modalVisible}
-          onRequestClose={closeModal} // Close modal when back button is pressed
-          presentationStyle="overFullScreen"
+          onRequestClose={() => setModalVisible(false)}
         >
-          <TouchableOpacity
-            style={styles.modalBackground}
-            onPressOut={closeModal} // Close modal when tapping outside the modal container
-          >
+          <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
-              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                <Ionicons name="close-circle" size={24} color="black" />
-              </TouchableOpacity>
               <Text style={styles.modalTitle}>Cancel Order</Text>
               <Text>Reason:</Text>
               <TextInput
@@ -187,7 +176,7 @@ export default function OrderDetail() {
                 </TouchableOpacity>
               </View>
             </View>
-          </TouchableOpacity>
+          </View>
         </Modal>
       </ScrollView>
     </View>
@@ -369,10 +358,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
   },
 });
