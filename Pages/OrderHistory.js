@@ -27,7 +27,7 @@ export default function OrderHistory() {
         };
 
         let response = await fetch(
-          `https://ku-man-api.vimforlanie.com/admin/canteen/shop/order?shopId=${shopId}`,
+          "https://ku-man-api.vimforlanie.com/admin/canteen/shop/order?shopId=${shopId}",
           {
             method: "GET",
             headers: headersList,

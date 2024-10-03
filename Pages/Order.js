@@ -8,7 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-  FlatList,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
@@ -195,22 +195,6 @@ export default function Order() {
     }
   };
 
-  // Render each item for FlatList
-  const renderOrderItem = ({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.orderContainer,
-        { backgroundColor: getBackgroundColor(item.orderStatus) },
-      ]}
-      onPress={() => gotoOrderDetail(item)}
-    >
-      <Text style={[styles.orderText, { fontWeight: "600" }]}>
-        Order ID: {item.orderId}
-      </Text>
-      <Text style={styles.orderText}>{item.orderStatus}</Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.OR_container}>
       <Header />
@@ -235,6 +219,7 @@ export default function Order() {
         </View>
       </View>
 
+<<<<<<< HEAD
       {/* Order List using FlatList */}
       <FlatList
         data={filteredData}
@@ -242,6 +227,26 @@ export default function Order() {
         renderItem={renderOrderItem}
         contentContainerStyle={styles.orderList}
       />
+=======
+      {/* Order List using ScrollView and map */}
+      <ScrollView style={styles.orderList}>
+        {orderData.map((order, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.orderContainer,
+              { backgroundColor: getBackgroundColor(order.orderStatus) },
+            ]}
+            onPress={() => gotoOrderDetail(order)}
+          >
+            <Text style={[styles.orderText, { fontWeight: "600" }]}>
+              Order ID: {order.orderId}
+            </Text>
+            <Text style={styles.orderText}>{order.orderStatus}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+>>>>>>> 0d96b33a8cb608991a45a0012e2d84370743855f
 
       {/* Pass applyFilter to FilterOrder */}
       <FilterOrder
@@ -305,8 +310,13 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   orderList: {
+<<<<<<< HEAD
     paddingBottom: 10, // Padding for the list
     flexGrow: 1, // Allow the list to grow and scroll properly
+=======
+    padding: 10,
+    flex: 1,
+>>>>>>> 0d96b33a8cb608991a45a0012e2d84370743855f
   },
   orderContainer: {
     padding: 15,

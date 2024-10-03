@@ -7,6 +7,9 @@ export default function LineGraph() {
   const [requesterData, setRequesterData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const graphWidth = Dimensions.get("screen").width*0.35
+  const graphHeight = Dimensions.get("screen").height*0.30
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -122,11 +125,41 @@ export default function LineGraph() {
               strokeWidth: '2',
               stroke: '#00ff00',
             },
+<<<<<<< HEAD
           }}
           bezier
           style={styles.chart}
         />
       </View>
+=======
+          ],
+          legend: ['Walker', 'Requester'],
+        }}
+        width={graphWidth} // Dynamic width minus padding
+        height={graphHeight} // Fixed height for the chart
+        yAxisLabel=""
+        yAxisSuffix=""
+        yAxisInterval={1}
+        chartConfig={{
+          backgroundColor: '#000',
+          backgroundGradientFrom: '#fffffe',
+          backgroundGradientTo: '#ccc',
+          decimalPlaces: 0,
+          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          style: {
+            borderRadius: 16,
+          },
+          propsForDots: {
+            r: '6',
+            strokeWidth: '2',
+            stroke: '#00ff00',
+          },
+        }}
+        bezier
+        style={styles.chart}
+      />
+>>>>>>> 0d96b33a8cb608991a45a0012e2d84370743855f
     </View>
   );
 }
