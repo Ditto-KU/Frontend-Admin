@@ -109,7 +109,8 @@ export default function Order_DB() {
     <View style={styles.container}>
       {/* Order List */}
       <View style={styles.orderList}>
-        <Text style={styles.header}>Orders ({totalOrders})</Text>
+        <Text style={styles.header}>Orders   ({totalOrders})</Text>
+        
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {orderData.map((order, index) => {
             let backgroundColor = "#FFF"; // Default background
@@ -177,52 +178,35 @@ export default function Order_DB() {
           }}
           style={{ height: 200 }} // Pie chart height
         />
-
+        
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(255, 222, 173)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(255, 222, 173)" }]}
             />
             <Text style={styles.legendText}>waitingAdmin: {waitingAdmin}</Text>
           </View>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(255, 240, 186)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]}
             />
             <Text style={styles.legendText}>inProgress: {inProgress}</Text>
           </View>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(211, 211, 211)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(211, 211, 211)" }]}
             />
-            <Text style={styles.legendText}>
-              lookingForWalker: {lookingForWalker}
-            </Text>
+            <Text style={styles.legendText}>lookingForWalker: {lookingForWalker}</Text>
           </View>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(144, 238, 144)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(144, 238, 144)" }]}
             />
             <Text style={styles.legendText}>completed: {completed}</Text>
           </View>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(255, 182, 193)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(255, 182, 193)" }]}
             />
             <Text style={styles.legendText}>cancelled: {cancelled}</Text>
           </View>
@@ -249,19 +233,21 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   orderList: {
-    flex: 1, // ใช้ flex เพื่อให้ ScrollView ยืดหยุ่น
+    flexDirection: "column",
+    justifyContent: "flex-start",
     padding: 10,
+    flex: 1,
     borderRadius: 10,
-    maxHeight: 400, // จำกัดความสูงของ ScrollView
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+    height: "100%",
   },
   header: {
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+    height: "100%",
   },
   orderContainer: {
     flexDirection: "row",

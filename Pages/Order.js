@@ -12,16 +12,14 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
-import FilterOrder from "../components/FilterOrder";
+import FilterComponent from "../components/FilterComponent";
 
 export default function Order() {
   const navigation = useNavigation();
-  const [orderData, setOrderData] = useState([]); // Store orders
-  const [filteredData, setFilteredData] = useState([]); // Filtered data for search and filter
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [searchText, setSearchText] = useState(""); // State for search input
-  const [modalVisible, setModalVisible] = useState(false); // Filter modal
+  const [orderData, setOrderData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const gotoOrderDetail = (order) => {
     navigation.navigate("OrderDetail", { order: order });
@@ -66,7 +64,6 @@ export default function Order() {
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
           setOrderData(sortedData); // Set order data
-          setFilteredData(sortedData); // Set filtered data to show initially
         } else {
           throw new Error(`Unexpected content-type: ${contentType}`);
         }
@@ -79,76 +76,12 @@ export default function Order() {
       }
     };
 
-    fetchData(); // Initial data fetch
+    // Set an interval to fetch data every second
+    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
-
-  // Update the data after filtering
-  const applyFilter = (filteredOrders) => {
-    setFilteredData(filteredOrders);
-  };
-
-  // Search Functionality
-  const handleSearch = (text) => {
-    setSearchText(text); // Update the search input
-    if (text === "") {
-      setFilteredData(orderData); // If search is cleared, show all data
-    } else {
-      const filteredOrders = orderData.filter((order) =>
-        order.orderId.toString().includes(text)
-      );
-      setFilteredData(filteredOrders);
-      
-      useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const headersList = {
-              Accept: "*/*",
-            };
-    
-            const response = await fetch(
-              `https://ku-man-api.vimforlanie.com/admin/order/search?walkerId=${searchText}&requesterId=${searchText}&orderId=${searchText}`,
-              {
-                method: "GET",
-                headers: headersList,
-              }
-            );
-    
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-    
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-              const data = await response.json();
-    
-              const sortedData = data.sort((a, b) => {
-                const statusOrder = {
-                  waitingAdmin: 1,
-                  inProgress: 2,
-                  lookingForWalker: 3,
-                  completed: 4,
-                  cancelled: 5,
-                };
-                return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
-              });
-              setOrderData(sortedData); // Set order data
-              setFilteredData(sortedData); // Set filtered data to show initially
-            } else {
-              throw new Error(`Unexpected content-type: ${contentType}`);
-            }
-          } catch (error) {
-            console.error("Error fetching data:", error);
-            setError(error.message);
-            Alert.alert("Error", error.message);
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchData(); // Initial data fetch
-      }, []);
-    }
-  };
 
   // Loading state
   if (loading) {
@@ -169,7 +102,7 @@ export default function Order() {
     );
   }
 
-  if (filteredData.length === 0) {
+  if (orderData.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <Text>No orders available</Text>
@@ -203,9 +136,7 @@ export default function Order() {
         <View style={styles.OR_searchContainer}>
           <TextInput
             style={styles.OR_searchInput}
-            placeholder="Search by Order ID"
-            value={searchText}
-            onChangeText={handleSearch} // Call the search function when text changes
+            placeholder="Search Orders"
           />
           <TouchableOpacity
             onPress={toggleModal} // Toggle filter modal
@@ -227,12 +158,27 @@ export default function Order() {
         contentContainerStyle={styles.orderList}
       />
 
-      {/* Pass applyFilter to FilterOrder */}
-      <FilterOrder
-        modalVisible={modalVisible}
-        toggleModal={toggleModal}
-        applyFilter={applyFilter}
-      />
+      {/* Order List using ScrollView and map */}
+      <ScrollView style={styles.orderList}>
+        {orderData.map((order, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.orderContainer,
+              { backgroundColor: getBackgroundColor(order.orderStatus) },
+            ]}
+            onPress={() => gotoOrderDetail(order)}
+          >
+            <Text style={[styles.orderText, { fontWeight: "600" }]}>
+              Order ID: {order.orderId}
+            </Text>
+            <Text style={styles.orderText}>{order.orderStatus}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+
+      <FilterComponent modalVisible={modalVisible} toggleModal={toggleModal} />
     </View>
   );
 }
@@ -240,7 +186,7 @@ export default function Order() {
 // Styles for the Order component
 const styles = StyleSheet.create({
   OR_container: {
-    flex: 1,  // Ensure the container takes the full available space
+    flex: 1,
     padding: 16,
     flexDirection: "column",
     justifyContent: "flex-start",
@@ -289,13 +235,18 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   orderList: {
+
     paddingBottom: 10, // Padding for the list
     flexGrow: 1, // Allow the list to grow and scroll properly
+
+    padding: 10,
+    flex: 1,
+
   },
   orderContainer: {
     padding: 15,
     marginBottom: 10,
-    borderRadius: 15,
+    borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
