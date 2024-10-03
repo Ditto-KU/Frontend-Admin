@@ -1,21 +1,71 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { PieChart } from 'react-minimal-pie-chart'; // Use a web-based pie chart library
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
 import { useNavigation } from "@react-navigation/native";
 
 export default function ContactSupport_DB() {
   const [supportRequests, setSupportRequests] = useState([
-    { id: 1, name: "user: xxxxx (requester)", time: "9:41", description: "รายละเอียด" },
-    { id: 2, name: "user: yyyyy (requester)", time: "9:42", description: "รายละเอียด" },
-    { id: 3, name: "user: zzzzz (requester)", time: "9:38", description: "รายละเอียด" },
-    { id: 4, name: "user: aaaaa (requester)", time: "9:38", description: "รายละเอียด" },
+    {
+      id: 1,
+      name: "user: xxxxx (requester)",
+      time: "9:41",
+      description: "รายละเอียด",
+    },
+    {
+      id: 2,
+      name: "user: yyyyy (requester)",
+      time: "9:42",
+      description: "รายละเอียด",
+    },
+    {
+      id: 3,
+      name: "user: zzzzz (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
+    {
+      id: 4,
+      name: "user: aaaaa (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
+    {
+      id: 5,
+      name: "user: aaaaa (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
+    {
+      id: 6,
+      name: "user: aaaaa (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
+    {
+      id: 7,
+      name: "user: aaaaa (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
+    {
+      id: 8,
+      name: "user: aaaaa (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
+    {
+      id: 9,
+      name: "user: aaaaa (requester)",
+      time: "9:38",
+      description: "รายละเอียด",
+    },
   ]);
 
   const totalRequests = 1230;
   const onprocess = 230;
   const completed = 1000;
   const navigation = useNavigation();
-  
+
   const handleCSPress = (request) => {
     navigation.navigate("ContactSupportDetail", { request });
   };
@@ -25,39 +75,62 @@ export default function ContactSupport_DB() {
       {/* Support Requests List */}
       <View style={styles.requestList}>
         <Text style={styles.header}>Contact Support</Text>
-        {supportRequests.map((request) => (
-          <TouchableOpacity key={request.id} style={styles.requestContainer} onPress={() => handleCSPress(request)}>
-            <Text style={styles.requestText}>{request.name}</Text>
-            <Text style={styles.requestTime}>{request.time}</Text>
-          </TouchableOpacity>
-        ))}
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {supportRequests.map((request) => (
+            <TouchableOpacity
+              key={request.id}
+              style={styles.requestContainer}
+              onPress={() => handleCSPress(request)}
+            >
+              <Text style={styles.requestText}>{request.name}</Text>
+              <Text style={styles.requestTime}>{request.time}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Pie Chart and Stats */}
       <View style={styles.chartContainer}>
         <PieChart
           data={[
-            { title: 'On process', value: onprocess, color: "rgb(255, 240, 186)" },
-            { title: 'Complete', value: completed, color: "rgb(144, 238, 144)" },
+            {
+              title: "On process",
+              value: onprocess,
+              color: "rgb(255, 240, 186)",
+            },
+            {
+              title: "Complete",
+              value: completed,
+              color: "rgb(144, 238, 144)",
+            },
           ]}
           radius={50} // Increased the radius to make the chart larger
           lineWidth={25} // Adjusted line width for better visibility
-          label={({ dataEntry }) => Math.round(dataEntry.percentage) + '%'}
+          label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
           labelStyle={{
-            fontSize: '10px',
-            fill: '#000',
+            fontSize: "10px",
+            fill: "#000",
           }}
           style={{ height: 200 }} // Increased chart height to make it fit better
         />
         <Text style={styles.totalText}>All requests: {totalRequests}</Text>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]} />
+            <View
+              style={[
+                styles.legendColor,
+                { backgroundColor: "rgb(255, 240, 186)" },
+              ]}
+            />
             <Text style={styles.legendText}>On process: {onprocess}</Text>
-            
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: "rgb(144, 238, 144)" }]} />
+            <View
+              style={[
+                styles.legendColor,
+                { backgroundColor: "rgb(144, 238, 144)" },
+              ]}
+            />
             <Text style={styles.legendText}>Complete: {completed}</Text>
           </View>
         </View>
@@ -78,19 +151,21 @@ const styles = StyleSheet.create({
     height: "100%", // Ensure it takes full height of the parent
     flex: 1, // Use flex to allow container to fill available space
     marginRight: 10,
-    
-    shadowColor: '#000',
+
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
   },
   requestList: {
-    flexDirection: "column",
-    justifyContent: "flex-start",
+    flex: 1, // ใช้ flex เพื่อให้ ScrollView ยืดหยุ่น
     padding: 10,
-    flexBasis: "50%", // Use flexBasis for width allocation
-    // backgroundColor: "#fff", // Optional: ensure the container is visually separated
     borderRadius: 10,
+    maxHeight: 400, // จำกัดความสูงของ ScrollView
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   header: {
     fontSize: 32,
@@ -145,5 +220,5 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 20,
-  }
+  },
 });

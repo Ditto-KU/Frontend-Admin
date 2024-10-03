@@ -81,24 +81,22 @@ export default function Verify_DB() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Verify New Walkers</Text>
+      <Text style={styles.header}>
+        Verify New Walkers ({verifyUser.length})
+      </Text>
+      <View style={styles.verifyList}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {verifyUser.length > 0 ? (
-          verifyUser.map((user, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.reportContainer}
-              onPress={() => gotoVerifydetail(user)}
-            >
-              <Text style={styles.reportText}>
-                User: {user.username ?? "N/A"}
-              </Text>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text>No data available</Text>
-        )}
+        {verifyUser.map((user, index) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.reportContainer}
+          onPress={() => gotoVerifydetail(user)}
+        >
+          <Text style={styles.reportText}>User: {user.username ?? "N/A"}</Text>
+        </TouchableOpacity>
+        ))}
       </ScrollView>
+      </View>
     </View>
   );
 }
@@ -106,6 +104,7 @@ export default function Verify_DB() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    marginRight: 20,
     backgroundColor: "#fafbfc",
     borderRadius: 10,
     shadowColor: "#000",
@@ -115,8 +114,14 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "50%",
   },
+  verifyList: {
+    flex: 1, // ใช้ flex เพื่อให้ ScrollView ยืดหยุ่น
+    padding: 10,
+    borderRadius: 10,
+    maxHeight: 400, // จำกัดความสูงของ ScrollView
+  },
   scrollContent: {
-    justifyContent: "flex-start",
+    flexGrow: 1,
     paddingBottom: 20,
   },
   header: {

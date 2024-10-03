@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,42 +6,89 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Modal,
-  TextInput,
+  ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Assuming use of Expo for icon management
-import { useRoute } from "@react-navigation/native"; // To get the passed order data
+import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 import Header from "../components/Header";
 
-export default function OrderDetail() {
-  // Use route to get the passed order object
+export default function ReportOrderDetail() {
   const route = useRoute();
-  const { order } = route.params; // Destructure the passed 'order' from the previous screen
+  const { orderId } = route.params; // Get the orderId passed from the previous screen
+
+  // State to store fetched order data
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Modal and cancellation state
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState(""); // For storing the cancellation reason
 
-  // Handlers for modal actions
+  // Fetch order details using orderId
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+        };
+
+        let response = await fetch(
+          `https://ku-man-api.vimforlanie.com/admin/order/info?orderId=${orderId}`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        let data = await response.json();
+        setOrder(data); // Set the fetched order data
+      } catch (error) {
+        console.error("Error fetching order details:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [orderId]);
+
+  // Modal handlers
   const handleCancelOrder = () => {
     setModalVisible(true);
   };
 
   const handleApprove = () => {
-    // Handle approve logic for cancellation (possibly an API call)
     console.log("Order Approved for Cancellation:", reason);
     setModalVisible(false);
   };
 
   const handleDisapprove = () => {
-    // Handle disapprove logic for cancellation
     console.log("Order Disapproved for Cancellation");
     setModalVisible(false);
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
-  };
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Order Details...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -51,7 +98,7 @@ export default function OrderDetail() {
           <View style={styles.LeftUp}>
             <View style={styles.LeftLeft}>
               {/* User Info */}
-              <Text style={styles.userTitle}>Requester: {order.requester.username}</Text>
+              <Text style={styles.userTitle}>Requester: {order.requester.phoneNumber}</Text>
 
               {/* Personal Verification */}
               <View style={styles.section}>
@@ -84,18 +131,20 @@ export default function OrderDetail() {
             <View style={styles.LeftRight}>
               {/* Delivery Address */}
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Delivery Address</Text>
+                <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+                  Delivery Address
+                </Text>
                 <View style={styles.iconRow}>
                   <Text style={styles.sectionDetail}>Address: {order.address.name}</Text>
-                  <Text style={styles.sectionDetail}>Recipient: {order.requester.username}</Text>
+                  <Text style={styles.sectionDetail}>Recipient: {order.requester.phoneNumber}</Text>
                 </View>
               </View>
 
               {/* Requester and Walker Info */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Requester</Text>
-                <Text style={styles.sectionDetail}>User: {order.requester.username}</Text>
-                <Text style={styles.sectionDetail}>Total: {order.totalPrice}</Text>
+                <Text style={styles.sectionDetail}>Phone: {order.requester.phoneNumber}</Text>
+                <Text style={styles.sectionDetail}>Total: {order.totalPrice} Baht</Text>
                 <TouchableOpacity style={styles.telButton}>
                   <Ionicons
                     name="call-outline"
@@ -109,8 +158,8 @@ export default function OrderDetail() {
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Walker</Text>
-                <Text style={styles.sectionDetail}>User: {order.walker.username}</Text>
-                <Text style={styles.sectionDetail}>Payment: {order.totalPrice}</Text>
+                <Text style={styles.sectionDetail}>Phone: {order.walker.phoneNumber}</Text>
+                <Text style={styles.sectionDetail}>Payment: {order.totalPrice} Baht</Text>
                 <TouchableOpacity style={styles.telButton}>
                   <Ionicons
                     name="call-outline"
@@ -148,47 +197,6 @@ export default function OrderDetail() {
           </View>
         </View>
 
-        {/* Modal for cancel order */}
-        <Modal
-          transparent={true}
-          animationType="fade"
-          visible={modalVisible}
-          onRequestClose={closeModal} // Close modal when back button is pressed
-          presentationStyle="overFullScreen"
-        >
-          <TouchableOpacity
-            style={styles.modalBackground}
-            onPressOut={closeModal} // Close modal when tapping outside the modal container
-          >
-            <View style={styles.modalContainer}>
-              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                <Ionicons name="close-circle" size={24} color="black" />
-              </TouchableOpacity>
-              <Text style={styles.modalTitle}>Cancel Order</Text>
-              <Text>Reason:</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter reason for cancellation"
-                value={reason}
-                onChangeText={setReason}
-              />
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={styles.approveButton}
-                  onPress={handleApprove}
-                >
-                  <Text style={styles.buttonText}>Approve</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.disapproveButton}
-                  onPress={handleDisapprove}
-                >
-                  <Text style={styles.buttonText}>Disapprove</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </Modal>
       </ScrollView>
     </View>
   );
@@ -206,6 +214,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     flex: 1,
     height: "100%",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 18,
+    color: "red",
   },
   leftColumn: {
     flex: 1,
@@ -320,59 +342,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    width: 300,
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  textInput: {
-    width: "100%",
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  approveButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  disapproveButton: {
-    backgroundColor: "#f44336",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
   },
 });

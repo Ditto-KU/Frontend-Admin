@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Picker, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import Datepicker from "./DatePicker";
 
-export default function FilterComponent({ modalVisible, toggleModal }) {
+export default function FilterOrder({ modalVisible, toggleModal }) {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCanteen, setSelectedCanteen] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState("");

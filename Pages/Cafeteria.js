@@ -22,7 +22,7 @@ export default function Cafeteria() {
           "Accept": "*/*"
         };
 
-        let response = await fetch("https://ku-man-api.vimforlanie.com/admin/canteen", { 
+        let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/canteen`, { 
           method: "GET",
           headers: headersList
         });

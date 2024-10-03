@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,20 +6,88 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRoute, useNavigation } from "@react-navigation/native"; // Added navigation for report
+import { useRoute, useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
 
 export default function OrderHistoryDetail() {
   const route = useRoute();
-  const navigation = useNavigation(); // Initialize navigation
-  const { order } = route.params; // Destructure the passed 'order' from the previous screen
+  const navigation = useNavigation();
+  const { orderId } = route.params; // Destructure orderId from the route parameters
+
+  // State to manage fetched order details, loading, and error
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Handler for navigating to the report page
   const handleReport = () => {
-    navigation.navigate("ReportDetail", { orderId: order.orderId });
+    navigation.navigate("ReportDetail", { orderId });
   };
+
+  // Fetch order details using orderId
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+        };
+
+        let response = await fetch(
+          `https://ku-man-api.vimforlanie.com/admin/order/detail?orderId=${orderId}`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json(); // Parse the response to JSON
+        setOrder(data); // Set order data
+      } catch (error) {
+        console.error("Error fetching order details:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false); // Stop loading after fetch or error
+      }
+    };
+
+    fetchOrderDetails();
+  }, [orderId]);
+
+  // Render loading or error state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Order Details...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  // Render the UI only if order data exists
+  if (!order) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>No order data available</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -35,7 +103,7 @@ export default function OrderHistoryDetail() {
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>User Verification</Text>
                 <Image
-                  source={{ uri: "https://via.placeholder.com/100" }} // Replace with actual image if needed
+                  source={{ uri: order.requester.profilePicture }} // Use actual profile picture
                   style={styles.profilePic}
                 />
               </View>
@@ -44,7 +112,7 @@ export default function OrderHistoryDetail() {
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Food Pickup Proof</Text>
                 <Image
-                  source={{ uri: "https://via.placeholder.com/150" }} // Replace with actual image if needed
+                  source={{ uri: order.Photo.photoPath }} // Use actual food pickup image
                   style={styles.foodImage}
                 />
               </View>
@@ -53,7 +121,7 @@ export default function OrderHistoryDetail() {
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Delivery Proof</Text>
                 <Image
-                  source={{ uri: "https://via.placeholder.com/150" }} // Replace with actual image if needed
+                  source={{ uri: order.Photo.photoPath }} // Use actual delivery image
                   style={styles.deliveryImage}
                 />
               </View>
@@ -69,11 +137,11 @@ export default function OrderHistoryDetail() {
                 </View>
               </View>
 
-              {/* Requester and Walker Info */}
+              {/* Requester Info */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Requester</Text>
                 <Text style={styles.sectionDetail}>User: {order.requester.username}</Text>
-                <Text style={styles.sectionDetail}>Total: {order.totalPrice}</Text>
+                <Text style={styles.sectionDetail}>Total: {order.totalPrice} Baht</Text>
                 <TouchableOpacity style={styles.telButton}>
                   <Ionicons
                     name="call-outline"
@@ -85,10 +153,11 @@ export default function OrderHistoryDetail() {
                 </TouchableOpacity>
               </View>
 
+              {/* Walker Info */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Walker</Text>
-                <Text style={styles.sectionDetail}>User: {order.walker.username}</Text>
-                <Text style={styles.sectionDetail}>Payment: {order.totalPrice}</Text>
+                <Text style={styles.sectionDetail}>Phone: {order.walker.phoneNumber}</Text>
+                <Text style={styles.sectionDetail}>Payment: {order.totalPrice} Baht</Text>
                 <TouchableOpacity style={styles.telButton}>
                   <Ionicons
                     name="call-outline"

@@ -2,40 +2,84 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function NewUser() {
-  // State to store the frequency of new users for today
   const [requesterCount, setRequesterCount] = useState(0);
   const [walkerCount, setWalkerCount] = useState(0);
+  const [oldOrders, setOldOrders] = useState([]); // Old orders
 
-  // Example data for new users (replace this with actual fetched data)
-  const newUsersToday = [
-    { id: 1, name: 'User A', type: 'requester', time: '10:30 AM' },
-    { id: 2, name: 'User B', type: 'walker', time: '11:00 AM' },
-    { id: 3, name: 'User C', type: 'requester', time: '1:30 PM' },
-    { id: 4, name: 'User D', type: 'walker', time: '2:00 PM' },
-  ];
+  // Fetch old orders data
+  const fetchOldOrders = async () => {
+    try {
+      let headersList = {
+        Accept: '*/*',
+      };
 
-  // Use effect to calculate frequencies for today's date
+      let response = await fetch('https://ku-man-api.vimforlanie.com/admin/order', {
+        method: 'GET',
+        headers: headersList,
+      });
+
+      let data = await response.json(); // Parse the response as JSON
+      setOldOrders(data); // Set old orders in the state
+    } catch (error) {
+      console.error('Error fetching old orders:', error);
+    }
+  };
+
+  // Fetch new orders data and calculate new requesters and walkers
+  const fetchNewOrders = async () => {
+    try {
+      let headersList = {
+        Accept: '*/*',
+      };
+
+      let response = await fetch('https://ku-man-api.vimforlanie.com/admin/order/today', {
+        method: 'GET',
+        headers: headersList,
+      });
+
+      let newOrdersData = await response.json();
+
+      // Extract requesters and walkers from old orders
+      const oldRequesters = oldOrders.map(order => order.requester?.username);
+      const oldWalkers = oldOrders.map(order => order.walker?.username);
+
+      // Filter new users (those not in the old orders)
+      const newRequesters = newOrdersData
+        .filter(order => order.requester && !oldRequesters.includes(order.requester.username))
+        .map(order => order.requester.username);
+
+      const newWalkers = newOrdersData
+        .filter(order => order.walker && !oldWalkers.includes(order.walker.username))
+        .map(order => order.walker.username);
+
+      // Update counts
+      setRequesterCount(newRequesters.length);
+      setWalkerCount(newWalkers.length);
+    } catch (error) {
+      console.error('Error fetching new orders:', error);
+    }
+  };
+
+  // Fetch old and new orders on component mount
   useEffect(() => {
-    // Filter users by type and count them
-    const todayRequesters = newUsersToday.filter(user => user.type === 'requester').length;
-    const todayWalkers = newUsersToday.filter(user => user.type === 'walker').length;
-
-    setRequesterCount(todayRequesters);
-    setWalkerCount(todayWalkers);
-  }, []);
+    const fetchData = async () => {
+      await fetchOldOrders(); // Fetch old orders
+      fetchNewOrders(); // Fetch new orders after old orders are set
+    };
+    fetchData();
+  }, [oldOrders]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>New Users Today</Text>
 
-      {/* Display the counts of Requesters and Walkers */}
-      <Text style={styles.total}>Requesters: {requesterCount}</Text>
-      <Text style={styles.total}>Walkers: {walkerCount}</Text>
+      {/* Display the counts of new Requesters and Walkers */}
+      <Text style={styles.total}>New Requesters: {requesterCount}</Text>
+      <Text style={styles.total}>New Walkers: {walkerCount}</Text>
     </View>
   );
 }
 
-// Styles with the new styles you provided
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fafbfc',
@@ -46,9 +90,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     justifyContent: 'center',
-    width: '96%', // Adjust width to fit the container
+    width: '96%',
     padding: 10,
-    height: "30%",
+    height: '32%',
     marginTop: 10,
     marginLeft: 10,
   },
