@@ -43,7 +43,6 @@ export default function App() {
     // <ScrollView>
     <NavigationContainer>
       <Stack.Navigator  screenOptions={{ headerShown: false }}>
-        {/* Define your screens here */}
         {/* <Stack.Screen name="KU-MAN" component={Title} /> */}
         {/* <Stack.Screen name="Login" component={Login} /> */}
         <Stack.Screen name="Main" component={Main} />

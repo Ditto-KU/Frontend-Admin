@@ -1,74 +1,78 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
 import { useNavigation } from "@react-navigation/native";
 
 export default function ContactSupport_DB() {
-  const [supportRequests, setSupportRequests] = useState([
-    {
-      id: 1,
-      name: "user: xxxxx (requester)",
-      time: "9:41",
-      description: "รายละเอียด",
-    },
-    {
-      id: 2,
-      name: "user: yyyyy (requester)",
-      time: "9:42",
-      description: "รายละเอียด",
-    },
-    {
-      id: 3,
-      name: "user: zzzzz (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-    {
-      id: 4,
-      name: "user: aaaaa (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-    {
-      id: 5,
-      name: "user: aaaaa (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-    {
-      id: 6,
-      name: "user: aaaaa (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-    {
-      id: 7,
-      name: "user: aaaaa (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-    {
-      id: 8,
-      name: "user: aaaaa (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-    {
-      id: 9,
-      name: "user: aaaaa (requester)",
-      time: "9:38",
-      description: "รายละเอียด",
-    },
-  ]);
-
-  const totalRequests = 1230;
-  const onprocess = 230;
-  const completed = 1000;
+  const [supportRequests, setSupportRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const totalRequests = 1230; // Static data for example purposes
+  const onprocess = 230; // Static data for example purposes
+  const completed = 1000; // Static data for example purposes
   const navigation = useNavigation();
 
-  const handleCSPress = (request) => {
-    navigation.navigate("ContactSupportDetail", { request });
+  // Fetch data from API
+  useEffect(() => {
+    const fetchSupportRequests = async () => {
+      try {
+        let headersList = {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        };
+
+        let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
+          method: "GET",
+          headers: headersList,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error fetching data: ${response.status}`);
+        }
+
+        let data = await response.json();
+        setSupportRequests(data); // Set the fetched data
+        setLoading(false); // Set loading to false when data is loaded
+      } catch (err) {
+        setError(err.message); // Set error if fetch fails
+        setLoading(false);
+      }
+    };
+
+    fetchSupportRequests();
+  }, []);
+
+  // Navigate to ContactSupportDetail with the orderId
+  const handleCSPress = (orderId) => {
+    navigation.navigate("ContactSupportDetail", { orderId });
   };
+
+  // If data is still loading
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading support requests...</Text>
+      </View>
+    );
+  }
+
+  // If there is an error
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -78,12 +82,11 @@ export default function ContactSupport_DB() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {supportRequests.map((request) => (
             <TouchableOpacity
-              key={request.id}
+              key={request.orderId}
               style={styles.requestContainer}
-              onPress={() => handleCSPress(request)}
+              onPress={() => handleCSPress(request.orderId)} // Navigate with orderId
             >
-              <Text style={styles.requestText}>{request.name}</Text>
-              <Text style={styles.requestTime}>{request.time}</Text>
+              <Text style={styles.requestText}>Order ID: {request.orderId}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -151,17 +154,16 @@ const styles = StyleSheet.create({
     height: "100%", // Ensure it takes full height of the parent
     flex: 1, // Use flex to allow container to fill available space
     marginRight: 10,
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
   },
   requestList: {
-    flex: 1, // ใช้ flex เพื่อให้ ScrollView ยืดหยุ่น
+    flex: 1,
     padding: 10,
     borderRadius: 10,
-    maxHeight: 400, // จำกัดความสูงของ ScrollView
+    maxHeight: 400, // Set max height for scrollable area
   },
   scrollContent: {
     flexGrow: 1,
@@ -196,7 +198,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     flexBasis: "50%", // Use flexBasis for width allocation
-    // backgroundColor: "#fff", // Optional: ensure the container is visually separated
     borderRadius: 10,
     marginTop: 30,
   },
@@ -220,5 +221,14 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 18,
   },
 });

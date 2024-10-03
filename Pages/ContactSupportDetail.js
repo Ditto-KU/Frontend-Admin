@@ -1,22 +1,23 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { PageStyle } from "../Style/PageStyle"; // Ensure this is correctly defined
-import OrderDetail from "./OrderDetail"; // Assuming this is a valid component
+import ViewOrderDetail from "./ViewOrderDetail"; // Assuming this is a valid component
 import ChatBox from "../components/ChatBox"; // Assuming this is a valid component
 
 export default function ContactSupportDetail({ route }) {
-  // Extract the report details passed via navigation
-  const { report } = route.params;
+  const { orderId } = route.params; // Extract the orderId passed via navigation
 
   return (
     <View style={styles.CSD_Container}>
-      <Text style={styles.CSD_Title}>Support Details</Text>
+      {/* Order Details Section */}
+      <View style={styles.CSD_OrderDetailContainer}>
+        <ViewOrderDetail style={styles.CSD_OrderDetail} orderId={orderId} />
+      </View>
 
-      {/* Render the OrderDetail component and pass the report details */}
-      <OrderDetail style={styles.CSD_OrderDetail} report={report} />
-
-      {/* Render the ChatBox component to allow user interaction */}
-      <ChatBox style={styles.CSD_ChatBox} report={report} />
+      {/* Chat Section */}
+      <View style={styles.CSD_ChatContainer}>
+        <Text style={styles.CSD_Title}>Contact Support</Text>
+        <ChatBox style={styles.CSD_ChatBox} />
+      </View>
     </View>
   );
 }
@@ -25,36 +26,42 @@ export default function ContactSupportDetail({ route }) {
 const styles = StyleSheet.create({
   CSD_Container: {
     flex: 1,
-    padding: 20,
+    flexDirection: "row",  // Align OrderDetail and ChatBox side by side
+    padding: 10,
     backgroundColor: "#f9f9f9",
+  },
+  CSD_OrderDetailContainer: {
+    flex: 3,  // Takes up 3/4 of the width for the order details
+    marginRight: 10,  // Add some space between order details and chat
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    padding: 10,
+  },
+  CSD_ChatContainer: {
+    flex: 1,  // Takes up 1/4 of the width for the chat section
+    justifyContent: "flex-start",  // Start the chat section from the top
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    padding: 10,
   },
   CSD_Title: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
-  },
-  CSD_OrderDetail: {
-    flex: 1,
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: "#FFF",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    marginBottom: 10,
   },
   CSD_ChatBox: {
-    flex: 2,
-    padding: 10,
-    backgroundColor: "#FFF",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    flex: 1,
+    marginTop: 10,  // Adds space between title and chatbox
   },
 });

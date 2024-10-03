@@ -8,6 +8,7 @@ import {
   ScrollView,
   Modal,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Assuming use of Expo for icon management
 import { useRoute } from "@react-navigation/native"; // To get the passed order data
@@ -21,20 +22,51 @@ export default function OrderDetail() {
   // Modal and cancellation state
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState(""); // For storing the cancellation reason
+  const [orderStatus, setOrderStatus] = useState(order.orderStatus); // Track the order status
+  const [loading, setLoading] = useState(false); // Loading state for the API call
 
   // Handlers for modal actions
   const handleCancelOrder = () => {
     setModalVisible(true);
   };
 
-  const handleApprove = () => {
-    // Handle approve logic for cancellation (possibly an API call)
-    console.log("Order Approved for Cancellation:", reason);
-    setModalVisible(false);
+  const handleApprove = async () => {
+    setLoading(true);
+    try {
+      // API call to update the order status to cancelled
+      let headersList = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      let bodyContent = JSON.stringify({
+        orderStatus: "cancelled",
+      });
+
+      let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/approval/${order.orderId}`, {
+        method: "PUT",
+        body: bodyContent,
+        headers: headersList,
+      });
+
+      if (response.ok) {
+        let data = await response.json();
+        console.log("Order Approved for Cancellation:", data);
+
+        // Update the local orderStatus to reflect the cancelled status
+        setOrderStatus("cancelled");
+        setModalVisible(false);
+      } else {
+        throw new Error("Failed to cancel order");
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDisapprove = () => {
-    // Handle disapprove logic for cancellation
     console.log("Order Disapproved for Cancellation");
     setModalVisible(false);
   };
@@ -125,13 +157,18 @@ export default function OrderDetail() {
           </View>
 
           <View style={styles.LeftDown}>
-            {/* Cancel Button at the bottom */}
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleCancelOrder}
-            >
-              <Text style={styles.cancelButtonText}>Cancel order</Text>
-            </TouchableOpacity>
+            {/* Show cancel button only if the order is not yet cancelled */}
+            {orderStatus !== "cancelled" && (
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleCancelOrder}
+              >
+                <Text style={styles.cancelButtonText}>Cancel order</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Show loading indicator if the API call is in progress */}
+            {loading && <ActivityIndicator size="small" color="#0000ff" />}
           </View>
         </View>
 
@@ -146,6 +183,13 @@ export default function OrderDetail() {
             <Text style={styles.sectionDetail}>Total: {order.totalPrice} Baht</Text>
             <Text style={styles.sectionDetail}>Shipping Fee: {order.shippingFee} Baht</Text>
           </View>
+
+          {/* Show cancelled status if the order is cancelled */}
+          {orderStatus === "cancelled" && (
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: "red" }]}>Order Cancelled</Text>
+            </View>
+          )}
         </View>
 
         {/* Modal for cancel order */}
