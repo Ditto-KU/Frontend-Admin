@@ -7,11 +7,16 @@ export default function OrderHistory() {
   const navigation = useNavigation();
   const route = useRoute();
   const { shopId } = route.params; // Get shopId from the previous screen
-
+  
   // States to manage fetched orders, loading and error state
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Handle navigation to OrderHistoryDetail page
+  const handleOrderPress = (orderId) => {
+    navigation.navigate("OrderHistoryDetail", { orderId });
+  };
 
   // Fetch order data based on shopId
   useEffect(() => {
@@ -22,7 +27,7 @@ export default function OrderHistory() {
         };
 
         let response = await fetch(
-          "https://ku-man-api.vimforlanie.com/admin/canteen/shop/order?shopId=${shopId}",
+          `https://ku-man-api.vimforlanie.com/admin/canteen/shop/order?shopId=${shopId}`,
           {
             method: "GET",
             headers: headersList,
@@ -50,15 +55,11 @@ export default function OrderHistory() {
     return () => clearInterval(intervalId);
   }, [shopId]); // Fetch when shopId changes
 
-  // Handle navigation to OrderHistoryDetail page
-  const handleOrderPress = (orderItemId) => {
-    navigation.navigate("OrderHistoryDetail", { orderItemId });
-  };
 
   // Render each order in the list
   const renderItem = ({ item }) => (
     <View style={styles.orderItem}>
-      <Text style={styles.orderText}>Order ID: {item.orderItemId}</Text>
+      <Text style={styles.orderText}>Order ID: {item.orderId}</Text>
       <Text style={styles.orderText}>Quantity: {item.quantity}</Text>
       <Text style={styles.orderText}>Total Price: {item.totalPrice} THB</Text>
       <Text style={styles.orderText}>Status: {item.orderItemStatus}</Text>
@@ -67,7 +68,7 @@ export default function OrderHistory() {
       {/* Button to navigate to order history detail */}
       <TouchableOpacity
         style={styles.detailButton}
-        onPress={() => handleOrderPress(item.orderItemId)}
+        onPress={() => handleOrderPress(item.orderId)}
       >
         <Text style={styles.buttonText}>View Details</Text>
       </TouchableOpacity>
