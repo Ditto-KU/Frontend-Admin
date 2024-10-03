@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native-web'; // Ensure you're using react-native-web
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default function DatePickerDropdown() {
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
   const handleDateChange = (date) => {
-    const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    const formattedDate = date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
     setSelectedDate(formattedDate);
-    setDatePickerVisible(false); // Close the modal after selecting the date
+    setDatePickerVisible(false); // Close modal after selecting a date
   };
 
   const toggleDatePicker = () => {
@@ -19,9 +19,6 @@ export default function DatePickerDropdown() {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.label}>วันที่</Text> */}
-
-      {/* Date Picker Button */}
       <TouchableOpacity
         style={styles.dropdownButton}
         onPress={toggleDatePicker}
@@ -31,7 +28,6 @@ export default function DatePickerDropdown() {
         </Text>
       </TouchableOpacity>
 
-      {/* Conditional rendering of the DatePicker component */}
       {isDatePickerVisible && (
         <View style={styles.datePickerDropdown}>
           <DatePicker
@@ -54,10 +50,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginTop: 50,
     width: '100%',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 10,
   },
   dropdownButton: {
     height: 50,

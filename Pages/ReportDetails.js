@@ -1,39 +1,74 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Head from "../components/Header";  // Import your header component
+import Head from "../components/Header"; // Import your header component
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 
 export default function ReportDetails({ route }) {
-    const navigation = useNavigation(); // Get navigation hook
-
+  const navigation = useNavigation(); // Get navigation hook
   const { report } = route.params;
 
   const handleShowOrder = () => {
-    // Logic for showing order
-    // console.log("Show order pressed");
-    navigation.navigate("OrderDetail", { orderId: report.orderId });
+    // Navigate to OrderDetail screen and pass the orderId
+    navigation.navigate("ReportOrderDetail", { orderId: report.orderId });
   };
 
   const handleEmail = () => {
     // Logic for sending email
-    // console.log("Email pressed");
+    console.log("Email pressed");
   };
 
   return (
     <View style={styles.container}>
       <Head />
       <View style={styles.header}>
-        <Text style={styles.title}>Report from User : {report.name}</Text>
+        <Text style={styles.title}>
+          Report from {report.reportBy === "requester" ? "Requester" : "Walker"}
+        </Text>
       </View>
+
       <View style={styles.reportDetails}>
-        <Text style={styles.label}>ชื่อ :</Text>
-        <Text style={styles.text}>{report.name}</Text>
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>Title: </Text>
+          <Text style={styles.text}>{report.title}</Text>
+        </Text>
 
-        <Text style={styles.label}>เบอร์โทรศัพท์ :</Text>
-        <Text style={styles.text}>{report.phone}</Text>
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>Description: </Text>
+          <Text style={styles.text}>{report.description}</Text>
+        </Text>
 
-        <Text style={styles.label}>รายละเอียด :</Text>
-        <Text style={styles.text}>{report.details}</Text>
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>Status: </Text>
+          <Text style={styles.text}>{report.status}</Text>
+        </Text>
+
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>Order ID: </Text>
+          <Text style={styles.text}>{report.orderId}</Text>
+        </Text>
+
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>Report ID: </Text>
+          <Text style={styles.text}>{report.reportId}</Text>
+        </Text>
+
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>
+            {report.reportBy === "requester" ? "Requester ID: " : "Walker ID: "}
+          </Text>
+          <Text style={styles.text}>
+            {report.reportBy === "requester"
+              ? report.requesterId
+              : report.walkerId}
+          </Text>
+        </Text>
+
+        <Text style={styles.inlineText}>
+          <Text style={styles.label}>Report Date: </Text>
+          <Text style={styles.text}>
+            {new Date(report.reportDate).toLocaleString()}
+          </Text>
+        </Text>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -75,11 +110,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "bold",
-    marginVertical: 8,
   },
   text: {
     fontSize: 16,
-    marginVertical: 4,
+    marginLeft: 5,
+  },
+  inlineText: {
+    flexDirection: "row",
+    marginVertical: 5,
   },
   buttonContainer: {
     flexDirection: "row",
