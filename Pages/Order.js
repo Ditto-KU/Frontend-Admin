@@ -150,6 +150,14 @@ export default function Order() {
         </View>
       </View>
 
+      {/* Order List using FlatList */}
+      <FlatList
+        data={filteredData}
+        keyExtractor={(item) => item.orderId.toString()}
+        renderItem={renderOrderItem}
+        contentContainerStyle={styles.orderList}
+      />
+
       {/* Order List using ScrollView and map */}
       <ScrollView style={styles.orderList}>
         {orderData.map((order, index) => (
@@ -168,6 +176,7 @@ export default function Order() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
 
       <FilterComponent modalVisible={modalVisible} toggleModal={toggleModal} />
     </View>
@@ -226,8 +235,13 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   orderList: {
+
+    paddingBottom: 10, // Padding for the list
+    flexGrow: 1, // Allow the list to grow and scroll properly
+
     padding: 10,
     flex: 1,
+
   },
   orderContainer: {
     padding: 15,

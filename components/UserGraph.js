@@ -52,6 +52,12 @@ export default function LineGraph() {
               color: (opacity = 1) => `rgba(128, 128, 128, ${opacity})`, // Gray for Requesters
               strokeWidth: 2,
             },
+
+          }}
+          bezier
+          style={styles.chart}
+        />
+      </View>
           ],
           legend: ['Walker', 'Requester'],
         }}
