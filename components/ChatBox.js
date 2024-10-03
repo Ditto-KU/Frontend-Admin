@@ -1,142 +1,163 @@
-import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { Ionicons } from '@expo/vector-icons';  // For better icons
+import React, { useState, useEffect, useRef } from "react";
+import {
+  SafeAreaView,
+  TextInput,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // For icons
+import io from "socket.io-client";
+import "react-native-url-polyfill/auto";
 
-export default function ChatBox() {
+export default function ChatBox({ orderId, userId = "123", role = "requester" }) {
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState("");
-  const textInputRef = useRef(null); // Create a reference for the TextInput
-  const flatListRef = useRef(null);  // Reference for FlatList to auto-scroll
+  const [socket, setSocket] = useState(null);
+  const flatListRef = useRef(null); // Reference for FlatList to auto-scroll
 
-  // Scroll to the end when a new message is added
+  // Initialize Socket.IO client
+  useEffect(() => {
+    const newSocket = io("https://ku-man-chat.vimforlanie.com/");
+    setSocket(newSocket);
+
+    // Join the chat room for the specific order
+    newSocket.emit("joinOrderChat", { userId, role, orderId });
+
+    // Listen for incoming messages
+    newSocket.on("message", (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+    return () => newSocket.disconnect(); // Cleanup on component unmount
+  }, [orderId]);
+
+  const sendMessage = (msg) => {
+    if (socket && msg.trim() !== "") {
+      const newMessage = {
+        orderId,
+        message: msg,
+        fromUser: userId,
+        role,
+        targetRole: "admin", // Assuming you're sending messages to the admin
+      };
+
+      socket.emit("orderMessage", newMessage); // Send message via Socket.IO
+      setMessages((prevMessages) => [...prevMessages, newMessage]); // Update messages state
+      setMessage(""); // Clear input field
+    }
+  };
+
+  // Scroll to the bottom of the message list whenever new messages arrive
   useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
 
-  const sendMessage = () => {
-    if (inputText.trim()) {
-      const newMessage = { id: Date.now().toString(), text: inputText, timestamp: new Date().toLocaleTimeString(), sender: "me" };
-      setMessages([...messages, newMessage]);
-      setInputText("");
-
-      // Automatically focus back on the TextInput after sending a message
-      if (textInputRef.current) {
-        textInputRef.current.focus();
-      }
-    }
-  };
-
-  const renderMessage = ({ item }) => (
-    <View style={[styles.CB_messageContainer, item.sender === "me" ? styles.CB_myMessage : styles.CB_receivedMessage]}>
-      <Text style={styles.CB_messageText}>{item.text}</Text>
-      <Text style={styles.CB_timestamp}>{item.timestamp}</Text>
-    </View>
-  );
-
   return (
-    <KeyboardAvoidingView style={styles.CB_container} >
+    <SafeAreaView style={styles.container}>
+      {/* Messages */}
       <FlatList
-        ref={flatListRef} // Attach ref to FlatList for auto-scrolling
+        ref={flatListRef}
         data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
-        style={styles.CB_chatArea}
-        contentContainerStyle={styles.CB_contentContainer} // Ensure smooth scrolling
-        showsVerticalScrollIndicator={false} // Hide scroll bar for a cleaner look
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View
+            style={[
+              styles.messageWrapper,
+              item.fromUser === userId
+                ? styles.sentMessage
+                : styles.receivedMessage,
+            ]}
+          >
+            <Text style={styles.messageText}>{item.message}</Text>
+            <Ionicons
+              name={item.role === "admin" ? "person-circle" : "person-circle-outline"}
+              size={24}
+              color={item.role === "admin" ? "black" : "green"}
+            />
+          </View>
+        )}
       />
 
-      <View style={styles.CB_inputArea}>
+      {/* Message Input with KeyboardAvoidingView */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 5 : 0}
+        style={styles.inputWrapper}
+      >
         <TextInput
-          ref={textInputRef} // Attach the reference to the TextInput
-          style={styles.CB_textInput}
-          placeholder="Type a message..."
-          value={inputText}
-          onChangeText={setInputText}
-          onSubmitEditing={sendMessage} // Sends message on pressing Enter
-          blurOnSubmit={false} // Prevents the TextInput from losing focus
+          style={styles.messageInput}
+          placeholder="Send a message"
+          value={message}
+          onChangeText={setMessage}
+          onSubmitEditing={() => sendMessage(message)}  // Trigger sendMessage on Enter
+          blurOnSubmit={false} // Prevent losing focus on pressing Enter
         />
-        <TouchableOpacity style={styles.CB_sendButton} onPress={sendMessage}>
+        <TouchableOpacity onPress={() => sendMessage(message)} style={styles.sendButton}>
           <Ionicons name="send" size={24} color="white" />
         </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  CB_container: {
-    padding: 10,
+  container: {
+    flex: 1,
     backgroundColor: "#fafbfc",
-    // flex: 1, // Ensures the container takes up all available space
     borderRadius: 10,
-    width: "30%",
-    height: "90%",
-    marginTop: 54,
-  },
-  CB_chatArea: {
-    flex: 1, // Makes the chat area grow to fill available space
-    marginBottom: 10,
-  },
-  CB_contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'flex-end', // Ensure the messages start from the bottom
-  },
-  CB_messageContainer: {
-    marginBottom: 10,
     padding: 10,
-    borderRadius: 10,
-    maxWidth: "75%",
-    alignSelf: "flex-start", // Default alignment for received messages
   },
-  CB_myMessage: {
-    backgroundColor: "#007AFF",
+  messageWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+    maxWidth: "80%", // Ensure the message doesn't take the full width
+  },
+  sentMessage: {
+    backgroundColor: "#E0E0E0",
+    padding: 10,
+    borderRadius: 15,
     alignSelf: "flex-end", // Align sent messages to the right
-    borderTopRightRadius: 0,
   },
-  CB_receivedMessage: {
-    backgroundColor: "#e0e0e0",
+  receivedMessage: {
+    backgroundColor: "#E8F5E9",
+    padding: 10,
+    borderRadius: 15,
     alignSelf: "flex-start", // Align received messages to the left
-    borderTopLeftRadius: 0,
   },
-  CB_messageText: {
+  messageText: {
     fontSize: 16,
-    color: "#fff",
+    marginRight: 10,
   },
-  CB_timestamp: {
-    fontSize: 10,
-    color: "#ccc",
-    marginTop: 5,
-    textAlign: "right",
-  },
-  CB_inputArea: {
+  inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     borderTopWidth: 1,
-    borderColor: "#cccccc",
-    backgroundColor: "#ffffff",
-    padding: 10,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 1, // Add shadow on Android
+    borderTopColor: "#ccc",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: "#F8F8F8",
   },
-  CB_textInput: {
+  messageInput: {
     flex: 1,
-    fontSize: 16,
-    padding: 10,
-    backgroundColor: "#f0f0f0",
+    height: 40,
     borderRadius: 20,
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    borderColor: "#ccc",
+    borderWidth: 1,
     marginRight: 10,
   },
-  CB_sendButton: {
-    backgroundColor: "#007AFF",
+  sendButton: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 20,
     padding: 10,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

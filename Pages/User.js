@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
-import Head from "../components/Header";
 import { PageStyle } from "../Style/PageStyle";
+import Head from "../components/Header";
 
 export default function User() {
   const navigation = useNavigation(); // Initialize navigation
 
-  // State for walkers and requesters data, loading state, and error handling
+  // State for walkers, requesters, loading state, and error handling
   const [walkers, setWalkers] = useState([]);
   const [requesters, setRequesters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Separate search states for walkers and requesters
+  const [walkerSearchText, setWalkerSearchText] = useState("");
+  const [requesterSearchText, setRequesterSearchText] = useState("");
 
   // Fetch data for walkers and requesters
   useEffect(() => {
@@ -21,7 +33,7 @@ export default function User() {
           Accept: "*/*",
         };
 
-        // Walker API request
+        // Fetch walkers
         let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walker", {
           method: "GET",
           headers: headersList,
@@ -32,7 +44,7 @@ export default function User() {
         let walkersData = await walkerResponse.json();
         setWalkers(walkersData);
 
-        // Requester API request
+        // Fetch requesters
         let requesterResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/requester", {
           method: "GET",
           headers: headersList,
@@ -42,7 +54,6 @@ export default function User() {
         }
         let requestersData = await requesterResponse.json();
         setRequesters(requestersData);
-
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -51,11 +62,7 @@ export default function User() {
       }
     };
 
-    // Set an interval to fetch data every second
-    const intervalId = setInterval(fetchWalkersAndRequesters, 1000); // Fetch every 1000 ms (1 second)
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
+    fetchWalkersAndRequesters();
   }, []);
 
   if (loading) {
@@ -75,57 +82,134 @@ export default function User() {
     );
   }
 
-  // Navigate to UserList page with walker data
-  const handleWalkerPress = () => {
-    navigation.navigate("UserList", {
-      users: walkers.map((walker) => ({
-        id: walker.walkerId,
-        username: walker.username,
-        email: walker.email,
-        phoneNumber: walker.phoneNumber,
-        profilePicture: walker.profilePicture,
-        bankAccountName: walker.bankAccountName,
-        bankAccountNo: walker.bankAccountNo,
-        status: walker.status,
-        registerAt: walker.registerAt,
-        verifyAt: walker.verifyAt,
-      })), // Passing walker data in the format expected by UserList
-      userType: "walker", // Pass user type as 'Walker'
-    });
+  // Search handlers for walkers and requesters
+  const handleWalkerSearch = (text) => {
+    setWalkerSearchText(text);
   };
 
-  // Navigate to UserList page with requester data
-  const handleRequesterPress = () => {
-    navigation.navigate("UserList", {
-      users: requesters.map((requester) => ({
-        id: requester.requesterId,
-        username: requester.username,
-        email: requester.email,
-        phoneNumber: requester.phoneNumber,
-        profilePicture: requester.profilePicture,
-        firstName: requester.firstName,
-        lastName: requester.lastName,
-        address: requester.address,
-      })), // Passing requester data in the format expected by UserList
-      userType: "requester", // Pass user type as 'Requester'
-    });
+  const handleRequesterSearch = (text) => {
+    setRequesterSearchText(text);
   };
+
+  // Filtered data for walkers and requesters based on search text
+  const filteredWalkers = walkers.filter((walker) =>
+    walker.username.toLowerCase().includes(walkerSearchText.toLowerCase())
+  );
+
+  const filteredRequesters = requesters.filter((requester) =>
+    requester.username.toLowerCase().includes(requesterSearchText.toLowerCase())
+  );
+
+  // Render individual user items and navigate to user detail on press
+  const renderUserItem = (item, userType) => (
+    <TouchableOpacity
+      style={styles.userItem}
+      onPress={() => navigation.navigate("UserDetail", { user: item, userType })}
+    >
+      <Text style={styles.userName}>{item.username}</Text>
+      <Text>User ID: {userType === "walker" ? item.walkerId : item.requesterId}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={PageStyle.US_container}>
       <Head />
-      {/* Buttons */}
-      <View style={PageStyle.US_innerContainer}>
-        <Text style={PageStyle.US_title}>KU-MAN User</Text>
-        <View style={PageStyle.US_buttonContainer}>
-          <TouchableOpacity style={PageStyle.US_button} onPress={handleWalkerPress}>
-            <Text style={PageStyle.US_buttonText}>Walker</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={PageStyle.US_button} onPress={handleRequesterPress}>
-            <Text style={PageStyle.US_buttonText}>Requester</Text>
-          </TouchableOpacity>
+      <Text style={PageStyle.US_title}>KU-MAN User</Text>
+
+      {/* Container for both walker and requester lists */}
+      <View style={styles.listContainer}>
+        {/* Walkers Column */}
+        <View style={styles.listColumn}>
+          <Text style={styles.columnTitle}>Walkers</Text>
+
+          {/* Walker Search Bar */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search Walkers"
+              value={walkerSearchText}
+              onChangeText={handleWalkerSearch} // Search for walkers
+            />
+          </View>
+
+          {/* Walker List */}
+          <FlatList
+            data={filteredWalkers}
+            renderItem={({ item }) => renderUserItem(item, "walker")}
+            keyExtractor={(item) => item.walkerId.toString()}
+          />
+        </View>
+
+        {/* Requesters Column */}
+        <View style={styles.listColumn}>
+          <Text style={styles.columnTitle}>Requesters</Text>
+
+          {/* Requester Search Bar */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search Requesters"
+              value={requesterSearchText}
+              onChangeText={handleRequesterSearch} // Search for requesters
+            />
+          </View>
+
+          {/* Requester List */}
+          <FlatList
+            data={filteredRequesters}
+            renderItem={({ item }) => renderUserItem(item, "requester")}
+            keyExtractor={(item) => item.requesterId.toString()}
+          />
         </View>
       </View>
     </View>
   );
 }
+
+// Styles for the User component and lists
+const styles = StyleSheet.create({
+  listContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
+  listColumn: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  columnTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  userItem: {
+    padding: 15,
+    marginVertical: 8,
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+});

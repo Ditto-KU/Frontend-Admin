@@ -23,10 +23,11 @@ export const PageStyle = StyleSheet.create({
     padding: 10,
     backgroundColor: "#f8f8f8",
     width: 400,
+    height: 400,
     justifyContent: "center",
     alignItems: "center",
 
-    height: 200, // Adjusted for better fit
+    // height: 100, // Adjusted for better fit
     borderRadius: 10,
   },
   loginHeader: {
