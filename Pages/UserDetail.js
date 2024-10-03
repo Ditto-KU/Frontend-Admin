@@ -13,68 +13,62 @@ export default function UserDetail() {
       <Header />
 
       {/* User General Information */}
-      <View style={styles.card}>
-        <View style={styles.userInfoContainer}>
-          <Text style={styles.userId}>UserID: {user.id || "N/A"}</Text>
-          <Text style={styles.userName}>Name: {user.username || "N/A"}</Text>
-          <Text style={styles.userPhone}>Phone: {user.phoneNumber || "N/A"}</Text>
-        </View>
+      <View style={styles.userInfoContainer}>
+        <Text style={styles.userId}>UserID: {user.id || "N/A"}</Text>
+        <Text style={styles.userName}>Name: {user.username || "N/A"}</Text>
+        <Text style={styles.userPhone}>Phone: {user.phoneNumber || "N/A"}</Text>
       </View>
 
       {/* Conditional rendering based on userType */}
       {userType === "walker" ? (
-        <View style={styles.card}>
-          <View style={styles.walkerContainer}>
-            {/* Display face photo for walkers */}
-            <View style={styles.facePhotoContainer}>
-              <Text style={styles.sectionTitle}>Face Photo</Text>
-              <Image
-                source={{
-                  uri: user.profilePicture
-                    ? user.profilePicture
-                    : "https://via.placeholder.com/150",
-                }} // Display profile picture or a placeholder
-                style={styles.facePhoto}
-              />
-            </View>
+        <View style={styles.walkerContainer}>
+          {/* Display face photo for walkers */}
+          <View style={styles.facePhotoContainer}>
+            <Text style={styles.sectionTitle}>Face Photo</Text>
+            <Image
+              source={{
+                uri: user.profilePicture
+                  ? user.profilePicture
+                  : "https://via.placeholder.com/150",
+              }} // Display profile picture or a placeholder
+              style={styles.facePhoto}
+            />
+          </View>
 
-            {/* Display bank account for walkers */}
-            <View style={styles.bankInfoContainer}>
-              <Text style={styles.sectionTitle}>Bank Account</Text>
-              <Text style={styles.userInfo}>
-                Account Name: {user.bankAccountName || "Not provided"}
-              </Text>
-              <Text style={styles.userInfo}>
-                Account No: {user.bankAccountNo || "Not provided"}
-              </Text>
-            </View>
+          {/* Display bank account for walkers */}
+          <View style={styles.bankInfoContainer}>
+            <Text style={styles.sectionTitle}>Bank Account</Text>
+            <Text style={styles.userInfo}>
+              Account Name: {user.bankAccountName || "Not provided"}
+            </Text>
+            <Text style={styles.userInfo}>
+              Account No: {user.bankAccountNo || "Not provided"}
+            </Text>
           </View>
         </View>
       ) : (
-        <View style={styles.card}>
-          <View style={styles.requesterContainer}>
-            {/* Display address for requesters */}
-            <Text style={styles.sectionTitle}>Address</Text>
-            {user.address && user.address.length > 0 ? (
-              user.address.map((addr, index) => (
-                <View key={index} style={styles.addressContainer}>
-                  <Text style={styles.userInfo}>Name: {addr.name}</Text>
-                  <Text style={styles.userInfo}>Detail: {addr.detail}</Text>
-                  <Text style={styles.userInfo}>
-                    Latitude: {addr.latitude}, Longitude: {addr.longitude}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.userInfo}>No address available</Text>
-            )}
+        <View style={styles.requesterContainer}>
+          {/* Display address for requesters */}
+          <Text style={styles.sectionTitle}>Address</Text>
+          {user.address && user.address.length > 0 ? (
+            user.address.map((addr, index) => (
+              <View key={index} style={styles.addressContainer}>
+                <Text style={styles.userInfo}>Name: {addr.name}</Text>
+                <Text style={styles.userInfo}>Detail: {addr.detail}</Text>
+                <Text style={styles.userInfo}>
+                  Latitude: {addr.latitude}, Longitude: {addr.longitude}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.userInfo}>No address available</Text>
+          )}
 
-            {/* Display order frequency */}
-            <Text style={styles.sectionTitle}>Order Frequency</Text>
-            <Text style={styles.userInfo}>
-              {user.orderFrequency || 0} orders
-            </Text>
-          </View>
+          {/* Display order frequency */}
+          <Text style={styles.sectionTitle}>Order Frequency</Text>
+          <Text style={styles.userInfo}>
+            {user.orderFrequency || 0} orders
+          </Text>
         </View>
       )}
     </View>
@@ -86,34 +80,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#F5F5F5",
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 15,
-    elevation: 5,
-    padding: 20,
-    marginBottom: 20,
-    borderColor: "#e0e0e0",
-    borderWidth: 1,
-    width: "70%",
-    alignSelf: "center",
+    alignItems: "center",
   },
   userInfoContainer: {
     alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 16,
     marginBottom: 20,
   },
   userId: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#555",
-    marginBottom: 5,
   },
   userName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "600",
     color: "#333",
     marginTop: 5,
@@ -126,45 +107,43 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000",
     marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingBottom: 5,
-    textAlign: "left",
-    width: "100%",
+    color: "#000",
   },
   facePhotoContainer: {
     alignItems: "center",
-    marginVertical: 20,
+    marginTop: 30,
   },
   facePhoto: {
     width: 150,
     height: 150,
     borderRadius: 75,
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: "#ccc",
     marginBottom: 20,
   },
   bankInfoContainer: {
+    alignItems: "flex-start",
     marginTop: 20,
   },
   userInfo: {
     fontSize: 16,
     color: "#333",
     marginBottom: 5,
-    paddingLeft: 5,
   },
   walkerContainer: {
+    alignItems: "center",
     width: "100%",
+    paddingHorizontal: 16,
+    marginTop: 50,
   },
   requesterContainer: {
+    alignItems: "center",
     width: "100%",
+    paddingHorizontal: 16,
+    marginTop: 50,
   },
   addressContainer: {
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-    paddingBottom: 10,
   },
 });

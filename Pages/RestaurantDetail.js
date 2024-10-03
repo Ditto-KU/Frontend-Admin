@@ -40,7 +40,7 @@ export default function RestaurantDetail() {
 
   // Function to navigate to the Order History screen
   const navigateToOrderHistory = () => {
-    navigation.navigate("OrderHistory", { shopId }); // Pass shopId to OrderHistory
+    navigation.navigate("OrderHistory", { restaurantId: shopId }); // Pass shopId to OrderHistory
   };
   // Function to fetch menu items from the API
   useEffect(() => {
@@ -107,11 +107,7 @@ export default function RestaurantDetail() {
       }
     };
 
-    // Set an interval to fetch data every second
-    const intervalId = setInterval(fetchShopInfo, 1000); // Fetch every 1000 ms (1 second)
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
+    fetchShopInfo();
   }, [shopId]); // Fetch the shop info when the component mounts and shopId is available
 
 
@@ -139,22 +135,22 @@ export default function RestaurantDetail() {
       <Header />
 
       {/* Restaurant Name */}
-      <Text style={styles.restaurantName}>{shopInfo?.shopName || 'Shop 1'}</Text>
+      <Text style={styles.restaurantName}>{shopInfo?.shopName || 'ร้านที่ 1'}</Text>
 
       <View style={styles.mainContainer}>
         {/* Left Section: Restaurant Status */}
         <View style={styles.statusContainer}>
-          <Text style={styles.statusText}>Shop Status</Text>
+          <Text style={styles.statusText}>สถานะร้าน</Text>
           <View style={styles.statusToggleContainer}>
             <Text style={styles.statusLabel}>
-              {isRestaurantOpen ? "Open" : "Close"}
+              {isRestaurantOpen ? "ร้านเปิด" : "ร้านปิด"}
             </Text>
             <View style={styles.switchContainer}>
               <Switch
                 value={isRestaurantOpen}
                 onValueChange={toggleRestaurantStatus}
                 thumbColor={isRestaurantOpen ? "#34C759" : "#f4f3f4"}
-                trackColor={{ false: "#f4f3f4", true: "#34C759" }}
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
               />
             </View>
           </View>
@@ -162,7 +158,7 @@ export default function RestaurantDetail() {
 
         {/* Center Section: Menu List */}
         <View style={styles.menuContainer}>
-          <Text style={styles.menuTitle}>Menu</Text>
+          <Text style={styles.menuTitle}>เมนู</Text>
           <ScrollView style={{ flexGrow: 1 }}>
             {menuItems.map((item, index) => (
               <View key={item.menuId} style={styles.menuItem}>
@@ -178,8 +174,8 @@ export default function RestaurantDetail() {
                   <Switch
                     value={item.status}
                     onValueChange={() => toggleMenuItem(index)}
-                    thumbColor={isRestaurantOpen ? "#34C759" : "#f4f3f4"}
-                    trackColor={{ false: "#f4f3f4", true: "#34C759" }}
+                    thumbColor={item.status ? "#34C759" : "#f4f3f4"}
+                    trackColor={{ false: "#767577", true: "#81b0ff" }}
                   />
                 </View>
               </View>
@@ -189,13 +185,13 @@ export default function RestaurantDetail() {
 
         {/* Right Section: Restaurant Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.detailsTitle}>Description</Text>
+          <Text style={styles.detailsTitle}>รายละเอียด</Text>
           <View style={styles.detailsTextContainer}>
             <Text style={styles.detailsText}>Username: {shopInfo?.username || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Shop Name: {shopInfo?.shopName || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Tel: {shopInfo?.tel || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Canteen Id: {shopInfo?.canteenId || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Shop Number: {shopInfo?.shopNumber || 'N/A'}</Text>
+            <Text style={styles.detailsText}>ชื่อร้าน: {shopInfo?.shopName || 'N/A'}</Text>
+            <Text style={styles.detailsText}>เบอร์โทรศัพท์: {shopInfo?.tel || 'N/A'}</Text>
+            <Text style={styles.detailsText}>โรงอาหาร: {shopInfo?.canteenId || 'N/A'}</Text>
+            <Text style={styles.detailsText}>หมายเลขร้าน: {shopInfo?.shopNumber || 'N/A'}</Text>
           </View>
         </View>
       </View>
@@ -205,7 +201,7 @@ export default function RestaurantDetail() {
         style={styles.historyButton}
         onPress={navigateToOrderHistory}
       >
-        <Text style={styles.historyButtonText}>Order History</Text>
+        <Text style={styles.historyButtonText}>ประวัติการทำอาหาร</Text>
       </TouchableOpacity>
     </View>
   );
@@ -320,10 +316,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "bold",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

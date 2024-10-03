@@ -1,72 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 export default function Income() {
-  const [totalIncome, setTotalIncome] = useState(0); // State to store the total income
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  // State to store the total income
+  const [totalIncome, setTotalIncome] = useState(0);
 
-  // Fetch order data and calculate total income based on shippingFee
+  // Example income data; this can be fetched from an API or calculated dynamically.
+  const incomeData = [
+    { id: 1, source: "Order #001", amount: 50 },
+    { id: 2, source: "Order #002", amount: 75 },
+    { id: 3, source: "Service #003", amount: 120 },
+  ];
+
+  // Calculate total income from incomeData
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const headersList = {
-          Accept: "*/*",
-        };
-
-        const response = await fetch(
-          "https://ku-man-api.vimforlanie.com/admin/order/today", // Replace with your actual API URL
-          {
-            method: "GET",
-            headers: headersList,
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-
-          // Calculate total income from shippingFee
-          const totalShippingFee = data.reduce((acc, order) => acc + (order.shippingFee || 0), 0);
-          setTotalIncome(totalShippingFee); // Set total income
-        } else {
-          throw new Error(`Unexpected content-type: ${contentType}`);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError(error.message);
-        Alert.alert("Error", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Fetch the data when the component mounts
-    fetchData();
+    const income = incomeData.reduce((acc, curr) => acc + curr.amount, 0);
+    setTotalIncome(income);
   }, []);
-
-  // Loading state
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading Income...</Text>
-      </View>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Error: {error}</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -86,9 +36,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     justifyContent: 'center',
-    width: '96%',
+    width: '96%', // Adjust width to fit the container
     padding: 10,
-    height: "32%",
+    height: "30%",
     marginTop: 10,
     marginLeft: 10,
   },
@@ -101,11 +51,6 @@ const styles = StyleSheet.create({
   total: {
     fontSize: 34,
     fontWeight: 'bold',
-    color: '#4caf50',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: '#4caf50', // Green color for positive income
   },
 });

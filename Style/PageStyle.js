@@ -70,7 +70,7 @@ export const PageStyle = StyleSheet.create({
     backgroundColor: "#fff",
     width: "15%",
     height: "100%",  // Full height, remove minHeight
-    borderRadius: 20,
+    borderRadius: 10,
     justifyContent: "space-between",
     marginRight: 10,
   },
@@ -89,9 +89,7 @@ export const PageStyle = StyleSheet.create({
     flexDirection: "row",
     // justifyContent: "space-between",
     // width: "100%",
-    // height: "12%",
-    height: "50%",
-    flexShrink: 1,
+    height: "12%",
   },
   M_CS_DB: {
     width: "50%", // Adjusted to accommodate margin
@@ -100,7 +98,6 @@ export const PageStyle = StyleSheet.create({
     borderRadius: 10,
     flexDirection: "row",
     justifyContent: "space-between",
-    flexShrink: 1,
   },
   M_order_DB: {
     padding: 5,
@@ -110,13 +107,11 @@ export const PageStyle = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: "row",
     justifyContent: "space-between",
-    flexShrink: 1,
   },  
   M_containerDown_DB: {
     borderRadius: 10,
     // width: "100%",
-    // height: "12%",
-    height: "50%",
+    height: "12%",
     backgroundColor: "#fff",
     // backgroundColor: "yellow",
     flexDirection: "row",
