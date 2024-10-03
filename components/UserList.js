@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  TextInput,
+  Image,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Head from "../components/Header"; // Assuming you have a Header component
@@ -14,25 +16,35 @@ export default function UserList() {
   const route = useRoute();
 
   // Get user list and type (walker or requester) from the previous screen
-  const { users, userType } = route.params; // Destructure params from navigation
+  const { users, userType } = route.params;
+
+  // State for search text and filtered data
+  const [searchText, setSearchText] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState(users); // Initially, display all users
 
   // Function to handle pressing on a user item
   const handleUserPress = (user) => {
     navigation.navigate("UserDetail", { user, userType }); // Pass user and userType
   };
 
+  // Function to handle search and filter data based on search input
+  const handleSearch = (text) => {
+    setSearchText(text); // Update the search text
+    if (text === "") {
+      setFilteredUsers(users); // If search is empty, show all users
+    } else {
+      const filtered = users.filter((user) =>
+        user.username.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredUsers(filtered); // Set filtered users
+    }
+  };
+
   // Function to render each user item in the list
-
   const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => handleUserPress(item)}
-      style={styles.userItem}
-    >
+    <TouchableOpacity onPress={() => handleUserPress(item)} style={styles.userItem}>
       <Text style={styles.userName}>{item.username}</Text>
-
-      <Text>
-        User: {userType === "walker" ? item.walkerId : item.requesterId}
-      </Text>
+      <Text>User: {userType === "walker" ? item.walkerId : item.requesterId}</Text>
     </TouchableOpacity>
   );
 
@@ -42,9 +54,27 @@ export default function UserList() {
       <Text style={styles.title}>
         {userType === "requester" ? "Requester List" : "Walker List"}
       </Text>
+
+      {/* Search bar */}
+      <View style={styles.OR_searchContainer}>
+        <TextInput
+          style={styles.OR_searchInput}
+          placeholder="Search by Username"
+          value={searchText}
+          onChangeText={handleSearch} // Call the search function when text changes
+        />
+        <TouchableOpacity style={styles.OR_filterButton}>
+          <Image
+            source={require("../Image/FilterIcon.png")} // Placeholder for filter icon
+            style={styles.OR_filterIcon}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* User List */}
       <FlatList
-        data={users} // Users passed from previous screen
-        renderItem={renderItem} // Function to render each user
+        data={filteredUsers} // Use the filtered data instead of the original users list
+        renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()} // Unique key for each item
         contentContainerStyle={styles.userList}
       />
@@ -83,14 +113,31 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  userTime: {
-    fontSize: 14,
-    color: "#555",
-    marginTop: 5,
+  OR_searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
-  userType: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 2,
+  OR_searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  OR_filterButton: {
+    marginLeft: 10,
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: "#EFEFEF",
+  },
+  OR_filterIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: "cover",
   },
 });

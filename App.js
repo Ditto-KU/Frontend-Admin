@@ -34,6 +34,7 @@ import UserDetail from "./Pages/UserDetail";
 import RestaurantDetail from "./Pages/RestaurantDetail";
 import OrderHistory from "./Pages/OrderHistory";
 import OrderHistoryDetail from "./Pages/OrderHistoryDetail";
+import ReportOrderDetail from "./Pages/ReportOrderDetail";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -62,6 +63,7 @@ export default function App() {
         <Stack.Screen name="RestaurantDetail" component={RestaurantDetail} />
         <Stack.Screen name="OrderHistory" component={OrderHistory} />
         <Stack.Screen name="OrderHistoryDetail" component={OrderHistoryDetail} />
+        <Stack.Screen name="ReportOrderDetail" component={ReportOrderDetail} />
       </Stack.Navigator>
     </NavigationContainer>
     // </ScrollView>

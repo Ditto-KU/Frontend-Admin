@@ -7,6 +7,7 @@ import {
   Modal,
   StyleSheet,
   Alert,
+  Linking,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Header from "../components/Header"; // Importing Header component
@@ -38,40 +39,39 @@ export default function VerifyDetail() {
   };
 
   // Function to send email notification when "ไม่ผ่าน"
-  const sendEmailNotification = async () => {
-    try {
-      const response = await fetch(
-        "https://ku-man-api.vimforlanie.com/admin/send-email", // Change to your backend email API
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: user.email, // Send to user's email
-            subject: "Your Verification Status",
-            message: "Your verification has failed.", // Customize this message
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to send email notification");
-      }
-
-      Alert.alert("Success", "An email has been sent to the user.");
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    }
+  const sendEmailNotification = () => {
+    const email = user.email;
+    const subject = "Your Verification Status";
+    const message = "Your verification has failed.";
+  
+    const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+  
+    // Open the email client
+    Linking.openURL(emailUrl)
+      .then(() => {
+        Alert.alert("Success", "An email prompt has been opened.");
+      })
+      .catch((error) => {
+        Alert.alert("Error", "Failed to open email client");
+      });
   };
 
   // Function to delete the user from the backend
   const deleteUserFromBackend = async () => {
     try {
+      const updatedUser = {
+        walkerId: user.walkerId,
+        // status: result, // true for pass, false for unpass
+      };
+
       const response = await fetch(
-        `https://ku-man-api.vimforlanie.com/admin/delete-user/${user.walkerId}`, // Assuming there's a DELETE endpoint for users
+        "https://ku-man-api.vimforlanie.com/admin/verify",
         {
-          method: "DELETE",
+          method: "DELETE", 
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedUser),
         }
       );
 
@@ -92,7 +92,7 @@ export default function VerifyDetail() {
     try {
       const updatedUser = {
         walkerId: user.walkerId,
-        status: result, // true for pass, false for unpass
+        // status: result, // true for pass, false for unpass
       };
 
       const response = await fetch(
