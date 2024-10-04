@@ -41,8 +41,7 @@ export default function Verify() {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
-          const filteredData = data.filter((user) => user.status === false);
-          setVerifyUser(filteredData);
+          setVerifyUser(data);
         } else {
           throw new Error(`Unexpected content-type: ${contentType}`);
         }

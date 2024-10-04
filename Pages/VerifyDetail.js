@@ -98,7 +98,7 @@ export default function VerifyDetail() {
       const response = await fetch(
         "https://ku-man-api.vimforlanie.com/admin/verify",
         {
-          method: "POST", // Assuming the update method is POST
+          method: "PUT", // Assuming the update method is POST
           headers: {
             "Content-Type": "application/json",
           },
