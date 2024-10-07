@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ComponentStyle } from "../Style/ComponentStyle"; // Ensure this is the correct path
+import { useRoute } from "@react-navigation/native";
 
 export default function SideBar() {
+  const route = useRoute();
+  const { authAdmin } = route.params;
   const navigation = useNavigation();
+  const authToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+
   const [pressedButton, setPressedButton] = useState(null);
 
   const handlePressIn = (buttonName) => {
@@ -21,7 +27,7 @@ export default function SideBar() {
         <View>
           <Text style={ComponentStyle.sidebarHeader}>KU-MAN Dashboard</Text>
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             ComponentStyle.sidebarButton,
             pressedButton === "Dashboard" &&
@@ -39,7 +45,7 @@ export default function SideBar() {
             />
             <Text style={ComponentStyle.sidebarButtonText}>Dashboard</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={[
@@ -48,7 +54,7 @@ export default function SideBar() {
           ]}
           onPressIn={() => handlePressIn("ContactSupport")}
           onPressOut={handlePressOut}
-          onPress={() => navigation.navigate("ContactSupport")}
+          onPress={() => navigation.navigate("ContactSupport", { authAdmin: authAdmin })}
         >
           <View style={ComponentStyle.sidebarIconAndText}>
             <Image

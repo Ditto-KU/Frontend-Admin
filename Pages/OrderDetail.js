@@ -18,7 +18,8 @@ export default function OrderDetail() {
   // Use route to get the passed order object
   const route = useRoute();
   const { order } = route.params; // Destructure the passed 'order' from the previous screen
-
+  const authToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   // Modal and cancellation state
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState(""); // For storing the cancellation reason
@@ -37,8 +38,8 @@ export default function OrderDetail() {
       let headersList = {
         Accept: "application/json",
         "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
       };
-
       let bodyContent = JSON.stringify({
         orderStatus: "cancelled",
       });

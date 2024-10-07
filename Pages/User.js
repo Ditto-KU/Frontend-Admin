@@ -7,12 +7,14 @@ import {
   ActivityIndicator,
   StyleSheet,
   TextInput,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 import { PageStyle } from "../Style/PageStyle";
-import Head from "../components/Header";
+import Head from "../components/Header"; 
 
-export default function User() {
+export default function User() { 
   const navigation = useNavigation(); // Initialize navigation
 
   // State for walkers, requesters, loading state, and error handling
@@ -20,6 +22,8 @@ export default function User() {
   const [requesters, setRequesters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Separate search states for walkers and requesters
   const [walkerSearchText, setWalkerSearchText] = useState("");
@@ -31,8 +35,8 @@ export default function User() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         // Fetch walkers
         let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walker", {
           method: "GET",
@@ -104,7 +108,7 @@ export default function User() {
   const renderUserItem = (item, userType) => (
     <TouchableOpacity
       style={styles.userItem}
-      onPress={() => navigation.navigate("UserDetail", { user: item, userType })}
+      onPress={() => navigation.navigate("UserDetail", { user: item, userType})}
     >
       <Text style={styles.userName}>{item.username}</Text>
       <Text>User ID: {userType === "walker" ? item.walkerId : item.requesterId}</Text>
@@ -133,11 +137,14 @@ export default function User() {
           </View>
 
           {/* Walker List */}
-          <FlatList
-            data={filteredWalkers}
-            renderItem={({ item }) => renderUserItem(item, "walker")}
-            keyExtractor={(item) => item.walkerId.toString()}
-          />
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <FlatList
+              data={filteredWalkers}
+              renderItem={({ item }) => renderUserItem(item, "walker")}
+              keyExtractor={(item) => item.walkerId.toString()}
+              contentContainerStyle={styles.userList}
+            />
+          </ScrollView>
         </View>
 
         {/* Requesters Column */}
@@ -155,11 +162,14 @@ export default function User() {
           </View>
 
           {/* Requester List */}
-          <FlatList
-            data={filteredRequesters}
-            renderItem={({ item }) => renderUserItem(item, "requester")}
-            keyExtractor={(item) => item.requesterId.toString()}
-          />
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <FlatList
+              data={filteredRequesters}
+              renderItem={({ item }) => renderUserItem(item, "requester")}
+              keyExtractor={(item) => item.requesterId.toString()}
+              contentContainerStyle={styles.userList}
+            />
+          </ScrollView>
         </View>
       </View>
     </View>
@@ -207,6 +217,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  userList: {
+    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
+    flex: 1, 
+    paddingBottom: 20,
   },
   userName: {
     fontSize: 18,

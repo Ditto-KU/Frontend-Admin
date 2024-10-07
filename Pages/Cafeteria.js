@@ -8,6 +8,8 @@ export default function Cafeteria() {
   const [canteens, setCanteens] = useState([]); // State to hold fetched canteen data
   const [loading, setLoading] = useState(true); // State to handle loading
   const [error, setError] = useState(null); // State to handle errors
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Function to handle button press and navigate to RestaurantInCafeteria screen
   const handleCafeteriaPress = (canteenId, cafeteriaName) => {
@@ -19,7 +21,8 @@ export default function Cafeteria() {
     const fetchData = async () => {
       try {
         let headersList = {
-          "Accept": "*/*"
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
 
         let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/canteen`, { 

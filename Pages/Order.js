@@ -9,12 +9,14 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
-import FilterOrder from "../components/FilterOrder";
+import FilterOrder from "../components/FilterOrder"; 
 
-export default function Order() {
+export default function Order() { 
   const navigation = useNavigation();
   const [orderData, setOrderData] = useState([]); // Store orders
   const [filteredData, setFilteredData] = useState([]); // Filtered data for search and filter
@@ -22,9 +24,11 @@ export default function Order() {
   const [error, setError] = useState(null); // Error state
   const [searchText, setSearchText] = useState(""); // State for search input
   const [modalVisible, setModalVisible] = useState(false); // Filter modal
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   const gotoOrderDetail = (order) => {
-    navigation.navigate("OrderDetail", { order: order });
+    navigation.navigate("OrderDetail", { order: order});
   };
 
   const toggleModal = () => {
@@ -37,8 +41,8 @@ export default function Order() {
       try {
         const headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         const response = await fetch(
           "https://ku-man-api.vimforlanie.com/admin/order",
           {
@@ -236,12 +240,14 @@ export default function Order() {
       </View>
 
       {/* Order List using FlatList */}
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.orderId.toString()}
-        renderItem={renderOrderItem}
-        contentContainerStyle={styles.orderList}
-      />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <FlatList
+          data={filteredData}
+          keyExtractor={(item) => item.orderId.toString()}
+          renderItem={renderOrderItem}
+          contentContainerStyle={styles.orderList}
+        />
+      </ScrollView>
 
       {/* Pass applyFilter to FilterOrder */}
       <FilterOrder
@@ -304,9 +310,14 @@ const styles = StyleSheet.create({
     height: 30,
     resizeMode: "cover",
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   orderList: {
-    paddingBottom: 10, // Padding for the list
-    flexGrow: 1, // Allow the list to grow and scroll properly
+    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
+    flex: 1, 
+    paddingBottom: 20,
   },
   orderContainer: {
     padding: 15,

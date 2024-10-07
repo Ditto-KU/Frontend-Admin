@@ -6,14 +6,16 @@ export default function LineGraph() {
   const [walkerData, setWalkerData] = useState([]);
   const [requesterData, setRequesterData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const authToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         const response = await fetch(
           "https://ku-man-api.vimforlanie.com/admin/order/today",
           {

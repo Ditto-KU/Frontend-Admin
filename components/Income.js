@@ -5,6 +5,8 @@ export default function Income() {
   const [totalIncome, setTotalIncome] = useState(0); // State to store the total income
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Fetch order data and calculate total income based on shippingFee
   useEffect(() => {
@@ -12,8 +14,8 @@ export default function Income() {
       try {
         const headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         const response = await fetch(
           "https://ku-man-api.vimforlanie.com/admin/order/today", // Replace with your actual API URL
           {

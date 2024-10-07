@@ -5,13 +5,17 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  FlatList,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
 
 export default function Verify() {
   const navigation = useNavigation();
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // State for API data, loading, and error
   const [verifyUser, setVerifyUser] = useState([]);
@@ -24,8 +28,8 @@ export default function Verify() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         let response = await fetch(
           "https://ku-man-api.vimforlanie.com/admin/verify",
           {
@@ -81,28 +85,33 @@ export default function Verify() {
     navigation.navigate("VerifyDetail", { user });
   };
 
+  // Render each user item
+  const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => handleUserPress(item)}>
+      <View style={styles.VE_listItem}>
+        <Text style={styles.VE_textName}>Username: {item.username}</Text>
+        <Text style={styles.VE_textTime}>
+          Registered At: {new Date(item.registerAt).toLocaleString()}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.VE_container}>
-      {/* Ensure Header has a defined height */}
       <Header />
       <View style={styles.VE_header}>
         <Text style={styles.VE_title}>User Verification</Text>
       </View>
 
-      {/* Wrapping the content in a ScrollView */}
+      {/* Use FlatList for displaying the list */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {verifyUser.map((item, index) => (
-          <TouchableOpacity key={index} onPress={() => handleUserPress(item)}>
-            <View style={styles.VE_listItem}>
-              <Text style={styles.VE_textName}>
-                Username: {item.username}
-              </Text>
-              <Text style={styles.VE_textTime}>
-                Registered At: {new Date(item.registerAt).toLocaleString()}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        <FlatList
+          data={verifyUser}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.username}
+          contentContainerStyle={styles.verifyList}
+        />
       </ScrollView>
     </View>
   );
@@ -110,7 +119,7 @@ export default function Verify() {
 
 const styles = StyleSheet.create({
   VE_container: {
-    flex: 1, // Allow the view to take full height for scrolling
+    flex: 1,
     padding: 16,
     backgroundColor: "#F5F5F5",
   },
@@ -161,7 +170,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
-    flexGrow: 1, // Ensures ScrollView content grows properly
-    paddingBottom: 30, // Optional: to give some space at the bottom
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  verifyList: {
+    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
+    flex: 1, 
+    paddingBottom: 20,
   },
 });

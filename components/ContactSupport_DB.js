@@ -9,11 +9,16 @@ import {
 } from "react-native";
 import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
 import { useNavigation } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 
 export default function ContactSupport_DB() {
+  const route = useRoute(); // Get route hook
+  const { authAdmin } = route.params;
   const [supportRequests, setSupportRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   
   const totalRequests = 1230; // Static data for example purposes
   const onprocess = 230; // Static data for example purposes
@@ -27,32 +32,43 @@ export default function ContactSupport_DB() {
         let headersList = {
           "Content-Type": "application/json",
           Accept: "application/json",
+          Authorization: `Bearer ${authAdmin}`,
         };
-
+  
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
           method: "GET",
           headers: headersList,
         });
-
+  
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.status}`);
         }
-
+  
         let data = await response.json();
-        setSupportRequests(data); // Set the fetched data
-        setLoading(false); // Set loading to false when data is loaded
+        console.log("API Response:", data);
+  
+        // Ensure the data is an array
+        if (Array.isArray(data)) {
+          setSupportRequests(data); // Set the data if it's an array
+        } else {
+          console.error("Data is not an array:", data);
+          setSupportRequests([]); // Fallback to empty array
+        }
+  
+        setLoading(false);
       } catch (err) {
-        setError(err.message); // Set error if fetch fails
+        setError(err.message); 
         setLoading(false);
       }
     };
-
+  
     fetchSupportRequests();
   }, []);
+  
 
   // Navigate to ContactSupportDetail with the orderId
   const handleCSPress = (orderId) => {
-    navigation.navigate("ContactSupportDetail", { orderId });
+    navigation.navigate("ContactSupportDetail", { orderId , authAdmin: authAdmin });
   };
 
   // If data is still loading

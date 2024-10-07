@@ -16,6 +16,8 @@ export default function ReportOrderDetail() {
   const route = useRoute();
   const { orderId } = route.params; // Get the orderId passed from the previous screen
 
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   // State to store fetched order data
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,8 +33,8 @@ export default function ReportOrderDetail() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         let response = await fetch(
           `https://ku-man-api.vimforlanie.com/admin/order/info?orderId=${orderId}`,
           {

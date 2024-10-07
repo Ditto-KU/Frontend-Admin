@@ -5,14 +5,16 @@ export default function NewUser() {
   const [requesterCount, setRequesterCount] = useState(0);
   const [walkerCount, setWalkerCount] = useState(0);
   const [oldOrders, setOldOrders] = useState([]); // Old orders
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Fetch old orders data
   const fetchOldOrders = async () => {
     try {
       let headersList = {
         Accept: '*/*',
+        Authorization: `Bearer ${authToken}`,
       };
-
       let response = await fetch('https://ku-man-api.vimforlanie.com/admin/order', {
         method: 'GET',
         headers: headersList,
@@ -30,6 +32,7 @@ export default function NewUser() {
     try {
       let headersList = {
         Accept: '*/*',
+        Authorization: `Bearer ${authToken}`,
       };
 
       let response = await fetch('https://ku-man-api.vimforlanie.com/admin/order/today', {

@@ -14,6 +14,8 @@ export default function CanteenAndShops() {
   const [openShops, setOpenShops] = useState(0); // Store open shops
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Fetch all canteens from the API
   useEffect(() => {
@@ -21,6 +23,7 @@ export default function CanteenAndShops() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
 
         let response = await fetch(
@@ -61,8 +64,8 @@ export default function CanteenAndShops() {
           const shopsPromises = canteens.map(async (canteen) => {
             let headersList = {
               Accept: "*/*",
+              Authorization: `Bearer ${authToken}`,
             };
-
             let response = await fetch(
               `https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${canteen.canteenId}`,
               {

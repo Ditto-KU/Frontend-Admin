@@ -20,7 +20,8 @@ export default function ViewOrderDetail({ orderId }) {  // Receiving orderId as 
     const fetchOrderDetails = async () => {
       try {
         const headersList = {
-          "Accept": "*/*",
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,        
         };
 
         // Fetch all orders from the API

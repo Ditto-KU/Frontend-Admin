@@ -7,7 +7,8 @@ export default function OrderHistory() {
   const navigation = useNavigation();
   const route = useRoute();
   const { shopId } = route.params; // Get shopId from the previous screen
-  
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   // States to manage fetched orders, loading and error state
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +25,8 @@ export default function OrderHistory() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         let response = await fetch(
           `https://ku-man-api.vimforlanie.com/admin/canteen/shop/order?shopId=${shopId}`,
           {

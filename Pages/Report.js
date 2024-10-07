@@ -8,12 +8,16 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Head from "../components/Header";
 import FilterComponent from "../components/FilterComponent"; // Import the FilterComponent
 
 export default function Report() {
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   const navigation = useNavigation(); // Get navigation hook
   const [modalVisible, setModalVisible] = useState(false); // State for controlling filter modal visibility
   const [reportData, setReportData] = useState([]); // Combined list for reports
@@ -28,7 +32,7 @@ export default function Report() {
       try {
         let headersList = {
           Accept: "*/*",
-        };
+          Authorization: `Bearer ${authToken}`,        };
 
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/report", {
           method: "GET",
@@ -54,7 +58,7 @@ export default function Report() {
 
   // Function to navigate to report details
   const handleReportPress = (report) => {
-    navigation.navigate("ReportDetails", { report });
+    navigation.navigate("ReportDetails", { report});
   };
 
   // Function to toggle modal visibility
@@ -198,12 +202,14 @@ export default function Report() {
       </View>
 
       {/* Report List */}
-      <FlatList
-        data={filteredData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.reportId.toString()}
-        contentContainerStyle={styles.RP_requesterList}
-      />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <FlatList
+          data={filteredData}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.reportId.toString()}
+          contentContainerStyle={styles.RP_requesterList}
+        />
+      </ScrollView>
 
       {/* Include the FilterComponent and pass props */}
       <FilterComponent
@@ -255,6 +261,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  RP_requesterList: {
+    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
+    flex: 1, 
+    paddingBottom: 20,
   },
   RP_filterButton: {
     marginLeft: 10,

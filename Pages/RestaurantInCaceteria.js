@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import the navigation hook
 import Head from "../components/Header";
+import { useRoute } from "@react-navigation/native";
 
-export default function RestaurantInCafeteria({ route }) {
+export default function RestaurantInCafeteria() {
+  const route = useRoute(); // Get the route hook
   const { canteenId, cafeteriaName } = route.params; // Retrieve canteenId and name from params
   const navigation = useNavigation(); // Access the navigation object
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Initialize state to hold restaurant data
   const [restaurantList, setRestaurantList] = useState([]);
@@ -23,9 +27,9 @@ export default function RestaurantInCafeteria({ route }) {
 
       try {
         let headersList = {
-          "Accept": "*/*",
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${canteenId}`, { 
           method: "GET",
           headers: headersList,

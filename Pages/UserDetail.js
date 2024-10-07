@@ -6,7 +6,8 @@ import Header from "../components/Header"; // Import Header component
 export default function UserDetail() {
   const route = useRoute();
   const { user, userType } = route.params; // Extract user data and userType from route params
-
+  const authToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   return (
     <View style={styles.container}>
       {/* Include Header */}

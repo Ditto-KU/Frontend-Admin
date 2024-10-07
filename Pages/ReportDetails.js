@@ -2,11 +2,15 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Head from "../components/Header"; // Import your header component
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
+import { useRoute } from "@react-navigation/native";
 
-export default function ReportDetails({ route }) {
+export default function ReportDetails() {
+  const route = useRoute(); // Get route hook 
   const navigation = useNavigation(); // Get navigation hook
   const { report } = route.params;
-
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+  
   const handleShowOrder = () => {
     // Navigate to OrderDetail screen and pass the orderId
     navigation.navigate("ReportOrderDetail", { orderId: report.orderId });

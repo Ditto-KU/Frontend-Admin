@@ -14,10 +14,11 @@ import Header from "../components/Header";
 import { useNavigation, useRoute } from "@react-navigation/native"; // Import useNavigation and useRoute
 
 export default function RestaurantDetail() {
-  const navigation = useNavigation(); // Initialize navigation
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   const route = useRoute(); // Get the route to access passed parameters
+  const navigation = useNavigation(); // Initialize navigation
   const { shopId } = route.params; // Retrieve the shopId passed from the previous screen
-
   // States for toggling restaurant, menu items, and shop info
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
   const [menuItems, setMenuItems] = useState([]);
@@ -42,14 +43,16 @@ export default function RestaurantDetail() {
   const navigateToOrderHistory = () => {
     navigation.navigate("OrderHistory", { shopId }); // Pass shopId to OrderHistory
   };
+
+  
   // Function to fetch menu items from the API
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         let response = await fetch(
           `https://ku-man-api.vimforlanie.com/admin/canteen/shop/menu?shopId=${shopId}`,
           {

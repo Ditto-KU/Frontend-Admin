@@ -8,12 +8,17 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Head from "../components/Header";
 import FilterComponent from "../components/FilterComponent";
+import { useRoute } from "@react-navigation/native";
 
 export default function ContactSupport() {
+  const route = useRoute();
+  const { authAdmin } = route.params;
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -21,6 +26,8 @@ export default function ContactSupport() {
   const [supportRequests, setSupportRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]); // State for filtered requests
   const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Fetch data from API
   useEffect(() => {
@@ -29,29 +36,30 @@ export default function ContactSupport() {
         let headersList = {
           "Content-Type": "application/json",
           Accept: "application/json",
+          Authorization: `Bearer ${authAdmin}`,  // Use authAdmin for this request
         };
-
+  
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
           method: "GET",
           headers: headersList,
         });
-
+  
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.status}`);
         }
-
-        let data = await response.json(); // Get the orderId data from the API
-        setSupportRequests(data); // Set the fetched data (array of { orderId })
-        setFilteredRequests(data); // Set the initial filtered data to be all data
-        setLoading(false); // Set loading to false when data is loaded
+  
+        let data = await response.json();
+        setSupportRequests(data);  // Set the fetched data
+        setLoading(false);         // Stop the loading state
       } catch (err) {
-        setError(err.message); // Set error if fetch fails
+        setError(err.message);
         setLoading(false);
       }
     };
-
+  
     fetchSupportRequests();
-  }, []);
+  }, [authAdmin]);
+  
 
   // Function to filter support requests by search query (orderId)
   const handleSearch = (query) => {
@@ -68,7 +76,7 @@ export default function ContactSupport() {
 
   // This function will navigate to the ContactSupportDetail page and pass the orderId.
   const handleCSPress = (orderId) => {
-    navigation.navigate("ContactSupportDetail", { orderId });
+    navigation.navigate("ContactSupportDetail", { orderId , authAdmin: authAdmin });
   };
 
   const toggleModal = () => {
@@ -128,14 +136,14 @@ export default function ContactSupport() {
         </View>
       </View>
 
-      <View style={styles.CS_content}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <FlatList
           data={filteredRequests} // Display filtered requests
           renderItem={renderItem}
           keyExtractor={(item) => item.orderId.toString()}
           contentContainerStyle={styles.CS_requesterList}
         />
-      </View>
+      </ScrollView>
 
       <FilterComponent modalVisible={modalVisible} toggleModal={toggleModal} />
     </View>
@@ -214,8 +222,14 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginVertical: 10,
   },
-  CS_requesterList: {
+  scrollContent: {
+    flexGrow: 1,
     paddingBottom: 20,
+  },
+  CS_requesterList: {
+    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
+    paddingBottom: 20,
+    flex: 1, 
   },
   loadingContainer: {
     flex: 1,

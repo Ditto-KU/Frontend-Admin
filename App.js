@@ -45,7 +45,7 @@ export default function App() {
       <Stack.Navigator  screenOptions={{ headerShown: false }}>
         <Stack.Screen name="KU-MAN" component={Title} />
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Main" component={Main} />
+        <Stack.Screen name="Dashboard" component={Main} />
         <Stack.Screen name="ContactSupport" component={ContactSupport} />
         <Stack.Screen name="Report" component={Report} />
         <Stack.Screen name="Order" component={Order} />

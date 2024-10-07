@@ -16,8 +16,9 @@ import Header from "../components/Header";
 export default function OrderHistoryDetail() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { orderId } = route.params; // Destructure orderId from the route parameters
-
+  const { orderId  } = route.params; // Destructure orderId from the route parameters
+  const authToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   // State to manage fetched order details, loading, and error
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,8 +35,8 @@ export default function OrderHistoryDetail() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         let response = await fetch(
           `https://ku-man-api.vimforlanie.com/admin/order/detail?orderId=${orderId}`,
           {

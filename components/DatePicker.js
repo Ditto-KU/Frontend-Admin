@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import 'react-datepicker/dist/react-datepicker.css'; 
 
-export default function DatePickerDropdown() {
+export default function DatePickerDropdown() { 
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   const [selectedDate, setSelectedDate] = useState('');
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 

@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons"; // For icons
 import io from "socket.io-client";
 import "react-native-url-polyfill/auto";
 
-export default function ChatBox({ orderId, userId = "123", role = "requester" }) {
+export default function ChatBox() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);

@@ -14,10 +14,12 @@ import Header from "../components/Header"; // Importing Header component
 
 export default function VerifyDetail() {
   const route = useRoute(); // To get the passed user data
-  const navigation = useNavigation();
   const { user } = route.params; // Destructure passed user data
+  const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [result, setResult] = useState(null); // To store Pass/Unpass result (true/false)
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Function to handle confirmation for both true (pass) and false (fail)
   const handleConfirm = (status) => {
@@ -70,6 +72,7 @@ export default function VerifyDetail() {
           method: "DELETE", 
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(updatedUser),
         }
@@ -101,6 +104,7 @@ export default function VerifyDetail() {
           method: "PUT", // Assuming the update method is POST
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(updatedUser),
         }

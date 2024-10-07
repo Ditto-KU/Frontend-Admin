@@ -15,7 +15,8 @@ import Head from "../components/Header"; // Assuming you have a Header component
 export default function UserList() {
   const navigation = useNavigation();
   const route = useRoute();
-
+  const authToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
   // Get user list and type (walker or requester) from the previous screen
   const { users, userType } = route.params;
 
@@ -25,7 +26,7 @@ export default function UserList() {
 
   // Function to handle pressing on a user item
   const handleUserPress = (user) => {
-    navigation.navigate("UserDetail", { user, userType }); // Pass user and userType
+    navigation.navigate("UserDetail", { user, userType, authToken }); // Pass user and userType
   };
 
   // Function to handle search and filter data based on search input

@@ -9,15 +9,17 @@ import {
   ScrollView,
 } from "react-native";
 import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native"; 
 
-export default function Order_DB() {
+export default function Order_DB() { 
   const navigation = useNavigation();
 
   // State variables
   const [orderData, setOrderData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Fetch order data from the API
   useEffect(() => {
@@ -25,8 +27,8 @@ export default function Order_DB() {
       try {
         const headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
-
         const response = await fetch(
           "https://ku-man-api.vimforlanie.com/admin/order",
           {
