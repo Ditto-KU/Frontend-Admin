@@ -69,7 +69,8 @@ export default function NewUser() {
       await fetchOldOrders(); // Fetch old orders
       fetchNewOrders(); // Fetch new orders after old orders are set
     };
-    fetchData();
+    const intervalId = setInterval(fetchData, 1000);
+    return () => clearInterval(intervalId); 
   }, [oldOrders]);
 
   return (

@@ -15,10 +15,11 @@ import { useNavigation } from "@react-navigation/native";
 import Head from "../components/Header";
 import FilterComponent from "../components/FilterComponent";
 import { useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ContactSupport() {
+export default function ContactSupport({ authAdmin }) {
   const route = useRoute();
-  const { authAdmin } = route.params;
+  // const authAdmin = AsyncStorage.getItem("authAdmin");
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export default function ContactSupport() {
         let headersList = {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${authAdmin}`,  // Use authAdmin for this request
+          Authorization: `Bearer ${authAdmin}`,
         };
   
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
@@ -49,10 +50,27 @@ export default function ContactSupport() {
         }
   
         let data = await response.json();
-        setSupportRequests(data);  // Set the fetched data
-        setLoading(false);         // Stop the loading state
+        console.log("API Response:", data);
+  
+        // Combine requester and walker data into one array for easier mapping
+        const combinedRequests = [
+          ...(Array.isArray(data.requester) ? data.requester.map((req) => ({
+            ...req,
+            role: 'requester',  // Indicate that this is a requester
+            userId: req.requesterId,
+          })) : []),
+          ...(Array.isArray(data.walker) ? data.walker.map((req) => ({
+            ...req,
+            role: 'walker',  // Indicate that this is a walker
+            userId: req.walkerId,
+          })) : [])
+        ];
+
+        setSupportRequests(combinedRequests);
+        setFilteredRequests(combinedRequests); // Initialize filtered requests
+        setLoading(false);
       } catch (err) {
-        setError(err.message);
+        setError(err.message); 
         setLoading(false);
       }
     };
@@ -61,22 +79,22 @@ export default function ContactSupport() {
   }, [authAdmin]);
   
 
-  // Function to filter support requests by search query (orderId)
-  const handleSearch = (query) => {
-    setSearchQuery(query); // Set the search query state
-    if (query === "") {
-      setFilteredRequests(supportRequests); // Show all if query is empty
+  // Handle search input change
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text === "") {
+      setFilteredRequests(supportRequests); // Reset to all requests if search query is empty
     } else {
-      const filteredData = supportRequests.filter((item) =>
-        item.orderId.toString().includes(query) // Ensure both are compared as strings
+      const filtered = supportRequests.filter((item) =>
+        item.orderId.toString().includes(text)
       );
-      setFilteredRequests(filteredData); // Update the filtered data
+      setFilteredRequests(filtered); // Filter based on orderId
     }
   };
 
-  // This function will navigate to the ContactSupportDetail page and pass the orderId.
-  const handleCSPress = (orderId) => {
-    navigation.navigate("ContactSupportDetail", { orderId , authAdmin: authAdmin });
+  // Navigate to ContactSupportDetail with the orderId, userId, and role
+  const handleCSPress = (orderId, userId, role) => {
+    navigation.navigate("ContactSupportDetail", { orderId, userId, role, authAdmin });
   };
 
   const toggleModal = () => {
@@ -84,11 +102,13 @@ export default function ContactSupport() {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleCSPress(item.orderId)}>
+    <TouchableOpacity onPress={() => handleCSPress(item.orderId, item.userId, item.role)}>
       <View style={styles.CS_listItem}>
-        <Text style={[styles.CS_listText, { fontWeight: "600" }]}>
-          Order ID: {item.orderId}
-        </Text>
+        {/* <Text style={[styles.CS_listText, { fontWeight: "600" }]}>
+          {item.role === 'requester' ? 'Requester' : 'Walker'} ID: {item.userId}
+        </Text> */}
+        <Text style={[styles.CS_listText, { fontWeight: "600" }]}>Order ID: {item.orderId}</Text>
+        <Text style={styles.CS_listText}>Status: {item.orderStatus}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -164,7 +184,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
-    width: "30%",
+    width: "100%",
     alignSelf: "center",
   },
   CS_title: {

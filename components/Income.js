@@ -17,7 +17,7 @@ export default function Income() {
           Authorization: `Bearer ${authToken}`,
         };
         const response = await fetch(
-          "https://ku-man-api.vimforlanie.com/admin/order/today", // Replace with your actual API URL
+          "https://ku-man-api.vimforlanie.com/admin/order", 
           {
             method: "GET",
             headers: headersList,
@@ -47,8 +47,8 @@ export default function Income() {
       }
     };
 
-    // Fetch the data when the component mounts
-    fetchData();
+    const intervalId = setInterval(fetchData, 1000);
+    return () => clearInterval(intervalId);
   }, []);
 
   // Loading state

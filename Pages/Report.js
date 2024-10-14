@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Head from "../components/Header";
-import FilterComponent from "../components/FilterComponent"; // Import the FilterComponent
+import FilterReport from "../components/FilterReport"; // Import the FilterReport component
 
 export default function Report() {
   const authToken =
@@ -24,15 +24,16 @@ export default function Report() {
   const [filteredData, setFilteredData] = useState([]); // Filtered data based on search and filters
   const [loading, setLoading] = useState(true); // Loading state for API call
   const [searchText, setSearchText] = useState(""); // Search text state
-  const [activeFilters, setActiveFilters] = useState({}); // State to store applied filters
+  const [activeFilters, setActiveFilters] = useState(null); // State to store applied filters
 
+  // Fetch report data from the API
   useEffect(() => {
-    // Fetch report data from the API
     const fetchReportData = async () => {
       try {
         let headersList = {
           Accept: "*/*",
-          Authorization: `Bearer ${authToken}`,        };
+          Authorization: `Bearer ${authToken}`,
+        };
 
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/report", {
           method: "GET",
@@ -58,7 +59,7 @@ export default function Report() {
 
   // Function to navigate to report details
   const handleReportPress = (report) => {
-    navigation.navigate("ReportDetails", { report});
+    navigation.navigate("ReportDetails", { report });
   };
 
   // Function to toggle modal visibility
@@ -85,6 +86,14 @@ export default function Report() {
       );
     }
 
+    // Apply date filter
+    if (filters && filters.date) {
+      const selectedDate = new Date(filters.date).toDateString();
+      filtered = filtered.filter(
+        (item) => new Date(item.reportDate).toDateString() === selectedDate
+      );
+    }
+
     // Apply other filters (like status, requester, walker)
     if (filters && filters.status) {
       filtered = filtered.filter((item) => item.status === filters.status);
@@ -104,53 +113,7 @@ export default function Report() {
   // Search Functionality
   const handleSearch = (text) => {
     setSearchText(text); // Update the search input
-    if (text === "") {
-      setFilteredData(reportData); // If search is cleared, show all data
-    } else {
-      const filteredReports = reportData.filter((order) =>
-        order.orderId.toString().includes(text)
-      );
-      setFilteredData(filteredReports);
-  
-      useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const headersList = {
-              Accept: "*/*",
-            };
-    
-            const response = await fetch(
-              `https://ku-man-api.vimforlanie.com/admin/report/search?walkerId=${searchText}&requesterId=${searchText}&orderId=${searchText}`,
-              {
-                method: "GET",
-                headers: headersList,
-              }
-            );
-    
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-    
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-              const data = await response.json();
-    
-              setReportData(reportData); // Set order data
-            } else {
-              throw new Error(`Unexpected content-type: ${contentType}`);
-            }
-          } catch (error) {
-            console.error("Error fetching data:", error);
-            setError(error.message);
-            Alert.alert("Error", error.message);
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchData(); // Initial data fetch
-      }, []);
-    }
+    filterReports(text, activeFilters); // Reapply filters with new search text
   };
 
   // Render each report item
@@ -185,14 +148,11 @@ export default function Report() {
         <View style={styles.RP_searchContainer}>
           <TextInput
             style={styles.RP_searchInput}
-            placeholder="Search by Order ID"
+            placeholder="Search by Order ID or Title"
             value={searchText}
             onChangeText={handleSearch}
           />
-          <TouchableOpacity
-            onPress={toggleModal}
-            style={styles.RP_filterButton}
-          >
+          <TouchableOpacity onPress={toggleModal} style={styles.RP_filterButton}>
             <Image
               source={require("../Image/FilterIcon.png")} // Adjust the path as necessary
               style={styles.RP_filterIcon}
@@ -211,8 +171,8 @@ export default function Report() {
         />
       </ScrollView>
 
-      {/* Include the FilterComponent and pass props */}
-      <FilterComponent
+      {/* Include the FilterReport and pass props */}
+      <FilterReport
         modalVisible={modalVisible}
         toggleModal={toggleModal}
         applyFilter={applyFilter}
@@ -267,8 +227,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   RP_requesterList: {
-    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
-    flex: 1, 
+    maxHeight: Dimensions.get("screen").height * 0.8, // Set max height for scrollable area
+    flex: 1,
     paddingBottom: 20,
   },
   RP_filterButton: {

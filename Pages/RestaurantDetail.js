@@ -11,25 +11,57 @@ import {
   Alert
 } from "react-native";
 import Header from "../components/Header";
-import { useNavigation, useRoute } from "@react-navigation/native"; // Import useNavigation and useRoute
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 export default function RestaurantDetail() {
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  const route = useRoute(); // Get the route to access passed parameters
-  const navigation = useNavigation(); // Initialize navigation
-  const { shopId } = route.params; // Retrieve the shopId passed from the previous screen
-  // States for toggling restaurant, menu items, and shop info
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { shopId } = route.params;
+
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
   const [menuItems, setMenuItems] = useState([]);
-  const [shopInfo, setShopInfo] = useState(null); // State for storing shop info
-  const [loading, setLoading] = useState(true); // Loading state for menu
-  const [shopLoading, setShopLoading] = useState(true); // Loading state for shop info
-  const [error, setError] = useState(null); // Error state
-  
-  // Function to toggle restaurant open/close
-  const toggleRestaurantStatus = () => {
-    setIsRestaurantOpen(!isRestaurantOpen);
+  const [shopInfo, setShopInfo] = useState(null); 
+  const [loading, setLoading] = useState(true); 
+  const [shopLoading, setShopLoading] = useState(true); 
+  const [error, setError] = useState(null);
+
+  // Function to toggle restaurant open/close and update the status
+  const toggleRestaurantStatus = async () => {
+    const newStatus = !isRestaurantOpen;
+    setIsRestaurantOpen(newStatus);
+
+    // API call to update the shop status
+    try {
+      let headersList = {
+        Accept: "*/*",
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      };
+
+      let response = await fetch(
+        `https://ku-man-api.vimforlanie.com/admin/canteen/shop/update-status`,
+        {
+          method: "POST",
+          headers: headersList,
+          body: JSON.stringify({
+            shopId,
+            status: newStatus, // Send the new status to the API
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      let data = await response.json();
+      Alert.alert("Success", `Shop is now ${newStatus ? "Open" : "Closed"}`);
+    } catch (error) {
+      console.error("Error updating shop status:", error);
+      Alert.alert("Error", error.message);
+    }
   };
 
   // Function to toggle menu item availability
@@ -41,10 +73,9 @@ export default function RestaurantDetail() {
 
   // Function to navigate to the Order History screen
   const navigateToOrderHistory = () => {
-    navigation.navigate("OrderHistory", { shopId }); // Pass shopId to OrderHistory
+    navigation.navigate("OrderHistory", { shopId });
   };
 
-  
   // Function to fetch menu items from the API
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -65,19 +96,19 @@ export default function RestaurantDetail() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        let data = await response.json(); // Parse response as JSON
-        setMenuItems(data); // Update state with the fetched menu items
-        setLoading(false); // Stop loading
+        let data = await response.json();
+        setMenuItems(data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching menu items:", error);
         setError(error.message);
         Alert.alert("Error", error.message);
-        setLoading(false); // Stop loading even if there is an error
+        setLoading(false);
       }
     };
 
     fetchMenuItems();
-  }, [shopId]); // Fetch the menu items when the component mounts and shopId is available
+  }, [shopId]);
 
   // Function to fetch shop information from the API
   useEffect(() => {
@@ -85,6 +116,7 @@ export default function RestaurantDetail() {
       try {
         let headersList = {
           Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
         };
 
         let response = await fetch(
@@ -99,26 +131,23 @@ export default function RestaurantDetail() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        let data = await response.json(); // Parse response as JSON
-        setShopInfo(data); // Update state with the fetched shop info
-        setShopLoading(false); // Stop loading
+        let data = await response.json();
+        setShopInfo(data);
+        setIsRestaurantOpen(data.status); // Set initial status based on the fetched data
+        setShopLoading(false);
       } catch (error) {
         console.error("Error fetching shop info:", error);
         setError(error.message);
         Alert.alert("Error", error.message);
-        setShopLoading(false); // Stop loading even if there is an error
+        setShopLoading(false);
       }
     };
 
-    // Set an interval to fetch data every second
     const intervalId = setInterval(fetchShopInfo, 1000); // Fetch every 1000 ms (1 second)
 
-    // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
-  }, [shopId]); // Fetch the shop info when the component mounts and shopId is available
+  }, [shopId]);
 
-
-  // Render loading or error state for the shop info
   if (shopLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -138,11 +167,8 @@ export default function RestaurantDetail() {
 
   return (
     <View style={styles.container}>
-      {/* Including the custom Header component */}
       <Header />
-
-      {/* Restaurant Name */}
-      <Text style={styles.restaurantName}>{shopInfo?.shopName || 'Shop 1'}</Text>
+      <Text style={styles.restaurantName}>{shopInfo?.shopName || "Shop"}</Text>
 
       <View style={styles.mainContainer}>
         {/* Left Section: Restaurant Status */}
@@ -150,7 +176,7 @@ export default function RestaurantDetail() {
           <Text style={styles.statusText}>Shop Status</Text>
           <View style={styles.statusToggleContainer}>
             <Text style={styles.statusLabel}>
-              {isRestaurantOpen ? "Open" : "Close"}
+              {isRestaurantOpen ? "Open" : "Closed"}
             </Text>
             <View style={styles.switchContainer}>
               <Switch
@@ -163,14 +189,14 @@ export default function RestaurantDetail() {
           </View>
         </View>
 
-        {/* Center Section: Menu List */}
+        {/* Menu List */}
         <View style={styles.menuContainer}>
           <Text style={styles.menuTitle}>Menu</Text>
           <ScrollView style={{ flexGrow: 1 }}>
             {menuItems.map((item, index) => (
               <View key={item.menuId} style={styles.menuItem}>
                 <Image
-                  source={{ uri: item.picture || "https://via.placeholder.com/60" }} // Use placeholder if no image
+                  source={{ uri: item.picture || "https://via.placeholder.com/60" }}
                   style={styles.menuImage}
                 />
                 <View style={styles.menuDetails}>
@@ -181,7 +207,7 @@ export default function RestaurantDetail() {
                   <Switch
                     value={item.status}
                     onValueChange={() => toggleMenuItem(index)}
-                    thumbColor={isRestaurantOpen ? "#34C759" : "#f4f3f4"}
+                    thumbColor={item.status ? "#34C759" : "#f4f3f4"}
                     trackColor={{ false: "#f4f3f4", true: "#34C759" }}
                   />
                 </View>
@@ -190,15 +216,23 @@ export default function RestaurantDetail() {
           </ScrollView>
         </View>
 
-        {/* Right Section: Restaurant Details */}
+        {/* Restaurant Details */}
         <View style={styles.detailsContainer}>
           <Text style={styles.detailsTitle}>Description</Text>
           <View style={styles.detailsTextContainer}>
-            <Text style={styles.detailsText}>Username: {shopInfo?.username || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Shop Name: {shopInfo?.shopName || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Tel: {shopInfo?.tel || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Canteen Id: {shopInfo?.canteenId || 'N/A'}</Text>
-            <Text style={styles.detailsText}>Shop Number: {shopInfo?.shopNumber || 'N/A'}</Text>
+            <Text style={styles.detailsText}>
+              Username: {shopInfo?.username || "N/A"}
+            </Text>
+            <Text style={styles.detailsText}>
+              Shop Name: {shopInfo?.shopName || "N/A"}
+            </Text>
+            <Text style={styles.detailsText}>Tel: {shopInfo?.tel || "N/A"}</Text>
+            <Text style={styles.detailsText}>
+              Canteen Id: {shopInfo?.canteenId || "N/A"}
+            </Text>
+            <Text style={styles.detailsText}>
+              Shop Number: {shopInfo?.shopNumber || "N/A"}
+            </Text>
           </View>
         </View>
       </View>
@@ -213,7 +247,6 @@ export default function RestaurantDetail() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

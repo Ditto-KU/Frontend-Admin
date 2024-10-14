@@ -6,7 +6,7 @@ export default function Header() {
     const navigation = useNavigation();
 
     const handleHomePress = () => {
-        navigation.navigate('Main');
+        navigation.navigate('Dashboard');
     };
 
     const handleBackPress = () => {

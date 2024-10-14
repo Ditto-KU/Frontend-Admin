@@ -1,14 +1,16 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import ViewOrderDetail from "./ViewOrderDetail"; // Assuming this is a valid component
 import ChatBox from "../components/ChatBox"; // Assuming this is a valid component
 import { useRoute } from "@react-navigation/native";
 
-export default function ContactSupportDetail() {
+export default function ContactSupportDetail({ authAdmin }) {
   const route = useRoute();
-  const { orderId, authAdmin } = route.params;
+  const { orderId, userId, role } = route.params; // Retrieve the orderId and authAdmin passed via route params
   const authToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+  const [supportData, setSupportData] = useState(null); // Store API data
+  const [error, setError] = useState(null); // Error state
 
   return (
     <View style={styles.CSD_Container}>
@@ -20,7 +22,7 @@ export default function ContactSupportDetail() {
       {/* Chat Section */}
       <View style={styles.CSD_ChatContainer}>
         <Text style={styles.CSD_Title}>Contact Support</Text>
-        <ChatBox style={styles.CSD_ChatBox} orderId={orderId} authAdmin={authAdmin}/>
+        <ChatBox style={styles.CSD_ChatBox} orderId={orderId} userId={userId} role={role} />
       </View>
     </View>
   );
@@ -30,13 +32,13 @@ export default function ContactSupportDetail() {
 const styles = StyleSheet.create({
   CSD_Container: {
     flex: 1,
-    flexDirection: "row",  // Align OrderDetail and ChatBox side by side
+    flexDirection: "row", // Align OrderDetail and ChatBox side by side
     padding: 10,
     backgroundColor: "#f9f9f9",
   },
   CSD_OrderDetailContainer: {
-    flex: 3,  // Takes up 3/4 of the width for the order details
-    marginRight: 10,  // Add some space between order details and chat
+    flex: 3, // Takes up 3/4 of the width for the order details
+    marginRight: 10, // Add some space between order details and chat
     backgroundColor: "#FFF",
     borderRadius: 8,
     shadowColor: "#000",
@@ -47,8 +49,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   CSD_ChatContainer: {
-    flex: 1,  // Takes up 1/4 of the width for the chat section
-    justifyContent: "flex-start",  // Start the chat section from the top
+    flex: 1, // Takes up 1/4 of the width for the chat section
+    justifyContent: "flex-start", // Start the chat section from the top
     backgroundColor: "#FFF",
     borderRadius: 8,
     shadowColor: "#000",
@@ -66,6 +68,21 @@ const styles = StyleSheet.create({
   },
   CSD_ChatBox: {
     flex: 1,
-    marginTop: 10,  // Adds space between title and chatbox
+    marginTop: 10, // Adds space between title and chatbox
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 18,
   },
 });
+

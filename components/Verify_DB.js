@@ -53,7 +53,6 @@ export default function Verify_DB() {
     };
 
     const intervalId = setInterval(fetchData, 1000);
-
     return () => clearInterval(intervalId);
   }, []);
 

@@ -14,23 +14,25 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
-import FilterOrder from "../components/FilterOrder"; 
+import FilterOrder from "../components/FilterOrder";
 
-export default function Order() { 
+export default function Order() {
   const navigation = useNavigation();
-  const [orderData, setOrderData] = useState([]); // Store orders
-  const [filteredData, setFilteredData] = useState([]); // Filtered data for search and filter
+  const [orderData, setOrderData] = useState([]); // Store all orders
+  const [filteredData, setFilteredData] = useState([]); // Filtered orders
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
   const [searchText, setSearchText] = useState(""); // State for search input
-  const [modalVisible, setModalVisible] = useState(false); // Filter modal
+  const [modalVisible, setModalVisible] = useState(false); // Filter modal visibility
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
-  const gotoOrderDetail = (order) => {
-    navigation.navigate("OrderDetail", { order: order});
+  // Function to navigate to order details page, only passing the orderId
+  const gotoOrderDetail = (orderId) => {
+    navigation.navigate("OrderDetail", { orderId });
   };
 
+  // Toggle Filter Modal
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
@@ -39,6 +41,7 @@ export default function Order() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true); // Show loading indicator
         const headersList = {
           Accept: "*/*",
           Authorization: `Bearer ${authToken}`,
@@ -69,8 +72,9 @@ export default function Order() {
             };
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
-          setOrderData(sortedData); // Set order data
-          setFilteredData(sortedData); // Set filtered data to show initially
+
+          setOrderData(sortedData); // Set full order data
+          setFilteredData(sortedData); // Show all data initially
         } else {
           throw new Error(`Unexpected content-type: ${contentType}`);
         }
@@ -79,78 +83,83 @@ export default function Order() {
         setError(error.message);
         Alert.alert("Error", error.message);
       } finally {
-        setLoading(false);
+        setLoading(false); // Hide loading indicator
       }
     };
 
-    fetchData(); // Initial data fetch
+    fetchData(); // Fetch orders initially
   }, []);
 
-  // Update the data after filtering
-  const applyFilter = (filteredOrders) => {
-    setFilteredData(filteredOrders);
+  // Apply filters from FilterOrder modal
+  const applyFilter = (filterData) => {
+    if (filterData) {
+      let filteredOrders = orderData;
+
+      // Filter by date
+      if (filterData.date) {
+        filteredOrders = filteredOrders.filter(
+          (order) =>
+            new Date(order.orderDate).toDateString() ===
+            new Date(filterData.date).toDateString()
+        );
+      }
+
+      // Filter by canteen
+      if (filterData.canteen) {
+        filteredOrders = filteredOrders.filter(
+          (order) => order.canteen.name === filterData.canteen
+        );
+      }
+
+      // Filter by restaurant
+      if (filterData.restaurant) {
+        filteredOrders = filteredOrders.filter(
+          (order) =>
+            order.restaurant && order.restaurant.name === filterData.restaurant
+        );
+      }
+
+      // Filter by order status
+      const activeStatusFilters = Object.keys(filterData.statusFilter).filter(
+        (status) => filterData.statusFilter[status]
+      );
+
+      if (activeStatusFilters.length > 0) {
+        filteredOrders = filteredOrders.filter((order) =>
+          activeStatusFilters.includes(order.orderStatus)
+        );
+      }
+
+      // Set filtered data to the filtered results
+      setFilteredData(filteredOrders);
+    } else {
+      setFilteredData(orderData); // No filter applied, show all data
+    }
+    const applyFilter = (filterData) => {
+      if (filterData) {
+        let filteredOrders = orderData;
+
+        // Filter logic for date, canteen, restaurant, and status filters...
+
+        // Set filtered data to the filtered results
+        setFilteredData(filteredOrders);
+      } else {
+        // If no filter is applied (reset), show all data
+        setFilteredData(orderData);
+      }
+    };
   };
 
-  // Search Functionality
+  // Search functionality
   const handleSearch = (text) => {
-    setSearchText(text); // Update the search input
+    setSearchText(text); // Update search text
     if (text === "") {
-      setFilteredData(orderData); // If search is cleared, show all data
+      setFilteredData(orderData); // Show all data if search is cleared
     } else {
       const filteredOrders = orderData.filter((order) =>
         order.orderId.toString().includes(text)
       );
       setFilteredData(filteredOrders);
-      
-      useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const headersList = {
-              Accept: "*/*",
-            };
-    
-            const response = await fetch(
-              `https://ku-man-api.vimforlanie.com/admin/order/search?walkerId=${searchText}&requesterId=${searchText}&orderId=${searchText}`,
-              {
-                method: "GET",
-                headers: headersList,
-              }
-            );
-    
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-    
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-              const data = await response.json();
-    
-              const sortedData = data.sort((a, b) => {
-                const statusOrder = {
-                  waitingAdmin: 1,
-                  inProgress: 2,
-                  lookingForWalker: 3,
-                  completed: 4,
-                  cancelled: 5,
-                };
-                return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
-              });
-              setOrderData(sortedData); // Set order data
-              setFilteredData(sortedData); // Set filtered data to show initially
-            } else {
-              throw new Error(`Unexpected content-type: ${contentType}`);
-            }
-          } catch (error) {
-            console.error("Error fetching data:", error);
-            setError(error.message);
-            Alert.alert("Error", error.message);
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchData(); // Initial data fetch
-      }, []);
     }
   };
 
@@ -168,15 +177,8 @@ export default function Order() {
   if (error) {
     return (
       <View style={styles.loadingContainer}>
+        <Header />
         <Text>Error: {error}</Text>
-      </View>
-    );
-  }
-
-  if (filteredData.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>No orders available</Text>
       </View>
     );
   }
@@ -206,7 +208,7 @@ export default function Order() {
         styles.orderContainer,
         { backgroundColor: getBackgroundColor(item.orderStatus) },
       ]}
-      onPress={() => gotoOrderDetail(item)}
+      onPress={() => gotoOrderDetail(item.orderId)} // Send only the orderId to OrderDetail
     >
       <Text style={[styles.orderText, { fontWeight: "600" }]}>
         Order ID: {item.orderId}
@@ -262,7 +264,7 @@ export default function Order() {
 // Styles for the Order component
 const styles = StyleSheet.create({
   OR_container: {
-    flex: 1,  // Ensure the container takes the full available space
+    flex: 1,
     padding: 16,
     flexDirection: "column",
     justifyContent: "flex-start",
@@ -315,8 +317,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   orderList: {
-    maxHeight: (Dimensions.get('screen').height)*0.8, // Set max height for scrollable area
-    flex: 1, 
+    maxHeight: Dimensions.get("screen").height * 0.8, // Set max height for scrollable area
+    flex: 1,
     paddingBottom: 20,
   },
   orderContainer: {

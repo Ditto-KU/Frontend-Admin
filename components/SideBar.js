@@ -1,15 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";  // Import Alert
 import { useNavigation } from "@react-navigation/native";
-import { ComponentStyle } from "../Style/ComponentStyle"; // Ensure this is the correct path
-import { useRoute } from "@react-navigation/native";
+import { ComponentStyle } from "../Style/ComponentStyle"; 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SideBar() {
-  const route = useRoute();
-  const { authAdmin } = route.params;
   const navigation = useNavigation();
-  const authToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   const [pressedButton, setPressedButton] = useState(null);
 
@@ -19,6 +15,20 @@ export default function SideBar() {
 
   const handlePressOut = () => {
     setPressedButton(null);
+  };
+
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("authAdmin"); // Clear the token from AsyncStorage
+      Alert.alert("Logged out", "You have successfully logged out."); // Show an alert
+
+      // Navigate to the Login screen
+      navigation.replace("Login"); 
+    } catch (error) {
+      console.error("Error during logout:", error);
+      Alert.alert("Error", "An error occurred during logout. Please try again.");
+    }
   };
 
   return (
@@ -50,11 +60,14 @@ export default function SideBar() {
         <TouchableOpacity
           style={[
             ComponentStyle.sidebarButton,
-            pressedButton === "ContactSupport" && ComponentStyle.sidebarButtonPressed,
+            pressedButton === "ContactSupport" &&
+              ComponentStyle.sidebarButtonPressed,
           ]}
           onPressIn={() => handlePressIn("ContactSupport")}
           onPressOut={handlePressOut}
-          onPress={() => navigation.navigate("ContactSupport", { authAdmin: authAdmin })}
+          onPress={() =>
+            navigation.navigate("ContactSupport", { authAdmin: authAdmin })
+          }
         >
           <View style={ComponentStyle.sidebarIconAndText}>
             <Image
@@ -62,7 +75,9 @@ export default function SideBar() {
               style={ComponentStyle.sidebarIcon}
               resizeMode="cover"
             />
-            <Text style={ComponentStyle.sidebarButtonText}>Contact Support</Text>
+            <Text style={ComponentStyle.sidebarButtonText}>
+              Contact Support
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -162,13 +177,11 @@ export default function SideBar() {
           </View>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+      <TouchableOpacity onPress={handleLogout}>
         <View style={ComponentStyle.sidebarSignOut}>
-          <Text style={{ textDecoration: "underline" }}>Sign out</Text>
+          <Text style={{ textDecoration: "underline" }}>Logout</Text>
         </View>
       </TouchableOpacity>
     </View>
   );
 }
-
-

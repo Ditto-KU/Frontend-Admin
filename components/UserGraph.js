@@ -8,7 +8,7 @@ export default function LineGraph() {
   const [loading, setLoading] = useState(true);
   const authToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -67,7 +67,8 @@ export default function LineGraph() {
       }
     };
 
-    fetchData();
+    const intervalId = setInterval(fetchData, 1000);
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {

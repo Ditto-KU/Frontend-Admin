@@ -10,19 +10,18 @@ import {
 import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
 import { useNavigation } from "@react-navigation/native";
 import { useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ContactSupport_DB() {
+export default function ContactSupport_DB({ authAdmin }) {
   const route = useRoute(); // Get route hook
-  const { authAdmin } = route.params;
-  const [supportRequests, setSupportRequests] = useState([]);
+  // const authAdmin = AsyncStorage.getItem("authAdmin");
+  const [supportRequests, setSupportRequests] = useState([]); // Store all support requests (combined)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  
-  const totalRequests = 1230; // Static data for example purposes
-  const onprocess = 230; // Static data for example purposes
-  const completed = 1000; // Static data for example purposes
+
+
   const navigation = useNavigation();
 
   // Fetch data from API
@@ -34,41 +33,64 @@ export default function ContactSupport_DB() {
           Accept: "application/json",
           Authorization: `Bearer ${authAdmin}`,
         };
-  
+
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
           method: "GET",
           headers: headersList,
         });
-  
+
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.status}`);
         }
-  
+
         let data = await response.json();
-        console.log("API Response:", data);
-  
-        // Ensure the data is an array
-        if (Array.isArray(data)) {
-          setSupportRequests(data); // Set the data if it's an array
-        } else {
-          console.error("Data is not an array:", data);
-          setSupportRequests([]); // Fallback to empty array
-        }
-  
+        // Combine requester and walker data into one array for easier mapping
+        const combinedRequests = [
+          ...(Array.isArray(data.requester) ? data.requester.map((req) => ({
+            ...req,
+            role: 'requester',
+            userId: req.requesterId,
+          })) : []),
+          ...(Array.isArray(data.walker) ? data.walker.map((req) => ({
+            ...req,
+            role: 'walker',
+            userId: req.walkerId,
+          })) : []),
+        ];
+
+        setSupportRequests(combinedRequests);
         setLoading(false);
       } catch (err) {
-        setError(err.message); 
+        setError(err.message);
         setLoading(false);
       }
     };
-  
-    fetchSupportRequests();
-  }, []);
-  
 
-  // Navigate to ContactSupportDetail with the orderId
-  const handleCSPress = (orderId) => {
-    navigation.navigate("ContactSupportDetail", { orderId , authAdmin: authAdmin });
+    const intervalId = setInterval(fetchSupportRequests, 1000); // Fetch every second
+    return () => clearInterval(intervalId); // Cleanup
+  }, []);
+
+  // Calculate the number of completed, inProgress, and lookingForWalker requests
+  const totalRequests = supportRequests.length;
+  const completedRequests = supportRequests.filter(
+    (req) => req.orderStatus === "completed"
+  ).length;
+  const cancelledRequests = supportRequests.filter(
+    (req) => req.orderStatus === "cancelled"
+  ).length;
+  const inProgressRequests = supportRequests.filter(
+    (req) => req.orderStatus === "inProgress"
+  ).length;
+  const lookingForWalkerRequests = supportRequests.filter(
+    (req) => req.orderStatus === "lookingForWalker"
+  ).length;
+
+  const onProcessRequests = inProgressRequests + lookingForWalkerRequests;
+  const completedProcessRequests = completedRequests + cancelledRequests;
+
+  // Navigate to ContactSupportDetail with the orderId, userId, and role
+  const handleCSPress = (orderId, userId, role) => {
+    navigation.navigate("ContactSupportDetail", { orderId, userId, role, authAdmin });
   };
 
   // If data is still loading
@@ -100,9 +122,11 @@ export default function ContactSupport_DB() {
             <TouchableOpacity
               key={request.orderId}
               style={styles.requestContainer}
-              onPress={() => handleCSPress(request.orderId)} // Navigate with orderId
+              onPress={() => handleCSPress(request.orderId, request.userId, request.role)} // Navigate with orderId, userId, and role
             >
-              <Text style={styles.requestText}>Order ID: {request.orderId}</Text>
+              <Text style={styles.requestText}>
+                {request.role.charAt(0).toUpperCase() + request.role.slice(1)} ID: {request.userId}, Order ID: {request.orderId}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -113,44 +137,37 @@ export default function ContactSupport_DB() {
         <PieChart
           data={[
             {
-              title: "On process",
-              value: onprocess,
+              title: "On Process",
+              value: onProcessRequests,
               color: "rgb(255, 240, 186)",
             },
             {
-              title: "Complete",
-              value: completed,
+              title: "Completed",
+              value: completedProcessRequests,
               color: "rgb(144, 238, 144)",
             },
           ]}
-          radius={50} // Increased the radius to make the chart larger
-          lineWidth={25} // Adjusted line width for better visibility
+          radius={50} // Adjust the radius if necessary
+          lineWidth={25} // Adjust line width for better visibility
           label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
           labelStyle={{
             fontSize: "10px",
             fill: "#000",
           }}
-          style={{ height: 200 }} // Increased chart height to make it fit better
+          style={{ height: 200 }} // Adjust chart height
         />
-        <Text style={styles.totalText}>All requests: {totalRequests}</Text>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(255, 240, 186)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]}
             />
-            <Text style={styles.legendText}>On process: {onprocess}</Text>
+            <Text style={styles.legendText}>On Process: {onProcessRequests}</Text>
           </View>
           <View style={styles.legendItem}>
             <View
-              style={[
-                styles.legendColor,
-                { backgroundColor: "rgb(144, 238, 144)" },
-              ]}
+              style={[styles.legendColor, { backgroundColor: "rgb(144, 238, 144)" }]}
             />
-            <Text style={styles.legendText}>Complete: {completed}</Text>
+            <Text style={styles.legendText}>Completed: {completedProcessRequests}</Text>
           </View>
         </View>
       </View>
@@ -206,10 +223,6 @@ const styles = StyleSheet.create({
   requestText: {
     fontSize: 16,
   },
-  requestTime: {
-    fontSize: 14,
-    color: "#000",
-  },
   chartContainer: {
     flexDirection: "column",
     alignItems: "center",
@@ -234,6 +247,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     marginRight: 8,
+    borderRadius: 5,
   },
   legendText: {
     fontSize: 20,

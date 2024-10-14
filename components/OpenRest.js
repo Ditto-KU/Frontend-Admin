@@ -49,7 +49,8 @@ export default function CanteenAndShops() {
       }
     };
 
-    fetchCanteens();
+    const intervalId = setInterval(fetchCanteens, 1000);
+    return () => clearInterval(intervalId); 
   }, []);
 
   // Fetch shops for all canteens

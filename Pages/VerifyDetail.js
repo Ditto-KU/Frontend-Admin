@@ -10,7 +10,8 @@ import {
   Linking,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import Header from "../components/Header"; // Importing Header component
+import Header from "../components/Header"; // Importing Header component+
+import ReactNativeEmailLink from 'react-native-email-link';
 
 export default function VerifyDetail() {
   const route = useRoute(); // To get the passed user data
@@ -31,32 +32,39 @@ export default function VerifyDetail() {
   const sendResultToBackend = async () => {
     if (result === false) {
       // If the result is "unpass" (false), send an email and delete the user
-      await sendEmailNotification();
-      await deleteUserFromBackend();
+      sendEmailNotification();
+      deleteUserFromBackend();
     } else {
       // If the result is "pass", just update the user status
-      await updateUserStatus();
+      updateUserStatus();
     }
     setModalVisible(false);
   };
 
-  // Function to send email notification when "ไม่ผ่าน"
   const sendEmailNotification = () => {
-    const email = user.email;
+    const email = "aekkarach.su@ku.th";
     const subject = "Your Verification Status";
-    const message = "Your verification has failed.";
+    const body = "Your verification has failed.";
+    
+    const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   
-    const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
-  
-    // Open the email client
-    Linking.openURL(emailUrl)
+    Linking.canOpenURL(emailUrl)
+      .then((supported) => {
+        if (!supported) {
+          throw new Error('Cannot handle mailto URL');
+        }
+        return Linking.openURL(emailUrl);
+      })
       .then(() => {
         Alert.alert("Success", "An email prompt has been opened.");
       })
       .catch((error) => {
-        Alert.alert("Error", "Failed to open email client");
+        console.error('Failed to send email:', error);
+        Alert.alert("Error", "Failed to open email client. Please check your email app.");
       });
   };
+  
+  
 
   // Function to delete the user from the backend
   const deleteUserFromBackend = async () => {

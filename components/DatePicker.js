@@ -1,49 +1,66 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css'; 
+import { View, Text, Button, StyleSheet, Modal, TouchableOpacity, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker'; // For mobile
 
-export default function DatePickerDropdown() { 
-  const authToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  const [selectedDate, setSelectedDate] = useState('');
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+export default function DatePickerDropdown() {
+  const [selectedDate, setSelectedDate] = useState(null); // To store selected date
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false); // Controls the visibility of the date picker
 
-  const handleDateChange = (date) => {
-    const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    setSelectedDate(formattedDate);
-    setDatePickerVisible(false); // Close the modal after selecting the date
+  // Handle date change for mobile and update the state with the formatted date
+  const handleDateChange = (event, date) => {
+    if (date) {
+      const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      setSelectedDate(formattedDate); // Set selected date
+    }
+    setDatePickerVisible(false); // Close date picker after selection
   };
 
+  // Function to handle date selection for web (HTML5 date input)
+  const handleWebDateChange = (event) => {
+    const webSelectedDate = event.target.value;
+    setSelectedDate(webSelectedDate); // Set selected date for web
+  };
+
+  // Toggle the date picker visibility
   const toggleDatePicker = () => {
-    setDatePickerVisible(!isDatePickerVisible);
+    if (Platform.OS === 'web') {
+      // For web, we create an input element to handle date picking
+      const input = document.createElement('input');
+      input.type = 'date'; // Use HTML5 date input
+      input.onchange = handleWebDateChange; // Attach the date change handler for web
+      input.click(); // Simulate a click to open the date picker
+    } else {
+      // For mobile, show the native date picker
+      setDatePickerVisible(true); // Open date picker modal on mobile
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.label}>วันที่</Text> */}
-
       {/* Date Picker Button */}
       <TouchableOpacity
         style={styles.dropdownButton}
-        onPress={toggleDatePicker}
+        onPress={toggleDatePicker} // Opens the date picker
       >
         <Text style={styles.dropdownButtonText}>
           {selectedDate ? selectedDate : 'Select Date'}
         </Text>
       </TouchableOpacity>
 
-      {/* Conditional rendering of the DatePicker component */}
-      {isDatePickerVisible && (
-        <View style={styles.datePickerDropdown}>
-          <DatePicker
-            selected={selectedDate ? new Date(selectedDate) : null}
-            onChange={handleDateChange}
-            inline
-            dateFormat="yyyy-MM-dd"
-          />
-          <Button title="Close" onPress={() => setDatePickerVisible(false)} />
-        </View>
+      {/* Modal for displaying DateTimePicker on mobile (Android/iOS) */}
+      {Platform.OS !== 'web' && isDatePickerVisible && (
+        <Modal visible={isDatePickerVisible} transparent={true} animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.datePickerContainer}>
+              <DateTimePicker
+                mode="date"
+                value={selectedDate ? new Date(selectedDate) : new Date()} // Display the selected date or current date
+                onChange={handleDateChange} // Update the state when the date changes
+              />
+              <Button title="Close" onPress={() => setDatePickerVisible(false)} />
+            </View>
+          </View>
+        </Modal>
       )}
     </View>
   );
@@ -56,10 +73,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginTop: 50,
     width: '100%',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 10,
   },
   dropdownButton: {
     height: 50,
@@ -75,13 +88,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  datePickerDropdown: {
-    marginTop: 10, // Push the DatePicker dropdown below the button
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  datePickerContainer: {
     backgroundColor: '#FFF',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    zIndex: 1000, // Ensure the datepicker is above other content
+    padding: 20,
+    borderRadius: 10,
   },
 });
