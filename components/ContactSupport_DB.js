@@ -7,20 +7,16 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { PieChart } from "react-minimal-pie-chart"; // Use a web-based pie chart library
+import { PieChart } from "react-minimal-pie-chart";
 import { useNavigation } from "@react-navigation/native";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ContactSupport_DB({ authAdmin }) {
-  const route = useRoute(); // Get route hook
-  // const authAdmin = AsyncStorage.getItem("authAdmin");
-  const [supportRequests, setSupportRequests] = useState([]); // Store all support requests (combined)
+  const route = useRoute();
+  const [supportRequests, setSupportRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const authToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-
 
   const navigation = useNavigation();
 
@@ -44,16 +40,15 @@ export default function ContactSupport_DB({ authAdmin }) {
         }
 
         let data = await response.json();
-        // Combine requester and walker data into one array for easier mapping
         const combinedRequests = [
           ...(Array.isArray(data.requester) ? data.requester.map((req) => ({
             ...req,
-            role: 'requester',
+            targetRole: "requester",
             userId: req.requesterId,
           })) : []),
           ...(Array.isArray(data.walker) ? data.walker.map((req) => ({
             ...req,
-            role: 'walker',
+            targetRole: "walker",
             userId: req.walkerId,
           })) : []),
         ];
@@ -70,7 +65,12 @@ export default function ContactSupport_DB({ authAdmin }) {
     return () => clearInterval(intervalId); // Cleanup
   }, []);
 
-  // Calculate the number of completed, inProgress, and lookingForWalker requests
+  // Filter for only "on process" requests
+  const onProcessRequests = supportRequests.filter(
+    (req) => req.orderStatus === "inProgress" || req.orderStatus === "lookingForWalker"
+  );
+
+  // Calculate other statistics
   const totalRequests = supportRequests.length;
   const completedRequests = supportRequests.filter(
     (req) => req.orderStatus === "completed"
@@ -78,19 +78,11 @@ export default function ContactSupport_DB({ authAdmin }) {
   const cancelledRequests = supportRequests.filter(
     (req) => req.orderStatus === "cancelled"
   ).length;
-  const inProgressRequests = supportRequests.filter(
-    (req) => req.orderStatus === "inProgress"
-  ).length;
-  const lookingForWalkerRequests = supportRequests.filter(
-    (req) => req.orderStatus === "lookingForWalker"
-  ).length;
-
-  const onProcessRequests = inProgressRequests + lookingForWalkerRequests;
   const completedProcessRequests = completedRequests + cancelledRequests;
 
   // Navigate to ContactSupportDetail with the orderId, userId, and role
-  const handleCSPress = (orderId, userId, role) => {
-    navigation.navigate("ContactSupportDetail", { orderId, userId, role, authAdmin });
+  const handleCSPress = (orderId, userId, targetRole) => {
+    navigation.navigate("ContactSupportDetail", { orderId, userId, targetRole });
   };
 
   // If data is still loading
@@ -114,18 +106,18 @@ export default function ContactSupport_DB({ authAdmin }) {
 
   return (
     <View style={styles.container}>
-      {/* Support Requests List */}
+      {/* Support Requests List (only "on process" requests) */}
       <View style={styles.requestList}>
         <Text style={styles.header}>Contact Support</Text>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {supportRequests.map((request) => (
+          {onProcessRequests.map((request) => (
             <TouchableOpacity
               key={request.orderId}
               style={styles.requestContainer}
-              onPress={() => handleCSPress(request.orderId, request.userId, request.role)} // Navigate with orderId, userId, and role
+              onPress={() => handleCSPress(request.orderId, request.userId, request.targetRole)} // Navigate with orderId, userId, and role
             >
               <Text style={styles.requestText}>
-                {request.role.charAt(0).toUpperCase() + request.role.slice(1)} ID: {request.userId}, Order ID: {request.orderId}
+                {request.targetRole && request.targetRole.charAt(0).toUpperCase() + request.targetRole.slice(1)} ID: {request.userId}, Order ID: {request.orderId}
               </Text>
             </TouchableOpacity>
           ))}
@@ -138,7 +130,7 @@ export default function ContactSupport_DB({ authAdmin }) {
           data={[
             {
               title: "On Process",
-              value: onProcessRequests,
+              value: onProcessRequests.length,
               color: "rgb(255, 240, 186)",
             },
             {
@@ -147,21 +139,21 @@ export default function ContactSupport_DB({ authAdmin }) {
               color: "rgb(144, 238, 144)",
             },
           ]}
-          radius={50} // Adjust the radius if necessary
-          lineWidth={25} // Adjust line width for better visibility
+          radius={50}
+          lineWidth={25}
           label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
           labelStyle={{
             fontSize: "10px",
             fill: "#000",
           }}
-          style={{ height: 200 }} // Adjust chart height
+          style={{ height: 200 }}
         />
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View
               style={[styles.legendColor, { backgroundColor: "rgb(255, 240, 186)" }]}
             />
-            <Text style={styles.legendText}>On Process: {onProcessRequests}</Text>
+            <Text style={styles.legendText}>On Process: {onProcessRequests.length}</Text>
           </View>
           <View style={styles.legendItem}>
             <View
@@ -178,14 +170,14 @@ export default function ContactSupport_DB({ authAdmin }) {
 // Styles
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row", // Side by side layout
+    flexDirection: "row",
     justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fafbfc",
     borderRadius: 10,
-    width: "100%", // Ensure it takes full width of the parent
-    height: "100%", // Ensure it takes full height of the parent
-    flex: 1, // Use flex to allow container to fill available space
+    width: "100%",
+    height: "100%",
+    flex: 1,
     marginRight: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -196,7 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     borderRadius: 10,
-    maxHeight: 400, // Set max height for scrollable area
+    maxHeight: 400,
   },
   scrollContent: {
     flexGrow: 1,
@@ -226,7 +218,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     flexDirection: "column",
     alignItems: "center",
-    flexBasis: "50%", // Use flexBasis for width allocation
+    flexBasis: "50%",
     borderRadius: 10,
     marginTop: 30,
   },

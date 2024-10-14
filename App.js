@@ -40,7 +40,7 @@ export default function App() {
       try {
         const storedToken = await AsyncStorage.getItem("authAdmin");
         if (storedToken) {
-          setAuthAdmin(storedToken); // Set the correct token
+          setAuthAdmin(storedToken);
         }
       } catch (error) {
         console.error("Error retrieving token:", error);
@@ -50,21 +50,20 @@ export default function App() {
     };
     checkToken();
   }, []);
+  
 
   // Auto logout due to inactivity
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (Date.now() - lastActivityTime > inactivityTimeout) {
-        Alert.alert(
-          "Session Expired",
-          "You have been logged out due to inactivity."
-        );
+        Alert.alert("Session Expired", "You have been logged out due to inactivity.");
         handleLogout();
       }
     }, 1000); // Check inactivity every second
-
+  
     return () => clearInterval(intervalId);
   }, [lastActivityTime]);
+  
 
   const resetActivityTimer = () => {
     setLastActivityTime(Date.now());

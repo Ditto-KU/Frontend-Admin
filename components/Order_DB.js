@@ -94,8 +94,8 @@ export default function Order_DB() {
   ).length;
 
   // Function to handle order detail navigation
-  const gotoOrderDetail = (order) => {
-    navigation.navigate("OrderDetail", { order: order });
+  const gotoOrderDetail = (orderID) => {
+    navigation.navigate("OrderDetail", { orderID });
   };
 
   if (loading) {
@@ -130,7 +130,7 @@ export default function Order_DB() {
               <TouchableOpacity
                 key={index}
                 style={[styles.orderContainer, { backgroundColor }]}
-                onPress={() => gotoOrderDetail(order)}
+                onPress={() => gotoOrderDetail(order.orderId)}
               >
                 <Text style={styles.orderText}>Order ID: {order.orderId}</Text>
                 <Text style={styles.orderText}>{order.orderStatus}</Text>

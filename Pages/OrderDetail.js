@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,52 +9,92 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Assuming use of Expo for icon management
 import { useRoute } from "@react-navigation/native"; // To get the passed order data
 import Header from "../components/Header";
 
 export default function OrderDetail() {
-  // Use route to get the passed order object
   const route = useRoute();
-  const { order } = route.params; // Destructure the passed 'order' from the previous screen
+  const { orderID } = route.params; // Destructure the passed 'orderID'
   const authToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  // Modal and cancellation state
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+
+  const [order, setOrder] = useState(null); // Order state
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState(""); // For storing the cancellation reason
-  const [orderStatus, setOrderStatus] = useState(order.orderStatus); // Track the order status
+  const [orderStatus, setOrderStatus] = useState(""); // Track the order status
   const [loading, setLoading] = useState(false); // Loading state for the API call
+  const [error, setError] = useState(null); // Error state
 
-  // Handlers for modal actions
-  const handleCancelOrder = () => {
-    setModalVisible(true);
-  };
+  // Fetch order data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true); // Show loading indicator
+        const headersList = {
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
+        };
+        const response = await fetch(
+          `https://ku-man-api.vimforlanie.com/admin/order/info?orderId=${orderID}`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setOrder(data); // Set order data
+          setOrderStatus(data.orderStatus);
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false); // Hide loading indicator
+      }
+    };
+
+    fetchData(); // Fetch orders initially
+  }, [orderID]);
 
   const handleApprove = async () => {
     setLoading(true);
     try {
       // API call to update the order status to cancelled
-      let headersList = {
+      const headersList = {
         Accept: "application/json",
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken}`,
       };
-      let bodyContent = JSON.stringify({
+      const bodyContent = JSON.stringify({
         orderStatus: "cancelled",
       });
 
-      let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/approval/${order.orderId}`, {
-        method: "PUT",
-        body: bodyContent,
-        headers: headersList,
-      });
+      const response = await fetch(
+        `https://ku-man-api.vimforlanie.com/admin/approval/${order.orderId}`,
+        {
+          method: "PUT",
+          body: bodyContent,
+          headers: headersList,
+        }
+      );
 
       if (response.ok) {
-        let data = await response.json();
+        const data = await response.json();
         console.log("Order Approved for Cancellation:", data);
 
-        // Update the local orderStatus to reflect the cancelled status
         setOrderStatus("cancelled");
         setModalVisible(false);
       } else {
@@ -68,13 +108,33 @@ export default function OrderDetail() {
   };
 
   const handleDisapprove = () => {
-    console.log("Order Disapproved for Cancellation");
     setModalVisible(false);
   };
 
   const closeModal = () => {
     setModalVisible(false);
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading order details...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  if (!order) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
@@ -101,15 +161,6 @@ export default function OrderDetail() {
                 <Image
                   source={{ uri: "https://via.placeholder.com/150" }} // Replace with actual image if needed
                   style={styles.foodImage}
-                />
-              </View>
-
-              {/* Proof of Delivery */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Delivery Proof</Text>
-                <Image
-                  source={{ uri: "https://via.placeholder.com/150" }} // Replace with actual image if needed
-                  style={styles.deliveryImage}
                 />
               </View>
             </View>
@@ -162,7 +213,7 @@ export default function OrderDetail() {
             {orderStatus !== "cancelled" && (
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={handleCancelOrder}
+                onPress={() => setModalVisible(true)}
               >
                 <Text style={styles.cancelButtonText}>Cancel order</Text>
               </TouchableOpacity>
@@ -199,7 +250,6 @@ export default function OrderDetail() {
           animationType="fade"
           visible={modalVisible}
           onRequestClose={closeModal} // Close modal when back button is pressed
-          presentationStyle="overFullScreen"
         >
           <TouchableOpacity
             style={styles.modalBackground}

@@ -16,7 +16,7 @@ export default function Main({ authAdmin }) {
 
   return (
     <View style={PageStyle.M_main}>
-      <Sidebar style={PageStyle.M_sidebar} />
+      <Sidebar style={PageStyle.M_sidebar} authAdmin={authAdmin}/>
       <View style={PageStyle.M_container_DB}>
         <View style={PageStyle.M_containerUp_DB}>
           <ContactSupport_DB style={PageStyle.M_CS_DB} authAdmin={authAdmin} />

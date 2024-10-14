@@ -3,10 +3,11 @@ import { View, Text, TouchableOpacity, Image, Alert } from "react-native";  // I
 import { useNavigation } from "@react-navigation/native";
 import { ComponentStyle } from "../Style/ComponentStyle"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Login from "./../Pages/Login";
 
-export default function SideBar() {
-  const navigation = useNavigation();
 
+export default function SideBar({ authAdmin }) {
+  const navigation = useNavigation();  // Get navigation from context
   const [pressedButton, setPressedButton] = useState(null);
 
   const handlePressIn = (buttonName) => {
@@ -20,16 +21,20 @@ export default function SideBar() {
   // Function to handle logout
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem("authAdmin"); // Clear the token from AsyncStorage
-      Alert.alert("Logged out", "You have successfully logged out."); // Show an alert
+      // Clear the token from AsyncStorage
+      await AsyncStorage.removeItem("authAdmin");
 
-      // Navigate to the Login screen
-      navigation.replace("Login"); 
+      // Show a logout confirmation alert
+      Alert.alert("Logged out", "You have successfully logged out.");
+
+      // Replace with the Login screen
+      navigation.replace("Login");
     } catch (error) {
       console.error("Error during logout:", error);
       Alert.alert("Error", "An error occurred during logout. Please try again.");
     }
   };
+  
 
   return (
     <View style={ComponentStyle.sidebar}>

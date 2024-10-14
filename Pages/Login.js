@@ -30,7 +30,6 @@ export default function Login({ setAuthAdmin }) {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         Alert.alert("Login Failed", "Invalid username or password");
         return;
       }
@@ -40,10 +39,12 @@ export default function Login({ setAuthAdmin }) {
 
       // Save the token in AsyncStorage
       await AsyncStorage.setItem("authAdmin", authAdmin);
-      setAuthAdmin(authAdmin); // Set the token in App state
+      setAuthAdmin(authAdmin); // Update App state with token
 
-      // Navigate to the main screen
-      navigation.replace("Dashboard");
+      // Navigate to the dashboard
+    //   navigation.replace("Dashboard");
+      navigation.navigate("ParentNavigator", { screen: "Dashboard" });
+
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Login Error", "Something went wrong. Please try again.");
