@@ -87,8 +87,10 @@ export default function Order() {
       }
     };
 
-    fetchData(); // Fetch orders initially
-  }, []);
+    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);  }, []);
 
   // Apply filters from FilterOrder modal
   const applyFilter = (filterData) => {

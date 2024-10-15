@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator,
+  View, Text, TextInput, TouchableOpacity, ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -10,11 +10,14 @@ export default function Login({ setAuthAdmin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // Add error message state
   const navigation = useNavigation();
 
   const handleSubmit = async () => {
+    setErrorMessage(""); // Clear previous error messages
+
     if (username === "" || password === "") {
-      Alert.alert("Validation Error", "Please enter both username and password.");
+      setErrorMessage("Please enter both username and password."); // Set error message
       return;
     }
 
@@ -29,8 +32,15 @@ export default function Login({ setAuthAdmin }) {
         body: JSON.stringify({ username, password }),
       });
 
+      if (response.status === 401 || response.status === 403) {
+        setErrorMessage("Invalid username or password. Please try again.");
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
-        Alert.alert("Login Failed", "Invalid username or password");
+        setErrorMessage(`Login failed. Error: ${response.status}`);
+        setLoading(false);
         return;
       }
 
@@ -42,12 +52,11 @@ export default function Login({ setAuthAdmin }) {
       setAuthAdmin(authAdmin); // Update App state with token
 
       // Navigate to the dashboard
-    //   navigation.replace("Dashboard");
       navigation.navigate("ParentNavigator", { screen: "Dashboard" });
 
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert("Login Error", "Something went wrong. Please try again.");
+      setErrorMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +81,12 @@ export default function Login({ setAuthAdmin }) {
           value={password}
           onChangeText={setPassword}
         />
+
+        {/* Conditionally render the error message */}
+        {errorMessage !== "" && (
+          <Text style={PageStyle.loginErrorText}>Invalid username or password</Text> // Add error text style
+        )}
+
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (

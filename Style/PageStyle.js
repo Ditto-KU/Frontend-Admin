@@ -56,6 +56,12 @@ export const PageStyle = StyleSheet.create({
     color: "black",
     fontSize: 16,
   },
+  loginErrorText: {
+    color: "red",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  
 
   //Main
   M_main: {
