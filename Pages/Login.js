@@ -73,6 +73,11 @@ export default function Login({ setAuthAdmin }) {
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
+          returnKeyType="next" // Move to the next field on 'Enter'
+          onSubmitEditing={() => {
+            // Focus the password input when 'Enter' is pressed
+            this.passwordInput.focus();
+          }}
         />
         <TextInput
           style={PageStyle.loginInput}
@@ -80,6 +85,9 @@ export default function Login({ setAuthAdmin }) {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+          returnKeyType="done" // Indicates submission is expected
+          onSubmitEditing={handleSubmit} // Submit the form when 'Enter' is pressed
+          ref={(input) => { this.passwordInput = input; }} // Reference to focus this input
         />
 
         {/* Conditionally render the error message */}
