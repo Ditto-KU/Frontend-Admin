@@ -136,9 +136,9 @@ export default function ContactSupport({ authAdmin }) {
       >
         <View>
           <Text style={[styles.CS_listText, { fontWeight: "600" }]}>
-            Order ID: {item.orderId}
+            Order ID: {item.orderId}  {user} ID: {userId}
           </Text>
-          <Text style={styles.CS_listText}>{user} ID: {userId}</Text> {/* Display the correct ID */}
+          {/* <Text style={styles.CS_listText}>{user} ID: {userId}</Text> Display the correct ID */}
           <Text style={styles.CS_listText}>Status: {item.orderStatus}</Text>
         </View>
       </TouchableOpacity>

@@ -108,7 +108,7 @@ export default function ContactSupport_DB({ authAdmin }) {
     <View style={styles.container}>
       {/* Support Requests List (only "on process" requests) */}
       <View style={styles.requestList}>
-        <Text style={styles.header}>Contact Support</Text>
+        <Text style={styles.header}>Contact Support ({onProcessRequests.length})</Text>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {onProcessRequests.map((request) => (
             <TouchableOpacity
@@ -116,7 +116,7 @@ export default function ContactSupport_DB({ authAdmin }) {
               style={styles.requestContainer}
               onPress={() => handleCSPress(request.orderId, request.userId, request.targetRole)} // Navigate with orderId, userId, and role
             >
-              <Text style={styles.requestText}>
+              <Text style={[styles.requestText,{ fontWeight: 600 }]}>
                 {request.targetRole && request.targetRole.charAt(0).toUpperCase() + request.targetRole.slice(1)} ID: {request.userId}, Order ID: {request.orderId}
               </Text>
             </TouchableOpacity>
