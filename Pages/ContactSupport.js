@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Head from "../components/Header";
-import FilterComponent from "../components/FilterComponent";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 

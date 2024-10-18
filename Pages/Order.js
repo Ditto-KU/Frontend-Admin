@@ -28,8 +28,8 @@ export default function Order() {
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   // Function to navigate to order details page, only passing the orderId
-  const gotoOrderDetail = (orderId) => {
-    navigation.navigate("OrderDetail", { orderId });
+  const gotoOrderDetail = (orderID) => {
+    navigation.navigate("OrderDetail", { orderID });
   };
 
   // Toggle Filter Modal
@@ -87,10 +87,7 @@ export default function Order() {
       }
     };
 
-    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);  }, []);
+    fetchData() }, []);
 
   // Apply filters from FilterOrder modal
   const applyFilter = (filterData) => {

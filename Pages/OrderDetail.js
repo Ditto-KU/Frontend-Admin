@@ -38,6 +38,8 @@ export default function OrderDetail() {
 
     const [walkerProfile, setWalkerProfile] = useState();
 
+    console.log("Order ID:", orderID);
+
     // Fetch order data from the API
     useEffect(() => {
         const fetchData = async () => {
@@ -209,6 +211,8 @@ export default function OrderDetail() {
         }
     };
 
+    
+
     // Show cancel button only if the order status is "waitingAdmin", "inProgress", or "lookingForWalker"
     const showCancelButton = ["waitingAdmin", "inProgress", "lookingForWalker"].includes(orderStatus);
 
@@ -247,7 +251,7 @@ export default function OrderDetail() {
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>User Verification</Text>
                     <Image
-                      source={{ uri: 'placeholder-url-for-verification-image' }} // Replace with actual source
+                      source={{ uri: walkerProfile || 'placeholder-url-for-verification-image' }} // Replace with actual source
                       style={styles.profileImage}
                     />
                   </View>
@@ -297,12 +301,6 @@ export default function OrderDetail() {
                   {/* Walker Info */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Walker Info</Text>
-                    {walkerProfile && (
-                      <Image
-                        source={{ uri: walkerProfile }}
-                        style={styles.profileImage} // Styling for the profile image
-                      />
-                    )}
                     <Text style={styles.sectionDetail}>WalkerId: {order.walker.walkerId}</Text>
                     <Text style={styles.sectionDetail}>Phone: {order.walker.phoneNumber}</Text>
                     <TouchableOpacity

@@ -111,7 +111,7 @@ export default function User() {
       onPress={() => navigation.navigate("UserDetail", { user: item, userType})}
     >
       <Text style={styles.userName}>{item.username}</Text>
-      <Text>User ID: {userType === "walker" ? item.walkerId : item.requesterId}</Text>
+      <Text>{userType} ID: {userType === "walker" ? item.walkerId : item.requesterId}</Text>
     </TouchableOpacity>
   );
 

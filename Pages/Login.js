@@ -64,7 +64,7 @@ export default function Login({ setAuthAdmin }) {
 
   return (
     <View style={PageStyle.loginBg}>
-      <Text style={PageStyle.loginHeaderText}>Admin</Text>
+      <Text style={PageStyle.loginHeaderText}>KU-Man Admin</Text>
       <View style={PageStyle.loginContainer}>
         <Text style={PageStyle.loginHeader}>Login</Text>
         <TextInput

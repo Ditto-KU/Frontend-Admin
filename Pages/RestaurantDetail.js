@@ -41,13 +41,13 @@ export default function RestaurantDetail() {
       };
 
       let response = await fetch(
-        `https://ku-man-api.vimforlanie.com/admin/canteen/shop/update-status`,
+        `https://ku-man-api.vimforlanie.com/admin/update-status`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: headersList,
           body: JSON.stringify({
-            shopId,
-            status: newStatus, // Send the new status to the API
+            "shopId": shopId,
+            "status": newStatus, // Send the new status to the API
           }),
         }
       );
@@ -58,17 +58,50 @@ export default function RestaurantDetail() {
 
       let data = await response.json();
       Alert.alert("Success", `Shop is now ${newStatus ? "Open" : "Closed"}`);
+      console.log("Updated shop status:", newStatus);
     } catch (error) {
       console.error("Error updating shop status:", error);
       Alert.alert("Error", error.message);
     }
   };
 
-  // Function to toggle menu item availability
-  const toggleMenuItem = (index) => {
-    const newMenuItems = [...menuItems];
-    newMenuItems[index].status = !newMenuItems[index].status;
-    setMenuItems(newMenuItems);
+  // Function to toggle the availability of a menu item
+  const toggleMenuItem = async (menuId, index) => {
+    const updatedMenuItems = [...menuItems];
+    const item = updatedMenuItems[index];
+
+    // Toggle the status
+    item.status = !item.status;
+    setMenuItems(updatedMenuItems); // Optimistically update the UI
+
+    try {
+      let headersList = {
+        Accept: "*/*",
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      };
+
+      let response = await fetch(
+        `https://ku-man-api.vimforlanie.com/admin/menu/update-status`,
+        {
+          method: "PATCH",
+          headers: headersList,
+          body: JSON.stringify({
+            "menuId": menuId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Updated menu item status:", data);
+    } catch (error) {
+      console.error("Error updating menu item status:", error);
+      Alert.alert("Error", error.message);
+    }
   };
 
   // Function to navigate to the Order History screen
@@ -98,6 +131,7 @@ export default function RestaurantDetail() {
 
         let data = await response.json();
         setMenuItems(data);
+        console.log("Fetched menu items:", data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching menu items:", error);
@@ -206,7 +240,7 @@ export default function RestaurantDetail() {
                 <View style={styles.switchContainer}>
                   <Switch
                     value={item.status}
-                    onValueChange={() => toggleMenuItem(index)}
+                    onValueChange={() => toggleMenuItem(item.menuId)}
                     thumbColor={item.status ? "#34C759" : "#f4f3f4"}
                     trackColor={{ false: "#f4f3f4", true: "#34C759" }}
                   />

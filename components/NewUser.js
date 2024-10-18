@@ -2,84 +2,83 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function NewUser() {
-  const [requesterCount, setRequesterCount] = useState(0);
-  const [walkerCount, setWalkerCount] = useState(0);
-  const [oldOrders, setOldOrders] = useState([]); // Old orders
+  const [walkers, setWalkers] = useState([]);
+  const [requesters, setRequesters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
-  // Fetch old orders data
-  const fetchOldOrders = async () => {
-    try {
-      let headersList = {
-        Accept: '*/*',
-        Authorization: `Bearer ${authToken}`,
-      };
-      let response = await fetch('https://ku-man-api.vimforlanie.com/admin/order', {
-        method: 'GET',
-        headers: headersList,
-      });
-
-      let data = await response.json(); // Parse the response as JSON
-      setOldOrders(data); // Set old orders in the state
-    } catch (error) {
-      console.error('Error fetching old orders:', error);
-    }
-  };
-
-  // Fetch new orders data and calculate new requesters and walkers
-  const fetchNewOrders = async () => {
-    try {
-      let headersList = {
-        Accept: '*/*',
-        Authorization: `Bearer ${authToken}`,
-      };
-
-      let response = await fetch('https://ku-man-api.vimforlanie.com/admin/order/today', {
-        method: 'GET',
-        headers: headersList,
-      });
-
-      let newOrdersData = await response.json();
-
-      // Extract requesters and walkers from old orders
-      const oldRequesters = oldOrders.map(order => order.requester?.username);
-      const oldWalkers = oldOrders.map(order => order.walker?.username);
-
-      // Filter new users (those not in the old orders)
-      const newRequesters = newOrdersData
-        .filter(order => order.requester && !oldRequesters.includes(order.requester.username))
-        .map(order => order.requester.username);
-
-      const newWalkers = newOrdersData
-        .filter(order => order.walker && !oldWalkers.includes(order.walker.username))
-        .map(order => order.walker.username);
-
-      // Update counts
-      setRequesterCount(newRequesters.length);
-      setWalkerCount(newWalkers.length);
-    } catch (error) {
-      console.error('Error fetching new orders:', error);
-    }
-  };
-
-  // Fetch old and new orders on component mount
+  // Fetch data for walkers and requesters
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchOldOrders(); // Fetch old orders
-      fetchNewOrders(); // Fetch new orders after old orders are set
+    const fetchWalkersAndRequesters = async () => {
+      try {
+        let headersList = {
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
+        };
+
+        // Fetch walkers
+        let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walker", {
+          method: "GET",
+          headers: headersList,
+        });
+        if (!walkerResponse.ok) {
+          throw new Error(`Error fetching walkers: ${walkerResponse.status}`);
+        }
+        let walkersData = await walkerResponse.json();
+        setWalkers(walkersData);
+
+        // Fetch requesters
+        let requesterResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/requester", {
+          method: "GET",
+          headers: headersList,
+        });
+        if (!requesterResponse.ok) {
+          throw new Error(`Error fetching requesters: ${requesterResponse.status}`);
+        }
+        let requestersData = await requesterResponse.json();
+        setRequesters(requestersData);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
-    const intervalId = setInterval(fetchData, 1000);
-    return () => clearInterval(intervalId); 
-  }, [oldOrders]);
+
+    fetchWalkersAndRequesters();
+  }, []);
+
+  // Function to check if the date matches today's date
+  const isToday = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Filter the walkers and requesters verified today
+  const newWalkersToday = walkers.filter((walker) => walker.verifyAt && isToday(walker.verifyAt));
+  const newRequestersToday = requesters.filter((requester) => requester.createAt && isToday(requester.createAt));
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>New Users Today</Text>
 
-      {/* Display the counts of new Requesters and Walkers */}
-      <Text style={styles.total}>New Requesters: {requesterCount}</Text>
-      <Text style={styles.total}>New Walkers: {walkerCount}</Text>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : (
+        <>
+          <Text style={styles.total}>New Requesters: {newRequestersToday.length}</Text>
+          <Text style={styles.total}>New Walkers: {newWalkersToday.length}</Text>
+        </>
+      )}
     </View>
   );
 }
@@ -107,8 +106,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   total: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#4caf50', // Green color for positive information
+    color: '#4caf50',
+  },
+  error: {
+    color: 'red',
+    fontSize: 16,
   },
 });

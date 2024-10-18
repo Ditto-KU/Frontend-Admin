@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert ,Linking , ActivityIndicator } from "react-native";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import * as MailComposer from "expo-mail-composer";
 import Head from "../components/Header";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
@@ -10,57 +11,80 @@ export default function ReportDetails() {
   const navigation = useNavigation();
   const { report } = route.params;
   const authToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   const handleShowOrder = () => {
-    navigation.navigate("ReportOrderDetail", { orderId: report.orderId });
+    navigation.navigate("OrderDetail", { orderID: report.orderId });
   };
 
   const handleEmail = async () => {
-    setIsSendingEmail(true);
-    let email = "";
-
+    setIsSendingEmail(true); // Start loading indicator
+  
     try {
+      // Authorization headers with admin token
       const headersList = {
         Accept: "*/*",
         Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
       };
-
+  
+      // Determine which endpoint to fetch the user data from
       let endpoint = "";
+      let idField = "";
       if (report.reportBy === "requester") {
-        endpoint = `https://ku-man-api.vimforlanie.com/admin/requester?requesterId=${report.requesterId}`;
+        endpoint = `https://ku-man-api.vimforlanie.com/admin/requester`;
+        idField = "requesterId";
       } else {
-        endpoint = `https://ku-man-api.vimforlanie.com/admin/walker?walkerId=${report.walkerId}`;
+        endpoint = `https://ku-man-api.vimforlanie.com/admin/walker`;
+        idField = "walkerId";
       }
-
+  
+      // Fetch the list of users (walkers or requesters) from the endpoint
       const response = await fetch(endpoint, { method: "GET", headers: headersList });
-      if (!response.ok) throw new Error("Failed to fetch user email");
-
-      const data = await response.json();
-      email = data.email;
-
-      // Dummy email sending logic
-      const sendEmailResponse = await fetch("https://email-api.example.com/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: email,
-          subject: `Report Notification - Report ID: ${report.reportId}`,
-          body: `Dear User,\n\nWe have received your report:\n\nTitle: ${report.title}\nDescription: ${report.description}\n\nWe will review it shortly.\n\nBest Regards,\nSupport Team`,
-        }),
-      });
-
-      if (!sendEmailResponse.ok) throw new Error("Failed to send email");
-      Alert.alert("Success", `Email sent to ${email}`);
+      if (!response.ok) throw new Error("Failed to fetch user data");
+  
+      const data = await response.json(); // List of users
+      console.log("Fetched data:", data);
+  
+      // Find the user matching the ID in the report
+      const user = data.find((item) => item[idField] === report[idField]);
+      console.log("Matched user:", user);
+  
+      // Ensure the user is found and email is available
+      if (!user || !user.email) {
+        throw new Error("Email address is missing.");
+      }
+  
+      const email = user.email; // Correctly access the email
+      console.log("User email:", email);
+  
+      // Prepare email content
+      const { title, description, reportId, reportBy, requesterId, walkerId } = report;
+      const userId = reportBy === 'requester' ? requesterId : walkerId;
+      const subject = `Report Notification - Report ID: ${reportId}`;
+      const body = `Dear ${reportBy} ${userId},\n\n We have received your report:\n\n Title: ${title}\n Description: ${description}\n\n We will review it shortly.\n\n Best Regards,\nSupport Team`;
+  
+      // Properly encode the subject and body for the mailto link
+      const encodedSubject = encodeURIComponent(subject);
+      const encodedBody = encodeURIComponent(body).replace(/%0A/g, '\n'); // Replace encoded newlines for better readability
+  
+      // Create the mailto link
+      const mailtoURL = `mailto:${email}?subject=${encodedSubject}&body=${encodedBody}`;
+  
+      // Open the user's email client
+      const supported = await Linking.canOpenURL(mailtoURL);
+      if (!supported) throw new Error("Email client is not available");
+  
+      await Linking.openURL(mailtoURL);
+      Alert.alert("Success", "Email client opened!");
     } catch (error) {
       console.error("Error sending email:", error);
-      Alert.alert("Error", "Failed to send the email. Please try again.");
+      Alert.alert("Error", "Failed to open the email client. Please try again.");
     } finally {
-      setIsSendingEmail(false);
+      setIsSendingEmail(false); // Stop loading indicator
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -87,6 +111,7 @@ export default function ReportDetails() {
 
           <Text style={styles.detail}><Text style={styles.label}>Order ID:</Text> {report.orderId}</Text>
           <Text style={styles.detail}><Text style={styles.label}>Report ID:</Text> {report.reportId}</Text>
+          <Text style={styles.detail}><Text style={styles.label}>Report By:</Text> {report.reportBy}</Text>
           <Text style={styles.detail}><Text style={styles.label}>
             {report.reportBy === "requester" ? "Requester ID:" : "Walker ID:"}
           </Text> {report.reportBy === "requester" ? report.requesterId : report.walkerId}</Text>

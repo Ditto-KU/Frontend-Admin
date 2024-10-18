@@ -22,13 +22,13 @@ export default function SideBar({ authAdmin }) {
   const handleLogout = async () => {
     try {
       // Clear the token from AsyncStorage
+      console.log('authAdmin',AsyncStorage.getItem("authAdmin"));
       await AsyncStorage.removeItem("authAdmin");
-
-      // Show a logout confirmation alert
-      Alert.alert("Logged out", "You have successfully logged out.");
+      console.log('authAdmin',AsyncStorage.getItem("authAdmin"));
 
       // Replace with the Login screen
       navigation.replace("Login");
+      navigation.navigate("Login");
     } catch (error) {
       console.error("Error during logout:", error);
       Alert.alert("Error", "An error occurred during logout. Please try again.");

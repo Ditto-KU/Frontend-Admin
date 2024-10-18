@@ -110,14 +110,15 @@ export default function ContactSupport_DB({ authAdmin }) {
       <View style={styles.requestList}>
         <Text style={styles.header}>Contact Support ({onProcessRequests.length})</Text>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {onProcessRequests.map((request) => (
+          {onProcessRequests.map((request, index) => (
             <TouchableOpacity
-              key={request.orderId}
+              key={`${request.orderId}-${request.userId}-${index}`} // Ensure uniqueness
               style={styles.requestContainer}
-              onPress={() => handleCSPress(request.orderId, request.userId, request.targetRole)} // Navigate with orderId, userId, and role
+              onPress={() => handleCSPress(request.orderId, request.userId, request.targetRole)}
             >
-              <Text style={[styles.requestText,{ fontWeight: 600 }]}>
-                {request.targetRole && request.targetRole.charAt(0).toUpperCase() + request.targetRole.slice(1)} ID: {request.userId}, Order ID: {request.orderId}
+              <Text style={[styles.requestText, { fontWeight: 600 }]}>
+                {request.targetRole && request.targetRole.charAt(0).toUpperCase() + request.targetRole.slice(1)}
+                ID: {request.userId}, Order ID: {request.orderId}
               </Text>
             </TouchableOpacity>
           ))}
@@ -128,26 +129,16 @@ export default function ContactSupport_DB({ authAdmin }) {
       <View style={styles.chartContainer}>
         <PieChart
           data={[
-            {
-              title: "On Process",
-              value: onProcessRequests.length,
-              color: "rgb(255, 240, 186)",
-            },
-            {
-              title: "Completed",
-              value: completedProcessRequests,
-              color: "rgb(144, 238, 144)",
-            },
+            { title: "On Process", value: onProcessRequests.length, color: "rgb(255, 240, 186)" },
+            { title: "Completed", value: completedProcessRequests, color: "rgb(144, 238, 144)" },
           ]}
           radius={50}
           lineWidth={25}
           label={({ dataEntry }) => Math.round(dataEntry.percentage) + "%"}
-          labelStyle={{
-            fontSize: "10px",
-            fill: "#000",
-          }}
+          labelStyle={{ fontSize: "10px", fill: "#000" }}
           style={{ height: 200 }}
         />
+
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View

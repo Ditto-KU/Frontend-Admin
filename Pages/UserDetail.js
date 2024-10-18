@@ -14,9 +14,10 @@ export default function UserDetail() {
       <Header />
 
       {/* User General Information */}
+      
       <View style={styles.card}>
         <View style={styles.userInfoContainer}>
-          <Text style={styles.userId}>UserID: {user.id || "N/A"}</Text>
+          <Text style={styles.userId}>{userType}ID: {userType === "walker" ? user.walkerId : user.requesterId}</Text>
           <Text style={styles.userName}>Name: {user.username || "N/A"}</Text>
           <Text style={styles.userPhone}>Phone: {user.phoneNumber || "N/A"}</Text>
         </View>

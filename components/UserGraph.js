@@ -3,11 +3,10 @@ import { View, Text, Dimensions, StyleSheet, ActivityIndicator, Alert } from 're
 import { LineChart } from 'react-native-chart-kit';
 
 export default function LineGraph() {
-  const [walkerData, setWalkerData] = useState([]);
-  const [requesterData, setRequesterData] = useState([]);
+  const [orderData, setOrderData] = useState([]); // Store order counts
   const [loading, setLoading] = useState(true);
   const authToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,25 +36,20 @@ export default function LineGraph() {
             '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM',
             '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'
           ];
-          const walkerCounts = new Array(timeLabels.length).fill(0);  // Initialize counts for each slot
-          const requesterCounts = new Array(timeLabels.length).fill(0);
+          const orderCounts = new Array(timeLabels.length).fill(0); // Initialize counts for each slot
 
           // Process each order and assign to the correct time slot
           data.forEach(order => {
-            const orderTime = new Date(order.orderDate).getHours();  // Extract the hour from the order date
+            const orderTime = new Date(order.orderDate).getHours(); // Extract the hour from the order date
 
-            if (orderTime >= 6 && orderTime <= 18) {  // Only consider orders between 6 AM and 6 PM
-              const index = orderTime - 6;  // Get the correct index in the timeLabels array
-
-              // Increment counts for walkers and requesters
-              if (order.walkerId) walkerCounts[index]++;
-              if (order.requesterId) requesterCounts[index]++;
+            if (orderTime >= 6 && orderTime <= 18) { // Only consider orders between 6 AM and 6 PM
+              const index = orderTime - 6; // Get the correct index in the timeLabels array
+              orderCounts[index]++; // Increment the order count
             }
           });
 
-          // Update the walker and requester data for the chart
-          setWalkerData(walkerCounts);
-          setRequesterData(requesterCounts);
+          // Update the order data for the chart
+          setOrderData(orderCounts);
         } else {
           throw new Error(`Unexpected content-type: ${contentType}`);
         }
@@ -67,8 +61,8 @@ export default function LineGraph() {
       }
     };
 
-    const intervalId = setInterval(fetchData, 1000);
-    return () => clearInterval(intervalId);
+    const intervalId = setInterval(fetchData, 1000); // Fetch data every second
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, []);
 
   if (loading) {
@@ -82,39 +76,31 @@ export default function LineGraph() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Walkers and Requesters Throughout the Day</Text>
+      <Text style={styles.title}>Orders Throughout the Day</Text>
       <View style={styles.chartContainer}>
         <LineChart
           data={{
             labels: [
-              '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM',
-              '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'
+              '6', '7', '8', '9', '10', '11',
+              '12', '13', '14', '15', '16', '17', '18'
             ],
             datasets: [
               {
-                data: walkerData,  // Dynamic walker data
-                color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`,  // Green for Walkers
-                strokeWidth: 2,
-              },
-              {
-                data: requesterData,  // Dynamic requester data
-                color: (opacity = 1) => `rgba(128, 128, 128, ${opacity})`,  // Gray for Requesters
+                data: orderData, // Dynamic order data
+                color: (opacity = 1) => `rgba(34, 197, 34, ${opacity})`, // Blue color for orders
                 strokeWidth: 2,
               },
             ],
-            legend: ['Walker', 'Requester'],
+            legend: ['Orders'],
           }}
-          width={Dimensions.get('screen').width * 0.4}  // Adjust width to 40% of the screen
-          height={250}  // Fixed height for the chart
-          yAxisLabel=""
-          yAxisSuffix=""
-          yAxisInterval={1}
-          withInnerLines={false}  // Disable inner grid lines (Optional)
+          width={Dimensions.get('screen').width * 0.4} // Adjust width to 90% of the screen
+          height={250} // Fixed height for the chart
+          yAxisInterval={1} // Set y-axis interval to 1
           chartConfig={{
             backgroundColor: '#000',
-            backgroundGradientFrom: '#fffffe',
-            backgroundGradientTo: '#ccc',
-            decimalPlaces: 0,
+            backgroundGradientFrom: '#ffffff',
+            backgroundGradientTo: '#eeeeee',
+            decimalPlaces: 0, // No decimal places
             color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
             style: {
@@ -122,8 +108,6 @@ export default function LineGraph() {
             },
             propsForDots: {
               r: '6',
-              strokeWidth: '2',
-              stroke: '#00ff00',
             },
           }}
           bezier
@@ -149,8 +133,8 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   chartContainer: {
-    overflow: 'hidden',  // Hide overflowing content
-    width: Dimensions.get('screen').width * 0.4,  // Set container width to 40%
+    overflow: 'hidden',
+    width: Dimensions.get('screen').width * 0.4,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -163,7 +147,7 @@ const styles = StyleSheet.create({
   chart: {
     marginVertical: 8,
     borderRadius: 16,
-    overflow: 'hidden',  // Ensure the chart stays inside its container
+    overflow: 'hidden',
   },
   loadingContainer: {
     flex: 1,

@@ -50,11 +50,7 @@ export default function RestaurantInCafeteria() {
         setLoading(false); // Stop loading after fetching the data
       }
     };
-    // Set an interval to fetch data every second
-    const intervalId = setInterval(fetchRestaurants, 1000); // Fetch every 1000 ms (1 second)
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
+    fetchRestaurants();
   }, [canteenId]); // Fetch data when the canteenId changes
 
 
@@ -86,14 +82,6 @@ export default function RestaurantInCafeteria() {
     );
   }
 
-  // If restaurantList is empty, display a message
-  if (restaurantList.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>No restaurants available for {cafeteriaName}.</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.OR_container}>

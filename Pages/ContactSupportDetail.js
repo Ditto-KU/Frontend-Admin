@@ -7,21 +7,23 @@ import { useRoute } from "@react-navigation/native";
 export default function ContactSupportDetail({ authAdmin }) {
   const route = useRoute();
   const { orderId, userId, targetRole } = route.params; // Retrieve the orderId and authAdmin passed via route params
+  const orderID = orderId; // Assign orderId to orderID for consistency
   const authToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  const [supportData, setSupportData] = useState(null); // Store API data
-  const [error, setError] = useState(null); // Error state
+
 
   return (
     <View style={styles.CSD_Container}>
       {/* Order Details Section */}
       <View style={styles.CSD_OrderDetailContainer}>
-        <ViewOrderDetail style={styles.CSD_OrderDetail} orderId={orderId} />
+        <ViewOrderDetail style={styles.CSD_OrderDetail} orderID={orderID} />
+        
       </View>
 
       {/* Chat Section */}
       <View style={styles.CSD_ChatContainer}>
         <Text style={styles.CSD_Title}>Contact Support</Text>
+        <Text style={styles.CSD_Title}>With: {targetRole} {userId}</Text>
         <ChatBox style={styles.CSD_ChatBox} orderId={orderId} userId={userId} targetRole={targetRole} />
       </View>
     </View>

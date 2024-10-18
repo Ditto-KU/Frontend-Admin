@@ -41,27 +41,34 @@ export default function VerifyDetail() {
     setModalVisible(false);
   };
 
-  const sendEmailNotification = () => {
-    const email = "aekkarach.su@ku.th";
-    const subject = "Your Verification Status";
-    const body = "Your verification has failed.";
-    
-    const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const sendEmailNotification = async () => {
+    try {
+      const email = user.email;
+      const subject = "Your Verification Status";
+      const body = "Your verification has failed. Please try again.";
   
-    Linking.canOpenURL(emailUrl)
-      .then((supported) => {
-        if (!supported) {
-          throw new Error('Cannot handle mailto URL');
-        }
-        return Linking.openURL(emailUrl);
-      })
-      .then(() => {
-        Alert.alert("Success", "An email prompt has been opened.");
-      })
-      .catch((error) => {
-        console.error('Failed to send email:', error);
-        Alert.alert("Error", "Failed to open email client. Please check your email app.");
-      });
+      if (!email) {
+        throw new Error("Email address is missing.");
+      }
+  
+      // Properly encode the subject and body for the mailto link
+      const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  
+      console.log("Generated mailto URL:", emailUrl);
+  
+      // Check if the device can open the mailto URL
+      const supported = await Linking.canOpenURL(emailUrl);
+      if (!supported) {
+        throw new Error("No email client is available to handle the request.");
+      }
+  
+      // Open the user's email client
+      await Linking.openURL(emailUrl);
+      Alert.alert("Success", "An email prompt has been opened.");
+    } catch (error) {
+      console.error("Failed to send email:", error);
+      Alert.alert("Error", error.message || "Failed to open email client. Please check your email app.");
+    }
   };
   
   
