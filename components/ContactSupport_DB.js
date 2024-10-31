@@ -55,6 +55,7 @@ export default function ContactSupport_DB() {
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.status}`);
         }
+        
   
         let data = await response.json();
         const combinedRequests = [

@@ -10,16 +10,16 @@ import Income from "../components/Income";
 import NewUser from "../components/NewUser";
 import { PageStyle } from "../Style/PageStyle";
 
-export default function Main({ authAdmin }) {
+export default function Main({ setAuthAdmin }) {
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   return (
     <View style={PageStyle.M_main}>
-      <Sidebar style={PageStyle.M_sidebar} authAdmin={authAdmin}/>
+      <Sidebar style={PageStyle.M_sidebar} setAuthAdmin={setAuthAdmin}/>
       <View style={PageStyle.M_container_DB}>
         <View style={PageStyle.M_containerUp_DB}>
-          <ContactSupport_DB style={PageStyle.M_CS_DB} authAdmin={authAdmin} />
+          <ContactSupport_DB style={PageStyle.M_CS_DB} setAuthAdmin={setAuthAdmin}/>
           <Order_DB style={PageStyle.M_order_DB} />
         </View>
         <View style={PageStyle.M_containerDown_DB}>

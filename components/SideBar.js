@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ComponentStyle } from "../Style/ComponentStyle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function SideBar({ authAdmin }) {
+export default function SideBar({ setAuthAdmin }) {
   const navigation = useNavigation(); // Access the navigation object
   const [pressedButton, setPressedButton] = useState(null);
 
@@ -22,6 +22,7 @@ export default function SideBar({ authAdmin }) {
         index: 0,
         routes: [{ name: "Login" }], // ชื่อ 'Login' ต้องตรงกับใน Stack.Navigator
       });
+      setAuthAdmin(null);
   
       console.log("รีเซ็ตสำเร็จ ไปยังหน้า Login");
     } catch (error) {

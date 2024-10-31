@@ -42,10 +42,12 @@ function AuthNavigator({ setAuthAdmin }) {
   );
 }
 
-function MainNavigator({ authAdmin }) {
+function MainNavigator({ setAuthAdmin }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Dashboard" component={Main} />
+      <Stack.Screen name="Dashboard">
+        {(props) => <Main {...props} setAuthAdmin={setAuthAdmin} />}
+      </Stack.Screen>
       <Stack.Screen name="ContactSupport" component={ContactSupport} />
       <Stack.Screen name="Report" component={Report} />
       <Stack.Screen name="Order" component={Order} />
@@ -113,6 +115,7 @@ export default function App() {
     try {
       await AsyncStorage.removeItem("authAdmin");
       setAuthAdmin(null);  // Clear the state immediately
+
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -144,7 +147,7 @@ export default function App() {
   return (
     <NavigationContainer>
       {authAdmin ? (
-        <MainNavigator authAdmin={authAdmin} />
+        <MainNavigator setAuthAdmin={setAuthAdmin}/>
       ) : (
         <AuthNavigator setAuthAdmin={setAuthAdmin} />
       )}

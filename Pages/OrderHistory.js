@@ -8,26 +8,27 @@ export default function OrderHistory() {
   const route = useRoute();
   const { shopId } = route.params; // Get shopId from the previous screen
   const authToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
-  // States to manage fetched orders, loading and error state
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Handle navigation to OrderHistoryDetail page
-  const handleOrderPress = (orderId) => {
-    navigation.navigate("OrderHistoryDetail", { orderId });
+  const handleOrderPress = (orderID) => {
+    navigation.navigate("OrderDetail", { orderID });
   };
 
   // Fetch order data based on shopId
   useEffect(() => {
     const fetchOrderHistory = async () => {
       try {
-        let headersList = {
+        setLoading(true); // Show loading indicator
+        const headersList = {
           Accept: "*/*",
           Authorization: `Bearer ${authToken}`,
         };
-        let response = await fetch(
+        const response = await fetch(
           `https://ku-man-api.vimforlanie.com/admin/canteen/shop/order?shopId=${shopId}`,
           {
             method: "GET",
@@ -39,8 +40,25 @@ export default function OrderHistory() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json(); // Parse response to JSON
-        setOrders(data); // Set the fetched orders in state
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+
+          const sortedData = data.sort((a, b) => {
+            const statusOrder = {
+              waitingAdmin: 1,
+              inProgress: 2,
+              lookingForWalker: 3,
+              completed: 4,
+              cancelled: 5,
+            };
+            return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
+          });
+
+          setOrders(sortedData);
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
       } catch (error) {
         console.error("Error fetching order history:", error);
         setError(error.message);
@@ -49,13 +67,9 @@ export default function OrderHistory() {
         setLoading(false); // Stop loading after data is fetched or error occurs
       }
     };
-    // Set an interval to fetch data every second
-    const intervalId = setInterval(fetchOrderHistory, 1000); // Fetch every 1000 ms (1 second)
 
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [shopId]); // Fetch when shopId changes
-
+    fetchOrderHistory();
+  }, [shopId]);
 
   // Render each order in the list
   const renderItem = ({ item }) => (
@@ -63,10 +77,9 @@ export default function OrderHistory() {
       <Text style={styles.orderText}>Order ID: {item.orderId}</Text>
       <Text style={styles.orderText}>Quantity: {item.quantity}</Text>
       <Text style={styles.orderText}>Total Price: {item.totalPrice} THB</Text>
-      <Text style={styles.orderText}>Status: {item.orderItemStatus}</Text>
+      <Text style={styles.orderText}>Status: {item.orderStatus}</Text>
       <Text style={styles.orderText}>Order Date: {new Date(item.orderItemDate).toLocaleDateString()}</Text>
 
-      {/* Button to navigate to order history detail */}
       <TouchableOpacity
         style={styles.detailButton}
         onPress={() => handleOrderPress(item.orderId)}
@@ -97,16 +110,12 @@ export default function OrderHistory() {
   // Render the orders list
   return (
     <View style={styles.container}>
-      {/* Add custom header */}
       <Header />
-
       <Text style={styles.header}>Order History</Text>
-
-      {/* Order List */}
       <FlatList
         data={orders} // Orders fetched from the API
         renderItem={renderItem}
-        keyExtractor={(item) => item.orderItemId.toString()}
+        keyExtractor={(item) => item.orderId.toString()}
         contentContainerStyle={styles.orderList}
       />
     </View>

@@ -398,6 +398,11 @@ export default function OrderDetail() {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Canteen Information</Text>
                         <Text style={styles.sectionDetail}>Canteen Name: {order.canteen.name}</Text>
+                        {order.orderItem.map((item, index) => (
+                            <View key={index}>
+                            <Text style={styles.sectionDetail}>Shop ID: {item.shopId}</Text>
+                            </View>
+                        ))}
                     </View>
 
                     {/* Pricing Info */}

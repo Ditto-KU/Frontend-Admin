@@ -64,7 +64,7 @@ export default function Verify_DB() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading...</Text>
+        <Text>Loading VerifyDetail...</Text>
       </View>
     );
   }

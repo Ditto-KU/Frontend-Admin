@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
 export default function NewUser() {
   const [walkers, setWalkers] = useState([]);
@@ -49,6 +49,16 @@ export default function NewUser() {
 
     fetchWalkersAndRequesters();
   }, []);
+
+    // Loading state
+    if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading NewUser...</Text>
+        </View>
+      );
+    }
 
   // Function to check if the date matches today's date
   const isToday = (dateString) => {
@@ -113,5 +123,10 @@ const styles = StyleSheet.create({
   error: {
     color: 'red',
     fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

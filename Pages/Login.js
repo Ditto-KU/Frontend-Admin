@@ -1,11 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
+  View, Text, TextInput, TouchableOpacity, ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -17,6 +12,7 @@ export default function Login({ setAuthAdmin }) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigation = useNavigation();
+  const passwordInputRef = useRef(null);
 
   const handleSubmit = async () => {
     setErrorMessage("");
@@ -35,14 +31,8 @@ export default function Login({ setAuthAdmin }) {
         body: JSON.stringify({ username, password }),
       });
 
-      if (response.status === 401 || response.status === 403) {
-        setErrorMessage("Invalid username or password.");
-        setLoading(false);
-        return;
-      }
-
       if (!response.ok) {
-        setErrorMessage(`Login failed. Error: ${response.status}`);
+        setErrorMessage("Invalid username or password.");
         setLoading(false);
         return;
       }
@@ -78,7 +68,7 @@ export default function Login({ setAuthAdmin }) {
           onChangeText={setUsername}
           autoCapitalize="none"
           returnKeyType="next"
-          onSubmitEditing={() => this.passwordInput.focus()}
+          onSubmitEditing={() => passwordInputRef.current.focus()}
         />
         <TextInput
           style={PageStyle.loginInput}
@@ -88,7 +78,7 @@ export default function Login({ setAuthAdmin }) {
           onChangeText={setPassword}
           returnKeyType="done"
           onSubmitEditing={handleSubmit}
-          ref={(input) => { this.passwordInput = input; }}
+          ref={passwordInputRef}
         />
 
         {errorMessage !== "" && (
