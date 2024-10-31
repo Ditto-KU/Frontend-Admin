@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, ActivityIndicator,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -10,14 +15,14 @@ export default function Login({ setAuthAdmin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(""); // Add error message state
+  const [errorMessage, setErrorMessage] = useState("");
   const navigation = useNavigation();
 
   const handleSubmit = async () => {
-    setErrorMessage(""); // Clear previous error messages
+    setErrorMessage("");
 
     if (username === "" || password === "") {
-      setErrorMessage("Please enter both username and password."); // Set error message
+      setErrorMessage("Please enter both username and password.");
       return;
     }
 
@@ -26,14 +31,12 @@ export default function Login({ setAuthAdmin }) {
     try {
       const response = await fetch("https://ku-man-api.vimforlanie.com/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
       if (response.status === 401 || response.status === 403) {
-        setErrorMessage("Invalid username or password. Please try again.");
+        setErrorMessage("Invalid username or password.");
         setLoading(false);
         return;
       }
@@ -47,12 +50,13 @@ export default function Login({ setAuthAdmin }) {
       const data = await response.json();
       const authAdmin = data.token;
 
-      // Save the token in AsyncStorage
       await AsyncStorage.setItem("authAdmin", authAdmin);
-      setAuthAdmin(authAdmin); // Update App state with token
+      setAuthAdmin(authAdmin);
 
-      // Navigate to the dashboard
-      navigation.navigate("ParentNavigator", { screen: "Dashboard" });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Dashboard" }],
+      });
 
     } catch (error) {
       console.error("Login error:", error);
@@ -73,11 +77,8 @@ export default function Login({ setAuthAdmin }) {
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
-          returnKeyType="next" // Move to the next field on 'Enter'
-          onSubmitEditing={() => {
-            // Focus the password input when 'Enter' is pressed
-            this.passwordInput.focus();
-          }}
+          returnKeyType="next"
+          onSubmitEditing={() => this.passwordInput.focus()}
         />
         <TextInput
           style={PageStyle.loginInput}
@@ -85,14 +86,13 @@ export default function Login({ setAuthAdmin }) {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
-          returnKeyType="done" // Indicates submission is expected
-          onSubmitEditing={handleSubmit} // Submit the form when 'Enter' is pressed
-          ref={(input) => { this.passwordInput = input; }} // Reference to focus this input
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
+          ref={(input) => { this.passwordInput = input; }}
         />
 
-        {/* Conditionally render the error message */}
         {errorMessage !== "" && (
-          <Text style={PageStyle.loginErrorText}>Invalid username or password</Text> // Add error text style
+          <Text style={PageStyle.loginErrorText}>{errorMessage}</Text>
         )}
 
         {loading ? (

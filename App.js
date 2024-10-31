@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, Alert } from "react-native";
+import { createNavigationContainerRef } from "@react-navigation/native";
 
 // Import all your screens
 import Title from "./Pages/Title";
@@ -26,7 +27,47 @@ import OrderHistory from "./Pages/OrderHistory";
 import OrderHistoryDetail from "./Pages/OrderHistoryDetail";
 import ReportOrderDetail from "./Pages/ReportOrderDetail";
 
+
 const Stack = createStackNavigator();
+const AuthStack = createStackNavigator();
+
+function AuthNavigator({ setAuthAdmin }) {
+  return (
+    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+      <AuthStack.Screen name="Title" component={Title} />
+      <AuthStack.Screen name="Login">
+        {(props) => <Login {...props} setAuthAdmin={setAuthAdmin} />}
+      </AuthStack.Screen>
+    </AuthStack.Navigator>
+  );
+}
+
+function MainNavigator({ authAdmin }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Dashboard" component={Main} />
+      <Stack.Screen name="ContactSupport" component={ContactSupport} />
+      <Stack.Screen name="Report" component={Report} />
+      <Stack.Screen name="Order" component={Order} />
+      <Stack.Screen name="Cafeteria" component={Cafeteria} />
+      <Stack.Screen name="Verify" component={Verify} />
+      <Stack.Screen name="User" component={User} />
+      <Stack.Screen name="ContactSupportDetail" component={ContactSupportDetail} />
+      <Stack.Screen name="RestaurantInCafeteria" component={RestaurantInCafeteria} />
+      <Stack.Screen name="ReportDetails" component={ReportDetails} />
+      <Stack.Screen name="OrderDetail" component={OrderDetail} />
+      <Stack.Screen name="UserList" component={UserList} />
+      <Stack.Screen name="VerifyDetail" component={VerifyDetail} />
+      <Stack.Screen name="UserDetail" component={UserDetail} />
+      <Stack.Screen name="RestaurantDetail" component={RestaurantDetail} />
+      <Stack.Screen name="OrderHistory" component={OrderHistory} />
+      <Stack.Screen name="OrderHistoryDetail" component={OrderHistoryDetail} />
+      <Stack.Screen name="ReportOrderDetail" component={ReportOrderDetail} />
+    </Stack.Navigator>
+  );
+}
+
+
 
 export default function App() {
   const [authAdmin, setAuthAdmin] = useState(null); // Changed authToken to authAdmin
@@ -39,9 +80,7 @@ export default function App() {
     const checkToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem("authAdmin");
-        if (storedToken) {
-          setAuthAdmin(storedToken);
-        }
+        setAuthAdmin(storedToken || null);  // Ensure state reflects token presence
       } catch (error) {
         console.error("Error retrieving token:", error);
       } finally {
@@ -50,7 +89,7 @@ export default function App() {
     };
     checkToken();
   }, []);
-  
+
 
   // Auto logout due to inactivity
   useEffect(() => {
@@ -60,10 +99,10 @@ export default function App() {
         handleLogout();
       }
     }, 1000); // Check inactivity every second
-  
+
     return () => clearInterval(intervalId);
   }, [lastActivityTime]);
-  
+
 
   const resetActivityTimer = () => {
     setLastActivityTime(Date.now());
@@ -73,11 +112,12 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("authAdmin");
-      setAuthAdmin(null); // Clear authAdmin token
+      setAuthAdmin(null);  // Clear the state immediately
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
+
 
   // Set up event listeners to detect user activity
   useEffect(() => {
@@ -95,59 +135,19 @@ export default function App() {
     return <Text>Loading...</Text>;
   }
 
+  console.log("authAdminauthAdmin", authAdmin);
+  const isNUll = AsyncStorage.getItem("authAdmin");
+  console.log("isNUll", isNUll);
+
+  
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {authAdmin ? ( // Use authAdmin here instead of authToken
-          <>
-            <Stack.Screen name="Dashboard">
-              {(props) => <Main {...props} authAdmin={authAdmin} />}
-            </Stack.Screen>
-            <Stack.Screen name="ContactSupport">
-              {(props) => <ContactSupport {...props} authAdmin={authAdmin} />}
-            </Stack.Screen>
-            <Stack.Screen name="Report" component={Report} />
-            <Stack.Screen name="Order" component={Order} />
-            <Stack.Screen name="Cafeteria" component={Cafeteria} />
-            <Stack.Screen name="Verify" component={Verify} />
-            <Stack.Screen name="User" component={User} />
-            <Stack.Screen name="ContactSupportDetail">
-              {(props) => (
-                <ContactSupportDetail {...props} authAdmin={authAdmin} />
-              )}
-            </Stack.Screen>
-            <Stack.Screen
-              name="RestaurantInCafeteria"
-              component={RestaurantInCafeteria}
-            />
-            <Stack.Screen name="ReportDetails" component={ReportDetails} />
-            <Stack.Screen name="OrderDetail" component={OrderDetail} />
-            <Stack.Screen name="UserList" component={UserList} />
-            <Stack.Screen name="VerifyDetail" component={VerifyDetail} />
-            <Stack.Screen name="UserDetail" component={UserDetail} />
-            <Stack.Screen
-              name="RestaurantDetail"
-              component={RestaurantDetail}
-            />
-            <Stack.Screen name="OrderHistory" component={OrderHistory} />
-            <Stack.Screen
-              name="OrderHistoryDetail"
-              component={OrderHistoryDetail}
-            />
-            <Stack.Screen
-              name="ReportOrderDetail"
-              component={ReportOrderDetail}
-            />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Title" component={Title} />
-            <Stack.Screen name="Login">
-              {(props) => <Login {...props} setAuthAdmin={setAuthAdmin} />}
-            </Stack.Screen>
-          </>
-        )}
-      </Stack.Navigator>
+      {authAdmin ? (
+        <MainNavigator authAdmin={authAdmin} />
+      ) : (
+        <AuthNavigator setAuthAdmin={setAuthAdmin} />
+      )}
     </NavigationContainer>
   );
 }

@@ -1,39 +1,37 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";  // Import Alert
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ComponentStyle } from "../Style/ComponentStyle"; 
+import { ComponentStyle } from "../Style/ComponentStyle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Login from "./../Pages/Login";
-
 
 export default function SideBar({ authAdmin }) {
-  const navigation = useNavigation();  // Get navigation from context
+  const navigation = useNavigation(); // Access the navigation object
   const [pressedButton, setPressedButton] = useState(null);
 
-  const handlePressIn = (buttonName) => {
-    setPressedButton(buttonName);
-  };
+  const handlePressIn = (buttonName) => setPressedButton(buttonName);
+  const handlePressOut = () => setPressedButton(null);
 
-  const handlePressOut = () => {
-    setPressedButton(null);
-  };
-
-  // Function to handle logout
   const handleLogout = async () => {
     try {
-      // Clear the token from AsyncStorage
-      console.log('authAdmin',AsyncStorage.getItem("authAdmin"));
       await AsyncStorage.removeItem("authAdmin");
-      console.log('authAdmin',AsyncStorage.getItem("authAdmin"));
-
-      // Replace with the Login screen
-      navigation.replace("Login");
-      navigation.navigate("Login");
+  
+      console.log("กำลังรีเซ็ตไปที่หน้า Login...");
+  
+      // ตรวจสอบว่ามีคอนเท็กซ์การนำทางที่ถูกต้อง และ reset การนำทาง
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }], // ชื่อ 'Login' ต้องตรงกับใน Stack.Navigator
+      });
+  
+      console.log("รีเซ็ตสำเร็จ ไปยังหน้า Login");
     } catch (error) {
       console.error("Error during logout:", error);
-      Alert.alert("Error", "An error occurred during logout. Please try again.");
+      Alert.alert("Error", "เกิดข้อผิดพลาดระหว่างออกจากระบบ กรุณาลองใหม่อีกครั้ง.");
     }
   };
+  
+  
+  
   
 
   return (
@@ -42,25 +40,6 @@ export default function SideBar({ authAdmin }) {
         <View>
           <Text style={ComponentStyle.sidebarHeader}>KU-MAN Dashboard</Text>
         </View>
-        {/* <TouchableOpacity
-          style={[
-            ComponentStyle.sidebarButton,
-            pressedButton === "Dashboard" &&
-              ComponentStyle.sidebarButtonPressed,
-          ]}
-          onPressIn={() => handlePressIn("Dashboard")}
-          onPressOut={handlePressOut}
-          onPress={() => navigation.navigate("Main")}
-        >
-          <View style={ComponentStyle.sidebarIconAndText}>
-            <Image
-              source={require("../Image/DashboardIcon.png")}
-              style={ComponentStyle.sidebarIcon}
-              resizeMode="cover"
-            />
-            <Text style={ComponentStyle.sidebarButtonText}>Dashboard</Text>
-          </View>
-        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={[
@@ -183,9 +162,9 @@ export default function SideBar({ authAdmin }) {
         </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={handleLogout}>
-        <View style={ComponentStyle.sidebarSignOut}>
-          <Text style={{ textDecoration: "underline" }}>Logout</Text>
-        </View>
+          <View style={ComponentStyle.sidebarSignOut}>
+            <Text style={{ textDecorationLine: "underline" }}>Logout</Text>
+          </View>
       </TouchableOpacity>
     </View>
   );

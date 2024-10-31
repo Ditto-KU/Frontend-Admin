@@ -16,7 +16,7 @@ import Head from "../components/Header";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ContactSupport({ authAdmin }) {
+export default function ContactSupport() {
   const route = useRoute();
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,10 +26,27 @@ export default function ContactSupport({ authAdmin }) {
   const [filteredRequests, setFilteredRequests] = useState([]); // State for filtered requests
   const [searchQuery, setSearchQuery] = useState(""); // State for search input
   const [filterStatus, setFilterStatus] = useState("all"); // State for filter by status
+  const [authAdmin, setAuthAdmin] = useState("");
+
+  useEffect(() => {
+    const fetchAuthToken = async () => {
+      const token = await AsyncStorage.getItem("authAdmin");
+      setAuthAdmin(token);
+      if (token) {
+        fetchMessages(token); // Pass token to fetchMessages
+      } else {
+        Alert.alert("Error", "Authentication token not found.");
+      }
+    };
+
+    fetchAuthToken();
+  }, []);
+
 
   // Fetch data from API
   useEffect(() => {
     const fetchSupportRequests = async () => {
+      if (!authAdmin) return;
       try {
         let headersList = {
           "Content-Type": "application/json",
@@ -74,30 +91,34 @@ export default function ContactSupport({ authAdmin }) {
     fetchSupportRequests();
   }, [authAdmin]);
 
-  // Handle search input change
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-    filterRequests(text, filterStatus);
-  };
+// Handle search input change
+const handleSearch = (text) => {
+  setSearchQuery(text);
+  setFilterStatus("all"); // รีเซ็ตการกรองสถานะทุกครั้งที่ค้นหา
+  filterRequests(text, "all");
+};
 
-  // Filter requests based on search and status
-  const filterRequests = (query, status) => {
-    let filtered = supportRequests;
 
-    // Filter by orderId if there's a search query
-    if (query) {
-      filtered = filtered.filter((item) =>
-        item.orderId.toString().includes(query)
-      );
-    }
+// ฟังก์ชันในการกรองรายการตาม `orderId` และสถานะ
+const filterRequests = (query, status) => {
+  let filtered = supportRequests;
 
-    // Filter by status if a filter is applied
-    if (status !== "all") {
-      filtered = filtered.filter((item) => item.orderStatus === status);
-    }
+  // กรองเฉพาะ `orderId` ที่ตรงกับค่าที่ค้นหาอย่างสมบูรณ์ (Exact match)
+  if (query) {
+    filtered = filtered.filter((item) => item.orderId.toString() === query.trim());
+  }
 
-    setFilteredRequests(filtered);
-  };
+  // กรองตามสถานะ หากเลือกสถานะใดสถานะหนึ่ง
+  if (status !== "all") {
+    filtered = filtered.filter((item) => item.orderStatus === status);
+  }
+
+  setFilteredRequests(filtered);
+};
+
+
+
+
 
   // Sort the filtered requests by status
   const sortedRequests = [...filteredRequests].sort((a, b) => {

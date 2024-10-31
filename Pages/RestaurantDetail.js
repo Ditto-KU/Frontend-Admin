@@ -65,44 +65,50 @@ export default function RestaurantDetail() {
     }
   };
 
-  // Function to toggle the availability of a menu item
-  const toggleMenuItem = async (menuId, index) => {
+  // Function to toggle the availability of a specific menu item
+const toggleMenuItem = async (menuId, index) => {
+  try {
+    // Update the menu item's status optimistically in the UI
     const updatedMenuItems = [...menuItems];
     const item = updatedMenuItems[index];
 
-    // Toggle the status
-    item.status = !item.status;
-    setMenuItems(updatedMenuItems); // Optimistically update the UI
+    // Toggle the current status
+    const newStatus = !item.status;
+    item.status = newStatus; 
+    setMenuItems(updatedMenuItems); // Update state immediately
 
-    try {
-      let headersList = {
-        Accept: "*/*",
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      };
+    // Prepare headers for API call
+    const headersList = {
+      Accept: "*/*",
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    };
 
-      let response = await fetch(
-        `https://ku-man-api.vimforlanie.com/admin/menu/update-status`,
-        {
-          method: "PATCH",
-          headers: headersList,
-          body: JSON.stringify({
-            "menuId": menuId,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    // Make the API request to update the menu item's status
+    const response = await fetch(
+      `https://ku-man-api.vimforlanie.com/admin/menu/update-status`,
+      {
+        method: "PATCH",
+        headers: headersList,
+        body: JSON.stringify({
+          menuId: menuId, // Use menuId from the item
+          // status: newStatus, // Send the new status
+        }),
       }
+    );
 
-      const data = await response.json();
-      console.log("Updated menu item status:", data);
-    } catch (error) {
-      console.error("Error updating menu item status:", error);
-      Alert.alert("Error", error.message);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+    console.log("Updated menu item status:", data);
+  } catch (error) {
+    console.error("Error updating menu item status:", error);
+    Alert.alert("Error", error.message);
+  }
+};
+
 
   // Function to navigate to the Order History screen
   const navigateToOrderHistory = () => {
@@ -223,32 +229,32 @@ export default function RestaurantDetail() {
           </View>
         </View>
 
-        {/* Menu List */}
         <View style={styles.menuContainer}>
-          <Text style={styles.menuTitle}>Menu</Text>
-          <ScrollView style={{ flexGrow: 1 }}>
-            {menuItems.map((item, index) => (
-              <View key={item.menuId} style={styles.menuItem}>
-                <Image
-                  source={{ uri: item.picture || "https://via.placeholder.com/60" }}
-                  style={styles.menuImage}
-                />
-                <View style={styles.menuDetails}>
-                  <Text style={styles.menuName}>{item.name}</Text>
-                  <Text style={styles.menuPrice}>{item.price} THB</Text>
-                </View>
-                <View style={styles.switchContainer}>
-                  <Switch
-                    value={item.status}
-                    onValueChange={() => toggleMenuItem(item.menuId)}
-                    thumbColor={item.status ? "#34C759" : "#f4f3f4"}
-                    trackColor={{ false: "#f4f3f4", true: "#34C759" }}
-                  />
-                </View>
-              </View>
-            ))}
-          </ScrollView>
+  <Text style={styles.menuTitle}>Menu</Text>
+  <ScrollView style={{ flexGrow: 1 }}>
+    {menuItems.map((item, index) => (
+      <View key={item.menuId} style={styles.menuItem}>
+        <Image
+          source={{ uri: item.picture || "https://via.placeholder.com/60" }}
+          style={styles.menuImage}
+        />
+        <View style={styles.menuDetails}>
+          <Text style={styles.menuName}>{item.name}</Text>
+          <Text style={styles.menuPrice}>{item.price} THB</Text>
         </View>
+        <View style={styles.switchContainer}>
+          <Switch
+            value={item.status}
+            onValueChange={() => toggleMenuItem(item.menuId, index)} // Pass both menuId and index
+            thumbColor={item.status ? "#34C759" : "#f4f3f4"}
+            trackColor={{ false: "#f4f3f4", true: "#34C759" }}
+          />
+        </View>
+      </View>
+    ))}
+  </ScrollView>
+</View>
+
 
         {/* Restaurant Details */}
         <View style={styles.detailsContainer}>

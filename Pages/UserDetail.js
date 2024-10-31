@@ -33,7 +33,7 @@ export default function UserDetail() {
               <Image
                 source={{
                   uri: user.profilePicture
-                    ? user.profilePicture
+                    ? `data:image/jpeg;base64,${user.profilePicture}`
                     : "https://via.placeholder.com/150",
                 }} // Display profile picture or a placeholder
                 style={styles.facePhoto}

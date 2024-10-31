@@ -12,33 +12,50 @@ import { useNavigation } from "@react-navigation/native";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ContactSupport_DB({ authAdmin }) {
+export default function ContactSupport_DB() {
   const route = useRoute();
   const [supportRequests, setSupportRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authAdmin, setAuthAdmin] = useState("");
 
   const navigation = useNavigation();
+  useEffect(() => {
+    const fetchAuthToken = async () => {
+      const token = await AsyncStorage.getItem("authAdmin");
+      setAuthAdmin(token);
+      if (token) {
+        fetchMessages(token); // Pass token to fetchMessages
+      } else {
+        Alert.alert("Error", "Authentication token not found.");
+      }
+    };
+
+    fetchAuthToken();
+  }, []);
+
 
   // Fetch data from API
   useEffect(() => {
     const fetchSupportRequests = async () => {
+      if (!authAdmin) return; // ตรวจสอบว่ามี authAdmin ก่อน
+    
       try {
         let headersList = {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${authAdmin}`,
+          Authorization: `Bearer ${authAdmin}`, // ส่ง authAdmin
         };
-
+  
         let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
           method: "GET",
           headers: headersList,
         });
-
+  
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.status}`);
         }
-
+  
         let data = await response.json();
         const combinedRequests = [
           ...(Array.isArray(data.requester) ? data.requester.map((req) => ({
@@ -52,7 +69,7 @@ export default function ContactSupport_DB({ authAdmin }) {
             userId: req.walkerId,
           })) : []),
         ];
-
+  
         setSupportRequests(combinedRequests);
         setLoading(false);
       } catch (err) {
@@ -60,10 +77,14 @@ export default function ContactSupport_DB({ authAdmin }) {
         setLoading(false);
       }
     };
-
-    const intervalId = setInterval(fetchSupportRequests, 1000); // Fetch every second
-    return () => clearInterval(intervalId); // Cleanup
-  }, []);
+  
+    // Call only if authAdmin is available
+    if (authAdmin) {
+      const intervalId = setInterval(fetchSupportRequests, 1000); // Fetch every second
+      return () => clearInterval(intervalId); // Cleanup interval when unmounted or authAdmin changes
+    }
+  }, [authAdmin]); // เพิ่ม authAdmin ใน dependency array
+  
 
   // Filter for only "on process" requests
   const onProcessRequests = supportRequests.filter(

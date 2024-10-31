@@ -11,7 +11,7 @@ export default function ContactSupportDetail({ authAdmin }) {
   const authToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
-
+  
   return (
     <View style={styles.CSD_Container}>
       {/* Order Details Section */}

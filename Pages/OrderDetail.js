@@ -211,7 +211,7 @@ export default function OrderDetail() {
         }
     };
 
-    
+
 
     // Show cancel button only if the order status is "waitingAdmin", "inProgress", or "lookingForWalker"
     const showCancelButton = ["waitingAdmin", "inProgress", "lookingForWalker"].includes(orderStatus);
@@ -240,187 +240,215 @@ export default function OrderDetail() {
 
     return (
         <View style={styles.container}>
-          <Header />
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
-            {/* Left column */}
-            <View style={styles.leftColumn}>
-              <View style={styles.leftColumnContainer}>
-                {/* Left column part 1 */}
-                <View style={styles.leftColumnPart}>
-                  {/* User Verification */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>User Verification</Text>
-                    <Image
-                      source={{ uri: walkerProfile || 'placeholder-url-for-verification-image' }} // Replace with actual source
-                      style={styles.profileImage}
-                    />
-                  </View>
-      
-                  {/* Food Pickup Proof */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Food Pickup Proof</Text>
-                    <View style={styles.imageContainer}>
-                      {order.foodPickupProofImages?.map((imageUri, index) => (
-                        <Image
-                          key={index}
-                          source={{ uri: imageUri }}
-                          style={styles.proofImage}
-                        />
-                      ))}
+            <Header />
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {/* Left column */}
+                <View style={styles.leftColumn}>
+                    <View style={styles.leftColumnContainer}>
+                        {/* Left column part 1 */}
+                        <View style={styles.leftColumnPart}>
+                            {/* User Verification */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>User Verification</Text>
+                                <Image
+                                    source={{ 
+                                        uri: walkerProfile
+                                        ? `data:image/jpeg;base64,${walkerProfile}`
+                                        : "https://via.placeholder.com/150" 
+                                    }}
+                                    style={styles.profileImage}
+                                />
+                            </View>
+
+                            {/* Food Pickup Proof */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Food Pickup Proof</Text>
+                                <View style={styles.imageContainer}>
+                                    {order.orderItem?.map((item, index) => (
+                                        item.Photo?.photoPath ? (
+                                            <Image
+                                                key={index}
+                                                source={{ 
+                                                    uri: item.Photo.photoPath
+                                                    ? `data:image/jpeg;base64,${item.Photo.photoPath}`
+                                                    : "https://via.placeholder.com/150" 
+                                                }}
+                                                // source={{ 
+                                                //     uri: item.Photo.photoPath
+                                                //     ? item.Photo.photoPath
+                                                //     : "https://via.placeholder.com/150" 
+                                                // }}
+                                                // source={{ uri: item.Photo.photoPath }}
+                                                style={styles.proofImage}
+                                            />
+                                        ) : (
+                                            <Text key={index}>No photo available</Text>
+                                        )
+                                    ))}
+                                </View>
+                            </View>
+
+
+
+                            {/* Delivery Proof */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Delivery Proof</Text>
+                                <View style={styles.imageContainer}>    
+                                    {order.Photo ? (
+                                    <Image
+                                        source={{ 
+                                        uri: order.Photo
+                                            ? `data:image/jpeg;base64,${order.Photo}`
+                                            : "https://via.placeholder.com/150" 
+                                        }}
+                                        style={styles.proofImage}
+                                    />
+                                    ) : (
+                                    <Text>No photo available</Text>
+                                    )}
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Left column part 2 */}
+                        <View style={styles.leftColumnPart}>
+                            {/* Requester Info */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Requester Info</Text>
+                                <Text style={styles.sectionDetail}>RequesterId: {order.requester.requesterId}</Text>
+                                <Text style={styles.sectionDetail}>Phone: {order.requester.phoneNumber}</Text>
+                                <TouchableOpacity
+                                    style={styles.callButton}
+                                    onPress={() => makeCall(order.requester.phoneNumber)}
+                                >
+                                    <Ionicons name="call-outline" size={16} color="#fff" />
+                                    <Text style={styles.callButtonText}>Call Requester</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Walker Info */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Walker Info</Text>
+                                <Text style={styles.sectionDetail}>WalkerId: {order.walker.walkerId}</Text>
+                                <Text style={styles.sectionDetail}>Phone: {order.walker.phoneNumber}</Text>
+                                <TouchableOpacity
+                                    style={styles.callButton}
+                                    onPress={() => makeCall(order.walker.phoneNumber)}
+                                >
+                                    <Ionicons name="call-outline" size={16} color="#fff" />
+                                    <Text style={styles.callButtonText}>Call Walker</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Delivery Address */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Delivery Address</Text>
+                                <Text style={styles.sectionDetail}>Address: {order.address.name}</Text>
+                                <Text style={styles.sectionDetail}>Detail: {order.address.detail}</Text>
+                                <Text style={styles.sectionDetail}>Note: {order.address.note}</Text>
+                            </View>
+                        </View>
                     </View>
-                  </View>
-      
-                  {/* Delivery Proof */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Delivery Proof</Text>
-                    {order.deliveryProofImage && (
-                      <Image
-                        source={{ uri: order.deliveryProofImage }}
-                        style={styles.proofImage}
-                      />
-                    )}
-                  </View>
+
+                    {/* Cancel Order Button at the bottom of Left Column */}
+                    <View style={styles.LeftDown}>
+                        {showCancelButton && (
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => setConfirmModalVisible(true)} // Open confirmation modal
+                            >
+                                <Text style={styles.cancelButtonText}>Cancel order</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
-      
-                {/* Left column part 2 */}
-                <View style={styles.leftColumnPart}>
-                  {/* Requester Info */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Requester Info</Text>
-                    <Text style={styles.sectionDetail}>RequesterId: {order.requester.requesterId}</Text>
-                    <Text style={styles.sectionDetail}>Phone: {order.requester.phoneNumber}</Text>
-                    <TouchableOpacity
-                      style={styles.callButton}
-                      onPress={() => makeCall(order.requester.phoneNumber)}
-                    >
-                      <Ionicons name="call-outline" size={16} color="#fff" />
-                      <Text style={styles.callButtonText}>Call Requester</Text>
-                    </TouchableOpacity>
-                  </View>
-      
-                  {/* Walker Info */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Walker Info</Text>
-                    <Text style={styles.sectionDetail}>WalkerId: {order.walker.walkerId}</Text>
-                    <Text style={styles.sectionDetail}>Phone: {order.walker.phoneNumber}</Text>
-                    <TouchableOpacity
-                      style={styles.callButton}
-                      onPress={() => makeCall(order.walker.phoneNumber)}
-                    >
-                      <Ionicons name="call-outline" size={16} color="#fff" />
-                      <Text style={styles.callButtonText}>Call Walker</Text>
-                    </TouchableOpacity>
-                  </View>
-      
-                  {/* Delivery Address */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Delivery Address</Text>
-                    <Text style={styles.sectionDetail}>Address: {order.address.name}</Text>
-                    <Text style={styles.sectionDetail}>Detail: {order.address.detail}</Text>
-                    <Text style={styles.sectionDetail}>Note: {order.address.note}</Text>
-                  </View>
+
+                {/* Right column */}
+                <View style={styles.rightColumn}>
+                    {/* Order Info */}
+                    <Text style={styles.orderTitle}>Order: {order.orderId}</Text>
+
+                    {/* Order Status */}
+                    <Text style={styles.orderTitle}>Status: {order.orderStatus}</Text>
+
+                    {/* Ordered Items */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Ordered Items</Text>
+                        {order.orderItem.map((item, index) => (
+                            <View key={item.orderItemId} style={styles.orderItem}>
+                                <Text style={styles.sectionDetail}>
+                                    {index + 1}. {item.menu.name} - {item.totalPrice} THB
+                                </Text>
+                                <Text style={styles.sectionDetail}>
+                                    Special Instructions: {item.specialInstructions || "None"}
+                                </Text>
+                                {item.orderItemExtra.length > 0 && (
+                                    <Text style={styles.sectionDetail}>
+                                        Extra:{" "}
+                                        {item.orderItemExtra
+                                            .map((extra) => extra.optionItem.name)
+                                            .join(", ")}
+                                    </Text>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+
+                    {/* Canteen Info */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Canteen Information</Text>
+                        <Text style={styles.sectionDetail}>Canteen Name: {order.canteen.name}</Text>
+                    </View>
+
+                    {/* Pricing Info */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Pricing Details</Text>
+                        <Text style={styles.sectionDetail}>Total Price: {order.totalPrice} Baht</Text>
+                        <Text style={styles.sectionDetail}>Shipping Fee: {order.shippingFee} Baht</Text>
+                    </View>
                 </View>
-              </View>
-      
-              {/* Cancel Order Button at the bottom of Left Column */}
-              <View style={styles.LeftDown}>
-                {showCancelButton && (
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => setConfirmModalVisible(true)} // Open confirmation modal
-                  >
-                    <Text style={styles.cancelButtonText}>Cancel order</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-      
-            {/* Right column */}
-            <View style={styles.rightColumn}>
-              {/* Order Info */}
-              <Text style={styles.orderTitle}>Order: {order.orderId}</Text>
-      
-              {/* Order Status */}
-              <Text style={styles.orderTitle}>Status: {order.orderStatus}</Text>
-      
-              {/* Ordered Items */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Ordered Items</Text>
-                {order.orderItem.map((item, index) => (
-                  <View key={item.orderItemId} style={styles.orderItem}>
-                    <Text style={styles.sectionDetail}>
-                      {index + 1}. {item.menu.name} - {item.totalPrice} THB
-                    </Text>
-                    <Text style={styles.sectionDetail}>
-                      Special Instructions: {item.specialInstructions || "None"}
-                    </Text>
-                    {item.orderItemExtra.length > 0 && (
-                      <Text style={styles.sectionDetail}>
-                        Extra:{" "}
-                        {item.orderItemExtra
-                          .map((extra) => extra.optionItem.name)
-                          .join(", ")}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-              </View>
-      
-              {/* Canteen Info */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Canteen Information</Text>
-                <Text style={styles.sectionDetail}>Canteen Name: {order.canteen.name}</Text>
-              </View>
-      
-              {/* Pricing Info */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Pricing Details</Text>
-                <Text style={styles.sectionDetail}>Total Price: {order.totalPrice} Baht</Text>
-                <Text style={styles.sectionDetail}>Shipping Fee: {order.shippingFee} Baht</Text>
-              </View>
-            </View>
-          </ScrollView>
-      
-          {/* Confirmation Modal */}
-          <Modal
-            transparent={true}
-            visible={confirmModalVisible}
-            onRequestClose={() => setConfirmModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.confirmModalContainer}>
-                <Text style={styles.modalTitle}>ยกเลิกออร์เดอร์</Text>
-                <Text style={styles.modalSubtitle}>สาเหตุ :</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter reason"
-                  value={reason}
-                  onChangeText={(text) => setReason(text)}
-                  multiline
-                />
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.approveButton}
-                    onPress={() => {
-                      setConfirmModalVisible(false); // Close the modal
-                      cancelOrder(); // Proceed to cancel the order
-                    }}
-                  >
-                    <Text style={styles.approveButtonText}>Approve</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.disapproveButton}
-                    onPress={() => setConfirmModalVisible(false)} // Close modal without action
-                  >
-                    <Text style={styles.disapproveButtonText}>Disapprove</Text>
-                  </TouchableOpacity>
+            </ScrollView>
+
+            {/* Confirmation Modal */}
+            <Modal
+                transparent={true}
+                visible={confirmModalVisible}
+                onRequestClose={() => setConfirmModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.confirmModalContainer}>
+                        <Text style={styles.modalTitle}>ยกเลิกออร์เดอร์</Text>
+                        <Text style={styles.modalSubtitle}>สาเหตุ :</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter reason"
+                            value={reason}
+                            onChangeText={(text) => setReason(text)}
+                            multiline
+                        />
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                                style={styles.approveButton}
+                                onPress={() => {
+                                    setConfirmModalVisible(false); // Close the modal
+                                    cancelOrder(); // Proceed to cancel the order
+                                }}
+                            >
+                                <Text style={styles.approveButtonText}>Approve</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.disapproveButton}
+                                onPress={() => setConfirmModalVisible(false)} // Close modal without action
+                            >
+                                <Text style={styles.disapproveButtonText}>Disapprove</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
-              </View>
-            </View>
-          </Modal>
+            </Modal>
         </View>
-      );
-      
+    );
+
 }
 
 const styles = StyleSheet.create({
@@ -461,7 +489,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     imageContainer: {
-        flexDirection: "row", // Display images in a row
+        flexDirection: "column", // Display images in a row
         flexWrap: "wrap", // Wrap images to a new row if they overflow
     },
     proofImage: {

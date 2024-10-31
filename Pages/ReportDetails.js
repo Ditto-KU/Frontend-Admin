@@ -117,7 +117,7 @@ export default function ReportDetails() {
           </Text> {report.reportBy === "requester" ? report.requesterId : report.walkerId}</Text>
           <Text style={styles.detail}><Text style={styles.label}>Date:</Text> {new Date(report.reportDate).toLocaleString()}</Text>
 
-          <Text style={styles.detail}><Text style={styles.label}>Status:</Text>
+          <Text style={styles.detail}><Text style={styles.label}>Report Status:</Text>
             <Text style={[styles.status, report.status === "resolved" ? styles.statusResolved : styles.statusPending]}>
               {report.status}
             </Text>

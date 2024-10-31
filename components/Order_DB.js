@@ -44,14 +44,17 @@ export default function Order_DB() {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
+          const filteredData = data.filter(
+            (item) => item.orderStatus !== "completed" && item.orderStatus !== "cancelled"
+          );
 
-          const sortedData = data.sort((a, b) => {
+          const sortedData = filteredData.sort((a, b) => {
             const statusOrder = {
               waitingAdmin: 1,
               inProgress: 2,
               lookingForWalker: 3,
-              completed: 4,
-              cancelled: 5,
+              // completed: 4,
+              // cancelled: 5,
             };
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
@@ -83,12 +86,12 @@ export default function Order_DB() {
   const inProgress = orderData.filter(
     (order) => order.orderStatus === "inProgress"
   ).length;
-  const completed = orderData.filter(
-    (order) => order.orderStatus === "completed"
-  ).length;
-  const cancelled = orderData.filter(
-    (order) => order.orderStatus === "cancelled"
-  ).length;
+  // const completed = orderData.filter(
+  //   (order) => order.orderStatus === "completed"
+  // ).length;
+  // const cancelled = orderData.filter(
+  //   (order) => order.orderStatus === "cancelled"
+  // ).length;
   const waitingAdmin = orderData.filter(
     (order) => order.orderStatus === "waitingAdmin"
   ).length;
@@ -117,10 +120,10 @@ export default function Order_DB() {
             let backgroundColor = "#FFF"; // Default background
             if (order.orderStatus === "inProgress")
               backgroundColor = "rgb(255, 240, 186)"; // Softer Yellow
-            else if (order.orderStatus === "completed")
-              backgroundColor = "rgb(144, 238, 144)"; // Softer Green
-            else if (order.orderStatus === "cancelled")
-              backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
+            // else if (order.orderStatus === "completed")
+            //   backgroundColor = "rgb(144, 238, 144)"; // Softer Green
+            // else if (order.orderStatus === "cancelled")
+            //   backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
             else if (order.orderStatus === "lookingForWalker")
               backgroundColor = "rgb(211, 211, 211)"; // Softer Gray
             else if (order.orderStatus === "waitingAdmin")
@@ -149,16 +152,16 @@ export default function Order_DB() {
               value: inProgress,
               color: "rgb(255, 240, 186)",
             }, // Softer Yellow
-            {
-              title: "completed",
-              value: completed,
-              color: "rgb(144, 238, 144)",
-            }, // Softer Green
-            {
-              title: "cancelled",
-              value: cancelled,
-              color: "rgb(255, 182, 193)",
-            }, // Softer Pink
+            // {
+            //   title: "completed",
+            //   value: completed,
+            //   color: "rgb(144, 238, 144)",
+            // }, // Softer Green
+            // {
+            //   title: "cancelled",
+            //   value: cancelled,
+            //   color: "rgb(255, 182, 193)",
+            // }, // Softer Pink
             {
               title: "lookingForWalker",
               value: lookingForWalker,
@@ -210,7 +213,7 @@ export default function Order_DB() {
               lookingForWalker: {lookingForWalker}
             </Text>
           </View>
-          <View style={styles.legendItem}>
+          {/* <View style={styles.legendItem}>
             <View
               style={[
                 styles.legendColor,
@@ -227,7 +230,7 @@ export default function Order_DB() {
               ]}
             />
             <Text style={styles.legendText}>cancelled: {cancelled}</Text>
-          </View>
+          </View> */}
         </View>
       </View>
     </View>

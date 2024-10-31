@@ -73,20 +73,20 @@ export default function Report() {
     filterReports(searchText, filters); // Filter reports based on current searchText and filters
   };
 
-  // Function to filter the reports based on search and active filters
+  // Function to filter the reports based on search by reportId or orderId and active filters
   const filterReports = (text, filters) => {
     let filtered = reportData;
 
-    // Apply search filter by title or description
+    // Apply search filter by reportId or orderId (exact match)
     if (text) {
       filtered = filtered.filter(
-        (item) =>
-          item.title.toLowerCase().includes(text.toLowerCase()) ||
-          item.description.toLowerCase().includes(text.toLowerCase())
+        (item) => 
+          item.reportId.toString() === text.trim() || 
+          item.orderId.toString() === text.trim()
       );
     }
 
-    // Apply date filter
+    // Apply date filter if needed
     if (filters && filters.date) {
       const selectedDate = new Date(filters.date).toDateString();
       filtered = filtered.filter(
@@ -116,15 +116,17 @@ export default function Report() {
     filterReports(text, activeFilters); // Reapply filters with new search text
   };
 
+
+
   // Render each report item
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleReportPress(item)}>
       <View style={styles.RP_listItem}>
         <View style={{ flexDirection: "column" }}>
           <Text style={[styles.RP_listText, { fontWeight: "600" }]}>
-            Order ID : {item.orderId}
+            Report ID : {item.reportId}
           </Text>
-          <Text style={styles.RP_listText}>Title: {item.title}</Text>
+          <Text style={styles.RP_listText}>Order ID : {item.orderId}  Title: {item.title}</Text>
         </View>
         <Text style={styles.RP_listTime}>{new Date(item.reportDate).toLocaleString()}</Text>
       </View>
@@ -148,7 +150,7 @@ export default function Report() {
         <View style={styles.RP_searchContainer}>
           <TextInput
             style={styles.RP_searchInput}
-            placeholder="Search by Order ID or Title"
+            placeholder="Search by Order ID or Report ID"
             value={searchText}
             onChangeText={handleSearch}
           />
