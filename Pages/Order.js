@@ -91,65 +91,44 @@ export default function Order() {
 
     fetchData() }, []);
 
-  // Apply filters from FilterOrder modal
-  const applyFilter = (filterData) => {
-    if (filterData) {
-      let filteredOrders = orderData;
-
-      // Filter by date
-      if (filterData.date) {
-        filteredOrders = filteredOrders.filter(
-          (order) =>
-            new Date(order.orderDate).toDateString() ===
-            new Date(filterData.date).toDateString()
-        );
-      }
-
-      // Filter by canteen
-      if (filterData.canteen) {
-        filteredOrders = filteredOrders.filter(
-          (order) => order.canteen.name === filterData.canteen
-        );
-      }
-
-      // Filter by restaurant
-      if (filterData.restaurant) {
-        filteredOrders = filteredOrders.filter(
-          (order) =>
-            order.restaurant && order.restaurant.name === filterData.restaurant
-        );
-      }
-
-      // Filter by order status
-      const activeStatusFilters = Object.keys(filterData.statusFilter).filter(
-        (status) => filterData.statusFilter[status]
-      );
-
-      if (activeStatusFilters.length > 0) {
-        filteredOrders = filteredOrders.filter((order) =>
-          activeStatusFilters.includes(order.orderStatus)
-        );
-      }
-
-      // Set filtered data to the filtered results
-      setFilteredData(filteredOrders);
-    } else {
-      setFilteredData(orderData); // No filter applied, show all data
-    }
     const applyFilter = (filterData) => {
       if (filterData) {
         let filteredOrders = orderData;
-
-        // Filter logic for date, canteen, restaurant, and status filters...
-
+    
+        // Filter by canteen name
+        if (filterData.canteen) {
+          filteredOrders = filteredOrders.filter(
+            (order) => order.canteen.name === filterData.canteen
+          );
+        }
+    
+        // Filter by restaurant name
+        if (filterData.restaurant) {
+          filteredOrders = filteredOrders.filter(
+            (order) =>
+              order.restaurant && order.restaurant.name === filterData.restaurant
+          );
+        }
+    
+        // Filter by order status
+        const activeStatusFilters = Object.keys(filterData.statusFilter).filter(
+          (status) => filterData.statusFilter[status]
+        );
+    
+        if (activeStatusFilters.length > 0) {
+          filteredOrders = filteredOrders.filter((order) =>
+            activeStatusFilters.includes(order.orderStatus)
+          );
+        }
+    
         // Set filtered data to the filtered results
         setFilteredData(filteredOrders);
       } else {
-        // If no filter is applied (reset), show all data
-        setFilteredData(orderData);
+        setFilteredData(orderData); // No filter applied, show all data
       }
     };
-  };
+    
+    
 
   // Search functionality
   const handleSearch = (text) => {

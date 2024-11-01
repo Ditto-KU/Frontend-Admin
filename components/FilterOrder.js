@@ -29,6 +29,7 @@ export default function FilterOrder({
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCanteen, setSelectedCanteen] = useState("");
+  const [selectedCanteenId, setSelectedCanteenId] = useState();
   const [canteens, setCanteens] = useState([]); // Store canteen data
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
   const [restaurantList, setRestaurantList] = useState([]); // Store restaurant data
@@ -127,7 +128,7 @@ export default function FilterOrder({
   }, []);
 
   useEffect(() => {
-    if (!selectedCanteen) return;
+    if (!selectedCanteenId) return;
 
     const fetchRestaurantData = async () => {
       setLoading(true);
@@ -137,7 +138,7 @@ export default function FilterOrder({
           Authorization: `Bearer ${authToken}`,
         };
         let response = await fetch(
-          `https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${selectedCanteen}`,
+          `https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${selectedCanteenId}`,
           {
             method: "GET",
             headers: headersList,
@@ -176,16 +177,22 @@ export default function FilterOrder({
 
   // Submit filter criteria to parent (Order.js)
   const handleSubmit = () => {
+    const selectedCanteenName = selectedCanteen; // Already holds the name
+    const selectedRestaurantName = restaurantList.find(
+      (restaurant) => restaurant.shopId === selectedRestaurant
+    )?.shopName || "";
+  
     const filterData = {
       date: selectedDate,
-      canteen: selectedCanteen,
-      restaurant: selectedRestaurant,
-      statusFilter, // Order status filter
+      canteen: selectedCanteenName,
+      restaurant: selectedRestaurantName,
+      statusFilter,
     };
-
-    applyFilter(filterData); // Pass the filter data back to the parent component (Order.js)
-    toggleModal(); // Close the modal after submitting
+  
+    applyFilter(filterData);
+    toggleModal();
   };
+  
 
   return (
     <Modal
@@ -206,44 +213,52 @@ export default function FilterOrder({
                 onDateChange={setSelectedDate}
               /> */}
 
-              <Text>โรงอาหาร</Text>
-              <Picker
-                selectedValue={selectedCanteen}
-                onValueChange={(itemValue) => {
-                  setSelectedCanteen(itemValue);
-                  setSelectedRestaurant(""); // Clear restaurant selection when canteen changes
-                }}
-                style={styles.dropdownPicker}
-              >
-                <Picker.Item label="Select Canteen" value="" />
-                {canteens.map((canteen) => (
-                  <Picker.Item
-                    key={canteen.canteenId} // Unique identifier
-                    label={canteen.name}
-                    value={canteen.canteenId}
-                  />
-                ))}
-              </Picker>
+<Text>โรงอาหาร</Text>
+<Picker
+  selectedValue={selectedCanteenId}
+  onValueChange={(canteenId, itemIndex) => {
+    const selectedCanteen = canteens.find((canteen) => canteen.canteenId === canteenId);
+    setSelectedCanteen(selectedCanteen ? selectedCanteen.name : ""); // Set name for display
+    setSelectedCanteenId(canteenId); // Set canteenId for fetching restaurant data
+    setSelectedRestaurant(""); // Reset restaurant when canteen changes
+  }}
+  style={styles.dropdownPicker}
+>
+  <Picker.Item label="Select Canteen" value="" />
+  {canteens.map((canteen) => (
+    <Picker.Item
+      key={canteen.canteenId}
+      label={canteen.name}
+      value={canteen.canteenId}
+    />
+  ))}
+</Picker>
 
-              <Text>ร้านอาหาร</Text>
-              {selectedCanteen ? (
-                <Picker
-                  selectedValue={selectedRestaurant}
-                  onValueChange={(itemValue) => setSelectedRestaurant(itemValue)}
-                  style={styles.dropdownPicker}
-                >
-                  <Picker.Item label="Select Restaurant" value="" />
-                  {restaurantList.map((restaurant) => (
-                    <Picker.Item
-                      key={restaurant.shopId} // Ensure each item has a unique key
-                      label={restaurant.shopName}
-                      value={restaurant.shopId}
-                    />
-                  ))}
-                </Picker>
-              ) : (
-                <Text style={styles.disabledText}>Please select a canteen first</Text>
-              )}
+
+<Text>ร้านอาหาร</Text>
+{selectedCanteenId ? (
+  <Picker
+    selectedValue={selectedRestaurant}
+    onValueChange={(shopId) => {
+      setSelectedRestaurant(shopId); // Store shopId instead of shopName
+    }}
+    style={styles.dropdownPicker}
+  >
+    <Picker.Item label="Select Restaurant" value="" />
+    {restaurantList.map((restaurant) => (
+      <Picker.Item
+        key={restaurant.shopId}
+        label={restaurant.shopName}
+        value={restaurant.shopId}
+      />
+    ))}
+  </Picker>
+) : (
+  <Text style={styles.disabledText}>Please select a canteen first</Text>
+)}
+
+
+
 
 
 

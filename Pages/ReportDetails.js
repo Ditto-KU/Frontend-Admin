@@ -46,12 +46,12 @@ export default function ReportDetails() {
       const response = await fetch(endpoint, { method: "GET", headers: headersList });
       if (!response.ok) throw new Error("Failed to fetch user data");
       const data = await response.json(); // Fetching data
+      console.log(" report data:", report);
       console.log("Fetched user data:", data);
-      // const user = data.find((item) => item[idField] === report[idField]); // Locate user by ID
+      const user = data.find((item) => item[idField] === report[idField]); // Locate user by ID
       // if (!user || !user.email) throw new Error("User or email address not found.");
-  
-      // const email = user.email;
-      const email = "setthawut.a@ku.th";
+      console.log("User data:", user);
+      const email = user.email;
       const subject = "Your Verification Status";
       const body = "Your verification has failed. Please try again.";
   
