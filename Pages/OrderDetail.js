@@ -341,8 +341,8 @@ export default function OrderDetail() {
                                 <Text style={styles.sectionDetail}>Note: {order.address.note}</Text>
                             </View>
                         </View>
-                        </View>
-    
+                    </View>
+
                     {/* Cancel Order Button */}
                     <View style={styles.LeftDown}>
                         {showCancelButton && (
@@ -372,13 +372,13 @@ export default function OrderDetail() {
                                     {index + 1}. {item.menu.name} (Quantity: {item.quantity}) - {item.totalPrice} THB
                                 </Text>
                                 <Text style={styles.sectionDetail}>Special Instructions: {item.specialInstructions || "None"}</Text>
-                                <Text style={styles.sectionDetail}>Shop Name: {itrm.orderItem.shopName}</Text>
-                                <Text style={styles.sectionDetail}>Shop ID: {item.orderItem.shopId}</Text>
                                 {item.orderItemExtra.length > 0 && (
                                     <Text style={styles.sectionDetail}>
                                         Extras: {item.orderItemExtra.map((extra) => `${extra.name} (${extra.price} THB)`).join(", ")}
                                     </Text>
                                 )}
+                                <Text style={styles.sectionDetail}>Shop Name: {item.shop.shopName}</Text>
+                                <Text style={styles.sectionDetail}>Shop ID: {item.shop.shopId}</Text>
                             </View>
                         ))}
                     </View>

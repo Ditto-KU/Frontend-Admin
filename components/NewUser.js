@@ -72,7 +72,7 @@ export default function NewUser() {
   };
 
   // Filter the walkers and requesters verified today
-  const newWalkersToday = walkers.filter((walker) => walker.verifyAt && isToday(walker.verifyAt));
+  const newWalkersToday = walkers.filter((walker) => walker.registerAt && isToday(walker.registerAt));
   const newRequestersToday = requesters.filter((requester) => requester.createAt && isToday(requester.createAt));
 
   return (

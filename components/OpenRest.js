@@ -4,109 +4,95 @@ import {
   Text,
   ActivityIndicator,
   Alert,
-  FlatList,
   StyleSheet,
 } from "react-native";
 
 export default function CanteenAndShops() {
-  const [canteens, setCanteens] = useState([]); // Store canteens
-  const [totalShops, setTotalShops] = useState(0); // Store total shops
-  const [openShops, setOpenShops] = useState(0); // Store open shops
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [canteens, setCanteens] = useState([]);
+  const [totalShops, setTotalShops] = useState(0);
+  const [openShops, setOpenShops] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const authToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
-  // Fetch all canteens from the API
+  // Fetch all canteens from the API once on component mount
   useEffect(() => {
     const fetchCanteens = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        let headersList = {
+        const headers = {
           Accept: "*/*",
           Authorization: `Bearer ${authToken}`,
         };
+        const response = await fetch("https://ku-man-api.vimforlanie.com/admin/canteen", {
+          method: "GET",
+          headers,
+        });
 
-        let response = await fetch(
-          `https://ku-man-api.vimforlanie.com/admin/canteen`,
-          {
-            method: "GET",
-            headers: headersList,
-          }
-        );
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const canteensData = await response.json(); // Parse canteen data
-        setCanteens(canteensData); // Set canteen data
-      } catch (error) {
-        console.error("Error fetching canteens:", error);
-        setError(error.message);
-        Alert.alert("Error", error.message);
+        const data = await response.json();
+        setCanteens(data); // Store canteen data
+      } catch (err) {
+        setError("Failed to fetch canteens.");
+        console.error("Error fetching canteens:", err);
       } finally {
-        setLoading(false); // Stop loading after fetching canteen data
+        setLoading(false);
       }
     };
 
-    const intervalId = setInterval(fetchCanteens, 1000);
-    return () => clearInterval(intervalId); 
+    fetchCanteens();
   }, []);
 
-  // Fetch shops for all canteens
+  // Fetch shops for all canteens whenever canteens are updated
   useEffect(() => {
     const fetchShopsForCanteens = async () => {
-      if (canteens.length > 0) {
-        try {
-          let totalShopCount = 0;
-          let openShopCount = 0;
+      if (canteens.length === 0) return;
 
-          // Fetch shops for each canteen
-          const shopsPromises = canteens.map(async (canteen) => {
-            let headersList = {
-              Accept: "*/*",
-              Authorization: `Bearer ${authToken}`,
-            };
-            let response = await fetch(
-              `https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${canteen.canteenId}`,
-              {
-                method: "GET",
-                headers: headersList,
-              }
-            );
+      setLoading(true);
+      setError(null);
+      let totalShopCount = 0;
+      let openShopCount = 0;
 
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
+      try {
+        const shopsDataPromises = canteens.map(async (canteen) => {
+          const headers = {
+            Accept: "*/*",
+            Authorization: `Bearer ${authToken}`,
+          };
 
-            const shops = await response.json(); // Parse shop data
+          const response = await fetch(
+            `https://ku-man-api.vimforlanie.com/admin/canteen/shop?canteenId=${canteen.canteenId}`,
+            { method: "GET", headers }
+          );
 
-            // Count total shops and open shops
-            totalShopCount += shops.length;
-            openShopCount += shops.filter((shop) => shop.status === true).length;
-          });
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-          // Resolve all promises
-          await Promise.all(shopsPromises);
+          const shops = await response.json();
+          totalShopCount += shops.length;
+          openShopCount += shops.filter((shop) => shop.status === true).length;
+        });
 
-          // Set total and open shops count
-          setTotalShops(totalShopCount);
-          setOpenShops(openShopCount);
-        } catch (error) {
-          console.error("Error fetching shops:", error);
-          setError(error.message);
-          Alert.alert("Error", error.message);
-        }
+        await Promise.all(shopsDataPromises);
+
+        setTotalShops(totalShopCount);
+        setOpenShops(openShopCount);
+      } catch (err) {
+        setError("Failed to fetch shops data.");
+        console.error("Error fetching shops:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchShopsForCanteens();
   }, [canteens]);
 
-  // Calculate the percentage of open shops
   const openPercentage = totalShops > 0 ? ((openShops / totalShops) * 100).toFixed(2) : 0;
 
-  // Loading state
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -116,7 +102,6 @@ export default function CanteenAndShops() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <View style={styles.loadingContainer}>
@@ -127,8 +112,6 @@ export default function CanteenAndShops() {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.text}>Total Shops: {totalShops}</Text>
-      <Text style={styles.text}>Open Shops: {openShops}</Text> */}
       <Text style={styles.text}>Open Shops</Text>
       <Text style={styles.percentage}>{openPercentage}%</Text>
       <Text style={styles.subtext}>of all shops are open</Text>
@@ -136,7 +119,7 @@ export default function CanteenAndShops() {
   );
 }
 
-// Styles for the component
+// Styles
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fafbfc',
@@ -166,7 +149,7 @@ const styles = StyleSheet.create({
   percentage: {
     fontSize: 34,
     fontWeight: "bold",
-    color: "#4caf50", // Green color for the percentage
+    color: "#4caf50",
   },
   subtext: {
     fontSize: 16,
