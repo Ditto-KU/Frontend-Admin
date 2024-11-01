@@ -45,7 +45,7 @@ export default function Order_DB() {
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
           const filteredData = data.filter(
-            (item) => item.orderStatus !== "completed" && item.orderStatus !== "cancelled" && item.orderStatus !== "waitingAdmin"
+            (item) => item.orderStatus !== "completed" && item.orderStatus !== "canceled" && item.orderStatus !== "cancelled" && item.orderStatus !== "waitingAdmin"
           );
 
           const sortedData = filteredData.sort((a, b) => {

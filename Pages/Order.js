@@ -118,6 +118,7 @@ export default function Order() {
               lookingForWalker: 3,
               completed: 4,
               cancelled: 5,
+              canceled: 5,
             };
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
@@ -183,6 +184,8 @@ export default function Order() {
       case "completed":
         return "rgb(144, 238, 144)"; // Softer Green
       case "cancelled":
+        return "rgb(255, 182, 193)"; // Softer Pink
+      case "canceled":
         return "rgb(255, 182, 193)"; // Softer Pink
       case "lookingForWalker":
         return "rgb(211, 211, 211)"; // Softer Gray
