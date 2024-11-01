@@ -11,6 +11,7 @@ import {
     ActivityIndicator,
     Alert,
     Linking,
+    Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Assuming use of Expo for icon management
 import { useRoute } from "@react-navigation/native"; // To get the passed order data
@@ -251,20 +252,26 @@ export default function OrderDetail() {
                             {/* Walker Verification */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Walker Verification</Text>
-                                <Image
-                                    source={{
-                                        uri: walkerProfile
-                                            ? `data:image/jpeg;base64,${walkerProfile}`
-                                            : "https://via.placeholder.com/150",
-                                    }}
-                                    style={styles.profileImage}
+                                <View style={styles.imageContainer}>
+                                    <Image
+                                        source={{
+                                            uri: walkerProfile
+                                                ? `data:image/jpeg;base64,${walkerProfile}`
+                                                : "https://via.placeholder.com/150",
+                                        }}
+                                        style={styles.profileImage}
                                 />
+                                </View>
                             </View>
 
                             {/* Food Pickup Proof */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Food Pickup Proof</Text>
-                                <View style={styles.imageContainer}>
+                                <ScrollView
+                                    style={styles.imageContainer}
+                                    contentContainerStyle={{ alignItems: 'flex-start' }} // Center images within the scrollable area
+                                    horizontal={false} // Vertical scrolling
+                                >
                                     {order.orderItem.map((item, index) => (
                                         item.Photo && item.Photo.photoPath ? (
                                             <Image
@@ -275,18 +282,20 @@ export default function OrderDetail() {
                                                         : "https://via.placeholder.com/150",
                                                 }}
                                                 style={styles.proofImage}
+                                                resizeMode="contain" // Adjust the image size to fit within the view
                                             />
                                         ) : (
                                             <Text key={index}>No photo available</Text>
                                         )
                                     ))}
-                                </View>
+                                </ScrollView>
                             </View>
+
 
                             {/* Delivery Proof */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Delivery Proof</Text>
-                                <View style={styles.imageContainer}>
+                                <View style={styles.imageContainer }>
                                     {order.Photo && order.Photo.photoPath ? (
                                         <Image
                                             source={{
@@ -490,6 +499,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     imageContainer: {
+        maxHeight: Dimensions.get("window").height / 3, // Limit the height of the image container
         flexDirection: "column", // Display images in a row
         flexWrap: "wrap", // Wrap images to a new row if they overflow
     },
