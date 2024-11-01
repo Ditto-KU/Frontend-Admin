@@ -52,8 +52,25 @@ export default function ReportDetails() {
       // if (!user || !user.email) throw new Error("User or email address not found.");
       console.log("User data:", user);
       const email = user.email;
-      const subject = "Your Verification Status";
-      const body = "Your verification has failed. Please try again.";
+      const subject = "Response to Your Food Order Report";
+
+      // Draft body for the email, allowing for further input
+      const body = `
+      Dear Customer,
+      
+      Thank you for bringing this issue to our attention regarding your recent food order. 
+      Here is the information we have received from your report:
+      
+      - **Order ID**: [Order ID here]
+      - **Report Title**: [Report title here]
+      - **Description**: [Report description here]
+      
+      Please feel free to provide any additional information that might help us resolve this issue.
+      
+      Best Regards,
+      Customer Support Team
+      `;
+      
   
       // Generate the mailto URL with encoded content
       const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
