@@ -18,6 +18,7 @@ export default function VerifyDetail() {
   const { user } = route.params; // Destructure passed user data
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const newVerifyUser = user.verifyAt === null ? true : false;
   const [result, setResult] = useState(null); // To store Pass/Unpass result (true/false)
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
@@ -27,6 +28,8 @@ export default function VerifyDetail() {
     setResult(status); // Set the status (pass/unpass)
     setModalVisible(true); // Open the modal for confirmation
   };
+
+  console.log("User :", user);
 
   // Function to send data to backend and remove user
   const sendResultToBackend = async () => {
@@ -46,22 +49,22 @@ export default function VerifyDetail() {
       const email = user.email;
       const subject = "Your Verification Status";
       const body = "Your verification has failed. Please try again.";
-  
+
       if (!email) {
         throw new Error("Email address is missing.");
       }
-  
+
       // Properly encode the subject and body for the mailto link
       const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  
+
       console.log("Generated mailto URL:", emailUrl);
-  
+
       // Check if the device can open the mailto URL
       const supported = await Linking.canOpenURL(emailUrl);
       if (!supported) {
         throw new Error("No email client is available to handle the request.");
       }
-  
+
       // Open the user's email client
       await Linking.openURL(emailUrl);
       Alert.alert("Success", "An email prompt has been opened.");
@@ -70,8 +73,8 @@ export default function VerifyDetail() {
       Alert.alert("Error", error.message || "Failed to open email client. Please check your email app.");
     }
   };
-  
-  
+
+
 
   // Function to delete the user from the backend
   const deleteUserFromBackend = async () => {
@@ -84,7 +87,7 @@ export default function VerifyDetail() {
       const response = await fetch(
         "https://ku-man-api.vimforlanie.com/admin/verify",
         {
-          method: "PATCH", 
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
@@ -145,16 +148,20 @@ export default function VerifyDetail() {
       {/* Include Header */}
       <Header />
       <View style={styles.innerContainer}>
-        <View style={styles.imageContainer}>
-              <Image
-                source={{
-                  uri: user.profilePicture
-                    ? `data:image/jpeg;base64,${user.profilePicture}`
-                    : "https://via.placeholder.com/150",
-                }} // Display profile picture or a placeholder
-                style={styles.image}
-              />
-            </View>
+        {newVerifyUser ? (
+          <Text style={[styles.userInfoTitle, { fontSize: 54, color: 'red' }]}>
+            New Walker
+          </Text>
+        ) : null}        <View style={styles.imageContainer}>
+          <Image
+            source={{
+              uri: user.profilePicture
+                ? `data:image/jpeg;base64,${user.profilePicture}`
+                : "https://via.placeholder.com/150",
+            }} // Display profile picture or a placeholder
+            style={styles.image}
+          />
+        </View>
 
         {/* Display user details */}
         <Text style={styles.userInfoTitle}>User Details</Text>
