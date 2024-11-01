@@ -32,6 +32,7 @@ export default function FilterOrder({
   const [selectedCanteenId, setSelectedCanteenId] = useState();
   const [canteens, setCanteens] = useState([]); // Store canteen data
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState();
   const [restaurantList, setRestaurantList] = useState([]); // Store restaurant data
   const [statusFilter, setStatusFilter] = useState(initialStatusFilter); // Order status filters
   const [loading, setLoading] = useState(false); // Loading state
@@ -162,7 +163,8 @@ export default function FilterOrder({
     };
 
     fetchRestaurantData();
-  }, [selectedCanteen]);
+  }, [selectedCanteenId]); // Trigger when selectedCanteenId changes
+
 
   // Function to reset filters and close the modal
   const handleReset = () => {
@@ -178,21 +180,22 @@ export default function FilterOrder({
   // Submit filter criteria to parent (Order.js)
   const handleSubmit = () => {
     const selectedCanteenName = selectedCanteen; // Already holds the name
-    const selectedRestaurantName = restaurantList.find(
-      (restaurant) => restaurant.shopId === selectedRestaurant
-    )?.shopName || "";
-  
+    // const selectedRestaurantName = restaurantList.find(
+    //   (restaurant) => restaurant.shopId === selectedRestaurant
+    // )?.shopName || "";
+    console.log("Selected restaurant name is:", selectedRestaurant);
+
     const filterData = {
       date: selectedDate,
       canteen: selectedCanteenName,
-      restaurant: selectedRestaurantName,
+      restaurant: selectedRestaurant,
       statusFilter,
     };
-  
+
     applyFilter(filterData);
     toggleModal();
   };
-  
+
 
   return (
     <Modal
@@ -213,54 +216,61 @@ export default function FilterOrder({
                 onDateChange={setSelectedDate}
               /> */}
 
-<Text>โรงอาหาร</Text>
-<Picker
-  selectedValue={selectedCanteenId}
-  onValueChange={(canteenId, itemIndex) => {
-    const selectedCanteen = canteens.find((canteen) => canteen.canteenId === canteenId);
-    setSelectedCanteen(selectedCanteen ? selectedCanteen.name : ""); // Set name for display
-    setSelectedCanteenId(canteenId); // Set canteenId for fetching restaurant data
-    setSelectedRestaurant(""); // Reset restaurant when canteen changes
-  }}
-  style={styles.dropdownPicker}
->
-  <Picker.Item label="Select Canteen" value="" />
-  {canteens.map((canteen) => (
-    <Picker.Item
-      key={canteen.canteenId}
-      label={canteen.name}
-      value={canteen.canteenId}
-    />
-  ))}
-</Picker>
+              <Text>โรงอาหาร</Text>
+              <Picker
+                selectedValue={selectedCanteenId}
+                onValueChange={(canteenId) => {
+                  const canteenIdNumber = parseInt(canteenId); // Convert to integer if necessary
+                  console.log("Selected canteenId:", canteenIdNumber);
+                  const selectedCanteen = canteens.find(
+                    (canteen) => parseInt(canteen.canteenId) === canteenIdNumber // Ensure both are numbers
+                  );
+                  console.log("Available canteens:", canteens);
+                  console.log("Selected canteen:", selectedCanteen);
+                  setSelectedCanteen(selectedCanteen ? selectedCanteen.name : ""); // Set name for display
+                  setSelectedCanteenId(canteenIdNumber); // Store canteenId
+                  setSelectedRestaurant(""); // Reset restaurant when canteen changes
+                }}
+                style={styles.dropdownPicker}
+              >
+                <Picker.Item label="Select Canteen" value="" />
+                {canteens.map((canteen) => (
+                  <Picker.Item
+                    key={canteen.canteenId}
+                    label={canteen.name}
+                    value={canteen.canteenId}
+                  />
+                ))}
+              </Picker>
 
+              <Text>ร้านอาหาร</Text>
+              {selectedCanteenId ? (
+                <Picker
+                  selectedValue={selectedRestaurant}
+                  onValueChange={(shopId) => {
+                    const selectedRestaurantObj = restaurantList.find(
+                      (restaurant) => parseInt(restaurant.shopId) === parseInt(shopId) // Ensure both are numbers
+                    );
+                    const restaurantName = selectedRestaurantObj ? selectedRestaurantObj.shopName : "";
+                    console.log("Selected restaurant name:", restaurantName);
 
-<Text>ร้านอาหาร</Text>
-{selectedCanteenId ? (
-  <Picker
-    selectedValue={selectedRestaurant}
-    onValueChange={(shopId) => {
-      setSelectedRestaurant(shopId); // Store shopId instead of shopName
-    }}
-    style={styles.dropdownPicker}
-  >
-    <Picker.Item label="Select Restaurant" value="" />
-    {restaurantList.map((restaurant) => (
-      <Picker.Item
-        key={restaurant.shopId}
-        label={restaurant.shopName}
-        value={restaurant.shopId}
-      />
-    ))}
-  </Picker>
-) : (
-  <Text style={styles.disabledText}>Please select a canteen first</Text>
-)}
-
-
-
-
-
+                    setSelectedRestaurant(restaurantName); // Set restaurant name for display
+                    setSelectedRestaurantId(shopId); // Optionally store shopId if needed
+                  }}
+                  style={styles.dropdownPicker}
+                >
+                  <Picker.Item label="Select Restaurant" value="" />
+                  {restaurantList.map((restaurant) => (
+                    <Picker.Item
+                      key={restaurant.shopId}
+                      label={restaurant.shopName}
+                      value={restaurant.shopId}
+                    />
+                  ))}
+                </Picker>
+              ) : (
+                <Text style={styles.disabledText}>Please select a canteen first</Text>
+              )}
 
               {/* Order Status Checkboxes */}
               <Text>Order Status</Text>

@@ -38,7 +38,55 @@ export default function Order() {
     setModalVisible(!modalVisible);
   };
 
-  // Fetch order data from the API
+  // Apply filter function outside useEffect
+  const applyFilter = (filterData) => {
+    console.log("Data before filter:", orderData);
+    console.log("Filter data:", filterData);
+    if (filterData) {
+      let filteredOrders = orderData;
+
+      // Filter by canteen name
+      if (filterData.canteen) {
+        filteredOrders = filteredOrders.filter(
+          (order) =>
+            order.canteen &&
+            order.canteen.name.trim() === filterData.canteen.trim()
+        );
+        console.log("Filtered by canteen:", filteredOrders);
+      }
+
+      // Filter by restaurant name
+      if (filterData.restaurant) {
+        filteredOrders = filteredOrders.filter(
+          (order) =>
+            order.orderItem &&
+            order.orderItem.some(
+              (item) =>
+                item.shop && item.shop.shopName === filterData.restaurant
+            )
+        );
+        console.log("Filtered by restaurant:", filteredOrders);
+      }
+
+      // Filter by order status
+      const activeStatusFilters = Object.keys(filterData.statusFilter).filter(
+        (status) => filterData.statusFilter[status]
+      );
+
+      if (activeStatusFilters.length > 0) {
+        filteredOrders = filteredOrders.filter((order) =>
+          activeStatusFilters.includes(order.orderStatus)
+        );
+      }
+
+      // Set filtered data to the filtered results
+      setFilteredData(filteredOrders);
+    } else {
+      setFilteredData(orderData); // No filter applied, show all data
+    }
+  };
+
+  // Fetch order data from the API inside useEffect
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,7 +121,7 @@ export default function Order() {
             };
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
-          
+
           setOrderAmount(sortedData.length); // Set total order amount
           setOrderData(sortedData); // Set full order data
           setFilteredData(sortedData); // Show all data initially
@@ -89,46 +137,10 @@ export default function Order() {
       }
     };
 
-    fetchData() }, []);
+    fetchData(); // Fetch data when component mounts
+  }, []);
 
-    const applyFilter = (filterData) => {
-      if (filterData) {
-        let filteredOrders = orderData;
-    
-        // Filter by canteen name
-        if (filterData.canteen) {
-          filteredOrders = filteredOrders.filter(
-            (order) => order.canteen.name === filterData.canteen
-          );
-        }
-    
-        // Filter by restaurant name
-        if (filterData.restaurant) {
-          filteredOrders = filteredOrders.filter(
-            (order) =>
-              order.restaurant && order.restaurant.name === filterData.restaurant
-          );
-        }
-    
-        // Filter by order status
-        const activeStatusFilters = Object.keys(filterData.statusFilter).filter(
-          (status) => filterData.statusFilter[status]
-        );
-    
-        if (activeStatusFilters.length > 0) {
-          filteredOrders = filteredOrders.filter((order) =>
-            activeStatusFilters.includes(order.orderStatus)
-          );
-        }
-    
-        // Set filtered data to the filtered results
-        setFilteredData(filteredOrders);
-      } else {
-        setFilteredData(orderData); // No filter applied, show all data
-      }
-    };
-    
-    
+
 
   // Search functionality
   const handleSearch = (text) => {

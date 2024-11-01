@@ -46,6 +46,7 @@ export default function User() {
           throw new Error(`Error fetching walkers: ${walkerResponse.status}`);
         }
         let walkersData = await walkerResponse.json();
+        walkersData = walkersData.filter((walker) => walker.walkerId !== 0);
         setWalkers(walkersData);
 
         // Fetch requesters

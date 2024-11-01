@@ -8,6 +8,49 @@ export default function UserDetail() {
   const { user, userType } = route.params; // Extract user data and userType from route params
   const authToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+  
+  // Fetch order data from the API inside useEffect
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true); // Show loading indicator
+        const headersList = {
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
+        };
+        const response = await fetch(
+          "https://ku-man-api.vimforlanie.com/admin/order",
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+
+          setOrderData(sortedData); // Set full order data
+        } else {
+          throw new Error(`Unexpected content-type: ${contentType}`);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false); // Hide loading indicator
+      }
+    };
+
+    fetchData(); // Fetch data when component mounts
+  }, []);
+
+
   return (
     <View style={styles.container}>
       {/* Include Header */}
@@ -82,11 +125,6 @@ export default function UserDetail() {
               <Text style={styles.userInfo}>No address available</Text>
             )}
 
-            {/* Display order frequency */}
-            <Text style={styles.sectionTitle}>Order Frequency</Text>
-            <Text style={styles.userInfo}>
-              {user.orderFrequency || 0} orders
-            </Text>
           </View>
         </View>
       )}
