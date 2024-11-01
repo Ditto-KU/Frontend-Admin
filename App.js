@@ -72,26 +72,27 @@ function MainNavigator({ setAuthAdmin }) {
 
 
 export default function App() {
-  const [authAdmin, setAuthAdmin] = useState(null); // Changed authToken to authAdmin
-  const [isLoading, setIsLoading] = useState(true);
+
+  //export default function App() {
+  const [authAdmin, setAuthAdmin] = useState(null); // Token for authentication
+  const [isLoading, setIsLoading] = useState(true); // Loading state to wait for token check
   const [lastActivityTime, setLastActivityTime] = useState(Date.now());
   const inactivityTimeout = 10 * 60 * 1000; // 10 minutes
 
-  // Check for the token when the app starts
+  // Check for token on app start
   useEffect(() => {
     const checkToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem("authAdmin");
-        setAuthAdmin(storedToken || null);  // Ensure state reflects token presence
+        setAuthAdmin(storedToken || null);
       } catch (error) {
         console.error("Error retrieving token:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Stop loading after checking token
       }
     };
     checkToken();
   }, []);
-
 
   // Auto logout due to inactivity
   useEffect(() => {
@@ -100,43 +101,46 @@ export default function App() {
         Alert.alert("Session Expired", "You have been logged out due to inactivity.");
         handleLogout();
       }
-    }, 1000); // Check inactivity every second
-
+    }, 1000); // Check every second
     return () => clearInterval(intervalId);
   }, [lastActivityTime]);
 
+  // Reset activity timer
+  const resetActivityTimer = () => setLastActivityTime(Date.now());
 
-  const resetActivityTimer = () => {
-    setLastActivityTime(Date.now());
-  };
-
-  // Handle logout
+  // Logout handler
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("authAdmin");
-      setAuthAdmin(null);  // Clear the state immediately
-
+      setAuthAdmin(null); // Clear token from state
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
+  // Handle login success
+  const handleLoginSuccess = async (token) => {
+    try {
+      await AsyncStorage.setItem("authAdmin", token);
+      setAuthAdmin(token); // Update state with the new token
+      setLastActivityTime(Date.now()); // Reset timer on login
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
 
-  // Set up event listeners to detect user activity
+  // Set up activity listeners
   useEffect(() => {
     const events = ["keypress", "click", "touchstart"];
     const resetTimer = () => resetActivityTimer();
     events.forEach((event) => window.addEventListener(event, resetTimer));
-
-    return () => {
-      events.forEach((event) => window.removeEventListener(event, resetTimer));
-    };
+    return () => events.forEach((event) => window.removeEventListener(event, resetTimer));
   }, []);
 
-  // Show loading screen while checking token
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
+ 
+
+  if (isLoading) return <Text>Loading...</Text>; // Display while checking token
+
 
   console.log("authAdminauthAdmin", authAdmin);
   const isNUll = AsyncStorage.getItem("authAdmin");

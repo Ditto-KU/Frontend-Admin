@@ -38,7 +38,7 @@ export default function User() {
           Authorization: `Bearer ${authToken}`,
         };
         // Fetch walkers
-        let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walker", {
+        let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walkerALL", {
           method: "GET",
           headers: headersList,
         });

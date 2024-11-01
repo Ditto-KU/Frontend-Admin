@@ -5,6 +5,7 @@ import * as MailComposer from "expo-mail-composer";
 import Head from "../components/Header";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
+
 export default function ReportDetails() {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const route = useRoute();
@@ -18,9 +19,8 @@ export default function ReportDetails() {
   };
 
   const handleEmail = async () => {
-    setIsSendingEmail(true); // Start loading indicator
-  
     try {
+      console.log("Sending email...");
       // Authorization headers with admin token
       const headersList = {
         Accept: "*/*",
@@ -28,60 +28,47 @@ export default function ReportDetails() {
         "Content-Type": "application/json",
       };
   
-      // Determine which endpoint to fetch the user data from
       let endpoint = "";
       let idField = "";
+  
+      // Determine which endpoint to fetch based on reportBy field
       if (report.reportBy === "requester") {
         endpoint = `https://ku-man-api.vimforlanie.com/admin/requester`;
         idField = "requesterId";
-      } else {
-        endpoint = `https://ku-man-api.vimforlanie.com/admin/walker`;
+      } else if (report.reportBy === "walker") {
+        endpoint = `https://ku-man-api.vimforlanie.com/admin/walkerALL`;
         idField = "walkerId";
+      } else {
+        throw new Error("Unknown report origin type.");
       }
   
-      // Fetch the list of users (walkers or requesters) from the endpoint
+      // Fetch user data based on report's requester or walker ID
       const response = await fetch(endpoint, { method: "GET", headers: headersList });
       if (!response.ok) throw new Error("Failed to fetch user data");
+      const data = await response.json(); // Fetching data
+      console.log("Fetched user data:", data);
+      // const user = data.find((item) => item[idField] === report[idField]); // Locate user by ID
+      // if (!user || !user.email) throw new Error("User or email address not found.");
   
-      const data = await response.json(); // List of users
-      console.log("Fetched data:", data);
+      // const email = user.email;
+      const email = "setthawut.a@ku.th";
+      const subject = "Your Verification Status";
+      const body = "Your verification has failed. Please try again.";
   
-      // Find the user matching the ID in the report
-      const user = data.find((item) => item[idField] === report[idField]);
-      console.log("Matched user:", user);
+      // Generate the mailto URL with encoded content
+      const emailUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      console.log("Generated mailto URL:", emailUrl);
   
-      // Ensure the user is found and email is available
-      if (!user || !user.email) {
-        throw new Error("Email address is missing.");
-      }
+      // Check if the device can open the mailto URL
+      const supported = await Linking.canOpenURL(emailUrl);
+      if (!supported) throw new Error("No email client available to handle the request.");
   
-      const email = user.email; // Correctly access the email
-      console.log("User email:", email);
-  
-      // Prepare email content
-      const { title, description, reportId, reportBy, requesterId, walkerId } = report;
-      const userId = reportBy === 'requester' ? requesterId : walkerId;
-      const subject = `Report Notification - Report ID: ${reportId}`;
-      const body = `Dear ${reportBy} ${userId},\n\n We have received your report:\n\n Title: ${title}\n Description: ${description}\n\n We will review it shortly.\n\n Best Regards,\nSupport Team`;
-  
-      // Properly encode the subject and body for the mailto link
-      const encodedSubject = encodeURIComponent(subject);
-      const encodedBody = encodeURIComponent(body).replace(/%0A/g, '\n'); // Replace encoded newlines for better readability
-  
-      // Create the mailto link
-      const mailtoURL = `mailto:${email}?subject=${encodedSubject}&body=${encodedBody}`;
-  
-      // Open the user's email client
-      const supported = await Linking.canOpenURL(mailtoURL);
-      if (!supported) throw new Error("Email client is not available");
-  
-      await Linking.openURL(mailtoURL);
-      Alert.alert("Success", "Email client opened!");
+      // Open the email client
+      await Linking.openURL(emailUrl);
+      Alert.alert("Success", "An email prompt has been opened.");
     } catch (error) {
-      console.error("Error sending email:", error);
-      Alert.alert("Error", "Failed to open the email client. Please try again.");
-    } finally {
-      setIsSendingEmail(false); // Stop loading indicator
+      console.error("Failed to send email:", error);
+      Alert.alert("Error", error.message || "Failed to open email client. Please check your email app.");
     }
   };
   
@@ -130,8 +117,7 @@ export default function ReportDetails() {
           <FontAwesome name="list-alt" size={20} color="#fff" />
           <Text style={styles.buttonText}>Show Order</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleEmail} disabled={isSendingEmail}>
-          {isSendingEmail ? <ActivityIndicator color="#fff" /> : <MaterialIcons name="email" size={20} color="#fff" />}
+        <TouchableOpacity style={styles.button} onPress={handleEmail}>
           <Text style={styles.buttonText}>Send Email</Text>
         </TouchableOpacity>
       </View>

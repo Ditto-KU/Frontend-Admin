@@ -20,7 +20,7 @@ export default function FilterOrder({
 }) {
   // Initial states for filters
   const initialStatusFilter = {
-    waitingAdmin: false,
+    // waitingAdmin: false,
     inProgress: false,
     lookingForWalker: false,
     completed: false,
@@ -36,7 +36,7 @@ export default function FilterOrder({
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
   const authToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get("window").width)).current; // Set initial value to off-screen right
 
@@ -136,10 +136,10 @@ export default function FilterOrder({
     setSelectedCanteen(""); // Reset canteen
     setSelectedRestaurant(""); // Reset restaurant
     setStatusFilter(initialStatusFilter); // Reset status filters
-    applyFilter(null); 
+    applyFilter(null);
     toggleModal(); // Close the modal
   };
-  
+
 
   // Submit filter criteria to parent (Order.js)
   const handleSubmit = () => {
@@ -163,7 +163,7 @@ export default function FilterOrder({
     >
       <TouchableWithoutFeedback onPress={toggleModal}>
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => {}}>
+          <TouchableWithoutFeedback onPress={() => { }}>
             <Animated.View
               style={[styles.modalContainer, { transform: [{ translateX: slideAnim }] }]}
             >
@@ -175,16 +175,16 @@ export default function FilterOrder({
 
               <Text>โรงอาหาร</Text>
               <Picker
-                selectedValue={selectedCanteen} // The selected canteen ID will be stored here
-                onValueChange={(itemValue) => setSelectedCanteen(itemValue)} // Set the numeric ID as the selected canteen
+                selectedValue={selectedCanteen}
+                onValueChange={(itemValue) => setSelectedCanteen(itemValue)}
                 style={styles.dropdownPicker}
               >
                 <Picker.Item label="Select Canteen" value="" />
                 {canteens.map((canteen) => (
                   <Picker.Item
-                    key={canteen.id} // Unique key for each item
-                    label={canteen.name} // Display the canteen name in the dropdown
-                    value={canteen.canteenId} // Use the canteenId as the value
+                    key={canteen.canteenId} // Ensure this is a unique identifier
+                    label={canteen.name}
+                    value={canteen.canteenId}
                   />
                 ))}
               </Picker>
@@ -192,16 +192,16 @@ export default function FilterOrder({
               <Text>ร้านอาหาร</Text>
               {selectedCanteen ? (
                 <Picker
-                  selectedValue={selectedRestaurant} // The selected restaurant ID will be stored here
-                  onValueChange={(itemValue) => setSelectedRestaurant(itemValue)} // Set the restaurant's shopId as the selected restaurant
+                  selectedValue={selectedRestaurant}
+                  onValueChange={(itemValue) => setSelectedRestaurant(itemValue)}
                   style={styles.dropdownPicker}
                 >
                   <Picker.Item label="Select Restaurant" value="" />
                   {restaurantList.map((restaurant) => (
                     <Picker.Item
-                      key={restaurant.shopId} // Unique key for each restaurant
-                      label={restaurant.shopName} // Display the shop name in the dropdown
-                      value={restaurant.shopId} // Use the shopId as the value
+                      key={restaurant.shopId} // Ensure this is unique for each item
+                      label={restaurant.shopName}
+                      value={restaurant.shopId}
                     />
                   ))}
                 </Picker>
@@ -210,6 +210,7 @@ export default function FilterOrder({
                   Please select a canteen first
                 </Text>
               )}
+
 
               {/* Order Status Checkboxes */}
               <Text>Order Status</Text>

@@ -84,7 +84,7 @@ export default function VerifyDetail() {
       const response = await fetch(
         "https://ku-man-api.vimforlanie.com/admin/verify",
         {
-          method: "DELETE", 
+          method: "PATCH", 
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
@@ -146,15 +146,15 @@ export default function VerifyDetail() {
       <Header />
       <View style={styles.innerContainer}>
         <View style={styles.imageContainer}>
-          <Image
-            source={{
-              uri: user.profilePicture
-                ? `https://ku-man.runnakjeen.com/${user.profilePicture}` // If profilePicture is a valid path
-                : "https://via.placeholder.com/150", // Fallback image
-            }}
-            style={styles.image}
-          />
-        </View>
+              <Image
+                source={{
+                  uri: user.profilePicture
+                    ? `data:image/jpeg;base64,${user.profilePicture}`
+                    : "https://via.placeholder.com/150",
+                }} // Display profile picture or a placeholder
+                style={styles.image}
+              />
+            </View>
 
         {/* Display user details */}
         <Text style={styles.userInfoTitle}>User Details</Text>

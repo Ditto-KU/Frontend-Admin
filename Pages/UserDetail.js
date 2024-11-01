@@ -56,6 +56,17 @@ export default function UserDetail() {
         <View style={styles.card}>
           <View style={styles.requesterContainer}>
             {/* Display address for requesters */}
+            <View style={styles.facePhotoContainer}>
+              <Text style={styles.sectionTitle}>Face Photo</Text>
+              <Image
+                source={{
+                  uri: user.profilePicture
+                    ? `data:image/jpeg;base64,${user.profilePicture}`
+                    : "https://via.placeholder.com/150",
+                }} // Display profile picture or a placeholder
+                style={styles.facePhoto}
+              />
+            </View>
             <Text style={styles.sectionTitle}>Address</Text>
             {user.address && user.address.length > 0 ? (
               user.address.map((addr, index) => (

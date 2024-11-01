@@ -45,14 +45,14 @@ export default function Order_DB() {
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
           const filteredData = data.filter(
-            (item) => item.orderStatus !== "completed" && item.orderStatus !== "cancelled"
+            (item) => item.orderStatus !== "completed" && item.orderStatus !== "cancelled" && item.orderStatus !== "waitingAdmin"
           );
 
           const sortedData = filteredData.sort((a, b) => {
             const statusOrder = {
-              waitingAdmin: 1,
-              inProgress: 2,
-              lookingForWalker: 3,
+              // waitingAdmin: 1,
+              inProgress: 1,
+              lookingForWalker: 2,
               // completed: 4,
               // cancelled: 5,
             };
@@ -92,9 +92,9 @@ export default function Order_DB() {
   // const cancelled = orderData.filter(
   //   (order) => order.orderStatus === "cancelled"
   // ).length;
-  const waitingAdmin = orderData.filter(
-    (order) => order.orderStatus === "waitingAdmin"
-  ).length;
+  // const waitingAdmin = orderData.filter(
+  //   (order) => order.orderStatus === "waitingAdmin"
+  // ).length;
 
   // Function to handle order detail navigation
   const gotoOrderDetail = (orderID) => {
@@ -114,7 +114,7 @@ export default function Order_DB() {
     <View style={styles.container}>
       {/* Order List */}
       <View style={styles.orderList}>
-        <Text style={styles.header}>Orders ({totalOrders})</Text>
+        <Text style={styles.header}>Orders In Process ({totalOrders})</Text>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {orderData.map((order, index) => {
             let backgroundColor = "#FFF"; // Default background
@@ -126,8 +126,8 @@ export default function Order_DB() {
             //   backgroundColor = "rgb(255, 182, 193)"; // Softer Pink
             else if (order.orderStatus === "lookingForWalker")
               backgroundColor = "rgb(211, 211, 211)"; // Softer Gray
-            else if (order.orderStatus === "waitingAdmin")
-              backgroundColor = "rgb(255, 222, 173)"; // Softer Peach
+            // else if (order.orderStatus === "waitingAdmin")
+            //   backgroundColor = "rgb(255, 222, 173)"; // Softer Peach
 
             return (
               <TouchableOpacity
@@ -167,11 +167,11 @@ export default function Order_DB() {
               value: lookingForWalker,
               color: "rgb(211, 211, 211)",
             }, // Softer Gray
-            {
-              title: "waitingAdmin",
-              value: waitingAdmin,
-              color: "rgb(255, 222, 173)",
-            }, // Softer Peach
+            // {
+            //   title: "waitingAdmin",
+            //   value: waitingAdmin,
+            //   color: "rgb(255, 222, 173)",
+            // }, // Softer Peach
           ]}
           radius={50} // Size of the pie chart
           lineWidth={25} // Line thickness
@@ -184,7 +184,7 @@ export default function Order_DB() {
         />
 
         <View style={styles.legend}>
-          <View style={styles.legendItem}>
+          {/* <View style={styles.legendItem}>
             <View
               style={[
                 styles.legendColor,
@@ -192,7 +192,7 @@ export default function Order_DB() {
               ]}
             />
             <Text style={styles.legendText}>waitingAdmin: {waitingAdmin}</Text>
-          </View>
+          </View> */}
           <View style={styles.legendItem}>
             <View
               style={[

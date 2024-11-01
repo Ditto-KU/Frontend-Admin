@@ -19,7 +19,7 @@ export default function Main({ setAuthAdmin }) {
       <Sidebar style={PageStyle.M_sidebar} setAuthAdmin={setAuthAdmin}/>
       <View style={PageStyle.M_container_DB}>
         <View style={PageStyle.M_containerUp_DB}>
-          <ContactSupport_DB style={PageStyle.M_CS_DB} setAuthAdmin={setAuthAdmin}/>
+          <ContactSupport_DB style={PageStyle.M_CS_DB}/>
           <Order_DB style={PageStyle.M_order_DB} />
         </View>
         <View style={PageStyle.M_containerDown_DB}>

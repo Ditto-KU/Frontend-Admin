@@ -111,7 +111,7 @@ export default function OrderDetail() {
                 };
 
                 // Fetch walkers
-                let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walker", {
+                let walkerResponse = await fetch("https://ku-man-api.vimforlanie.com/admin/walkerALL", {
                     method: "GET",
                     headers: headersList,
                 });
@@ -247,9 +247,9 @@ export default function OrderDetail() {
                     <View style={styles.leftColumnContainer}>
                         {/* Left column part 1 */}
                         <View style={styles.leftColumnPart}>
-                            {/* User Verification */}
+                            {/* Walker Verification */}
                             <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>User Verification</Text>
+                                <Text style={styles.sectionTitle}>Walker Verification</Text>
                                 <Image
                                     source={{ 
                                         uri: walkerProfile
@@ -377,11 +377,12 @@ export default function OrderDetail() {
                         {order.orderItem.map((item, index) => (
                             <View key={item.orderItemId} style={styles.orderItem}>
                                 <Text style={styles.sectionDetail}>
-                                    {index + 1}. {item.menu.name} - {item.totalPrice} THB
+                                    {index + 1}. {item.menu.name}  ({item.quantity}) - {item.totalPrice} THB
                                 </Text>
                                 <Text style={styles.sectionDetail}>
                                     Special Instructions: {item.specialInstructions || "None"}
                                 </Text>
+                                <Text style={styles.sectionDetail}>Shop ID: {item.shopId}</Text>
                                 {item.orderItemExtra.length > 0 && (
                                     <Text style={styles.sectionDetail}>
                                         Extra:{" "}
@@ -398,11 +399,6 @@ export default function OrderDetail() {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Canteen Information</Text>
                         <Text style={styles.sectionDetail}>Canteen Name: {order.canteen.name}</Text>
-                        {order.orderItem.map((item, index) => (
-                            <View key={index}>
-                            <Text style={styles.sectionDetail}>Shop ID: {item.shopId}</Text>
-                            </View>
-                        ))}
                     </View>
 
                     {/* Pricing Info */}

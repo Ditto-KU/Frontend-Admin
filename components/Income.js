@@ -73,7 +73,7 @@ export default function Income() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Income</Text>
-      <Text style={styles.total}>${totalIncome.toFixed(2)}</Text>
+      <Text style={styles.total}>{totalIncome.toFixed(2)} Baht</Text>
     </View>
   );
 }

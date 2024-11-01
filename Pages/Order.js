@@ -24,6 +24,7 @@ export default function Order() {
   const [error, setError] = useState(null); // Error state
   const [searchText, setSearchText] = useState(""); // State for search input
   const [modalVisible, setModalVisible] = useState(false); // Filter modal visibility
+  const [OrderAmount, setOrderAmount] = useState(); // State for total order amount
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
@@ -72,7 +73,8 @@ export default function Order() {
             };
             return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
           });
-
+          
+          setOrderAmount(sortedData.length); // Set total order amount
           setOrderData(sortedData); // Set full order data
           setFilteredData(sortedData); // Show all data initially
         } else {
@@ -220,7 +222,7 @@ export default function Order() {
     <View style={styles.OR_container}>
       <Header />
       <View style={styles.OR_header}>
-        <Text style={styles.OR_title}>Order List</Text>
+        <Text style={styles.OR_title}>Order List ({OrderAmount})</Text>
         <View style={styles.OR_searchContainer}>
           <TextInput
             style={styles.OR_searchInput}

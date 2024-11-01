@@ -5,6 +5,7 @@ import { LineChart } from 'react-native-chart-kit';
 export default function LineGraph() {
   const [orderData, setOrderData] = useState([]); // Store order counts
   const [loading, setLoading] = useState(true);
+  const [orderNumber, setOrderNumber] = useState(); // Store the total number of orders
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
@@ -27,9 +28,13 @@ export default function LineGraph() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        
+
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
+
+          setOrderNumber(data.length);
 
           // Time slots from 6 AM to 6 PM
           const timeLabels = [
@@ -76,7 +81,7 @@ export default function LineGraph() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Orders Throughout the Day</Text>
+      <Text style={styles.title}>Orders Throughout the Day ({orderNumber})</Text>
       <View style={styles.chartContainer}>
         <LineChart
           data={{

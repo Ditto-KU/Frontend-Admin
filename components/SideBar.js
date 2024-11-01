@@ -51,7 +51,7 @@ export default function SideBar({ setAuthAdmin }) {
           onPressIn={() => handlePressIn("ContactSupport")}
           onPressOut={handlePressOut}
           onPress={() =>
-            navigation.navigate("ContactSupport", { authAdmin: authAdmin })
+            navigation.navigate("ContactSupport")
           }
         >
           <View style={ComponentStyle.sidebarIconAndText}>
