@@ -1,56 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import navigation hook
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Dimensions,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Head from "../components/Header";
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function Cafeteria() {
-  const navigation = useNavigation(); // Hook to access navigation
-  const [canteens, setCanteens] = useState([]); // State to hold fetched canteen data
-  const [loading, setLoading] = useState(true); // State to handle loading
-  const [error, setError] = useState(null); // State to handle errors
+  const navigation = useNavigation();
+  const [canteens, setCanteens] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const authToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhZG1pbjIiLCJpYXQiOjE3MjgxMjg1MDIsImV4cCI6MTczNjc2ODUwMn0.gqSAFiuUiAAnZHupDmJdlOqlKz2rqPxAbPVffcKt1Is";
 
-  // Function to handle button press and navigate to RestaurantInCafeteria screen
+  // Handle button press and navigate to RestaurantInCafeteria screen
   const handleCafeteriaPress = (canteenId, cafeteriaName) => {
-    navigation.navigate("RestaurantInCafeteria", { canteenId, cafeteriaName }); // Navigate and pass canteenId and name
+    navigation.navigate("RestaurantInCafeteria", { canteenId, cafeteriaName });
   };
 
   // Fetch canteen data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let headersList = {
+        const headersList = {
           Accept: "*/*",
           Authorization: `Bearer ${authToken}`,
         };
 
-        let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/canteen`, { 
+        const response = await fetch("https://ku-man-api.vimforlanie.com/admin/canteen", {
           method: "GET",
-          headers: headersList
+          headers: headersList,
         });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json(); // Parse the response to JSON
-        setCanteens(data); // Set the canteen data to the state
+        const data = await response.json();
+        setCanteens(data);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError(error.message);
         Alert.alert("Error", error.message);
       } finally {
-        setLoading(false); // Stop loading after fetching the data
+        setLoading(false);
       }
     };
 
-    // Set an interval to fetch data every second
-    const intervalId = setInterval(fetchData, 1000); // Fetch every 1000 ms (1 second)
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
-  }, []); // Empty dependency array to run the effect only once on component mount
+    fetchData();
+  }, []);
 
   // Render loading state
   if (loading) {
@@ -71,71 +77,76 @@ export default function Cafeteria() {
     );
   }
 
+  // Render each cafeteria item
+  const renderCafeteriaItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.CA_listItem}
+      onPress={() => handleCafeteriaPress(item.canteenId, item.name)}
+    >
+      <Text style={styles.CA_listText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.CA_container}>
       <Head />
       <View style={styles.CA_header}>
         <Text style={styles.CA_title}>Cafeteria List</Text>
       </View>
-      {/* Cafeteria Buttons in Column, dynamically rendered from fetched data */}
-      <View style={styles.CA_column}>
-        {canteens.map((canteen) => (
-          <TouchableOpacity
-            key={canteen.canteenId} // Unique key for each button
-            style={styles.CA_button}
-            onPress={() => handleCafeteriaPress(canteen.canteenId, canteen.name)} // Pass canteenId and name
-          >
-            <Text style={styles.CA_buttonText}>{canteen.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+
+      {/* FlatList for rendering cafeteria buttons */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <FlatList
+          data={canteens}
+          renderItem={renderCafeteriaItem}
+          keyExtractor={(item) => item.canteenId.toString()}
+          contentContainerStyle={styles.CA_listContainer}
+        />
+      </ScrollView>
     </View>
   );
 }
 
-// Styles for Cafeteria with column layout (no grid)
+// Styles for the Cafeteria component
 const styles = StyleSheet.create({
   CA_container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F0F0F0", // Softer background for better contrast
+    backgroundColor: "#F5F5F5",
   },
   CA_header: {
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
-    width: "100%", // Full width for balance
+    width: "100%",
   },
   CA_title: {
-    fontSize: 36,
-    fontWeight: "600",
+    fontSize: 30,
+    fontWeight: "bold",
     color: "#333",
     textAlign: "center",
-    marginBottom: 20,
   },
-  CA_column: {
+  CA_listContainer: {
+    maxHeight: Dimensions.get("screen").height * 0.8, // Set max height for scrollable area
     flex: 1,
-    justifyContent: "flex-start", // Align buttons to the top
-    alignItems: "center", // Center buttons horizontally
-    paddingVertical: 10,
+    paddingBottom: 20,
   },
-  CA_button: {
-    width: "70%", // Occupies most of the width of the screen
-    paddingVertical: 36, // Increase padding for better touchable area
-    marginVertical: 16,
-    backgroundColor: "#FFF",
-    borderRadius: 12, // Keep slightly rounded corners
-    alignItems: "center",
+  CA_listItem: {
+    flexDirection: "row",
     justifyContent: "center",
+    padding: 15,
+    marginVertical: 8,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4, // Light elevation for depth
+    elevation: 5,
   },
-  CA_buttonText: {
-    fontSize: 24, // Increased font size for better readability
-    color: "#444", // Soft color for the text
+  CA_listText: {
+    fontSize: 24,
+    color: "#444",
     textAlign: "center",
   },
   loadingContainer: {
@@ -143,4 +154,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
 });
+

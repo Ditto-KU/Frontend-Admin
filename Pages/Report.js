@@ -173,6 +173,8 @@ export default function Report() {
         />
       </ScrollView>
 
+      
+
       {/* Include the FilterReport and pass props */}
       <FilterReport
         modalVisible={modalVisible}

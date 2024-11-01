@@ -242,19 +242,20 @@ export default function OrderDetail() {
         <View style={styles.container}>
             <Header />
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/* Left column */}
+                {/* Left Column */}
                 <View style={styles.leftColumn}>
                     <View style={styles.leftColumnContainer}>
-                        {/* Left column part 1 */}
-                        <View style={styles.leftColumnPart}>
+
+                        {/* Left Column - Left Part */}
+                        <View style={styles.leftColumnContainerLeft}>
                             {/* Walker Verification */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Walker Verification</Text>
                                 <Image
-                                    source={{ 
+                                    source={{
                                         uri: walkerProfile
-                                        ? `data:image/jpeg;base64,${walkerProfile}`
-                                        : "https://via.placeholder.com/150" 
+                                            ? `data:image/jpeg;base64,${walkerProfile}`
+                                            : "https://via.placeholder.com/150",
                                     }}
                                     style={styles.profileImage}
                                 />
@@ -264,21 +265,15 @@ export default function OrderDetail() {
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Food Pickup Proof</Text>
                                 <View style={styles.imageContainer}>
-                                    {order.orderItem?.map((item, index) => (
-                                        item.Photo?.photoPath ? (
+                                    {order.orderItem.map((item, index) => (
+                                        item.Photo && item.Photo.photoPath ? (
                                             <Image
                                                 key={index}
-                                                source={{ 
+                                                source={{
                                                     uri: item.Photo.photoPath
-                                                    ? `data:image/jpeg;base64,${item.Photo.photoPath}`
-                                                    : "https://via.placeholder.com/150" 
+                                                        ? `data:image/jpeg;base64,${item.Photo.photoPath}`
+                                                        : "https://via.placeholder.com/150",
                                                 }}
-                                                // source={{ 
-                                                //     uri: item.Photo.photoPath
-                                                //     ? item.Photo.photoPath
-                                                //     : "https://via.placeholder.com/150" 
-                                                // }}
-                                                // source={{ uri: item.Photo.photoPath }}
                                                 style={styles.proofImage}
                                             />
                                         ) : (
@@ -288,34 +283,32 @@ export default function OrderDetail() {
                                 </View>
                             </View>
 
-
-
                             {/* Delivery Proof */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Delivery Proof</Text>
-                                <View style={styles.imageContainer}>    
-                                    {order.Photo ? (
-                                    <Image
-                                        source={{ 
-                                        uri: order.Photo
-                                            ? `data:image/jpeg;base64,${order.Photo}`
-                                            : "https://via.placeholder.com/150" 
-                                        }}
-                                        style={styles.proofImage}
-                                    />
+                                <View style={styles.imageContainer}>
+                                    {order.Photo && order.Photo.photoPath ? (
+                                        <Image
+                                            source={{
+                                                uri: order.Photo.photoPath
+                                                    ? `data:image/jpeg;base64,${order.Photo.photoPath}`
+                                                    : "https://via.placeholder.com/150",
+                                            }}
+                                            style={styles.proofImage}
+                                        />
                                     ) : (
-                                    <Text>No photo available</Text>
+                                        <Text>No photo available</Text>
                                     )}
                                 </View>
                             </View>
                         </View>
 
-                        {/* Left column part 2 */}
-                        <View style={styles.leftColumnPart}>
+                        {/* Left Column - Right Part */}
+                        <View style={styles.leftColumnContainerRight}>
                             {/* Requester Info */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Requester Info</Text>
-                                <Text style={styles.sectionDetail}>RequesterId: {order.requester.requesterId}</Text>
+                                <Text style={styles.sectionDetail}>Requester ID: {order.requester.requesterId}</Text>
                                 <Text style={styles.sectionDetail}>Phone: {order.requester.phoneNumber}</Text>
                                 <TouchableOpacity
                                     style={styles.callButton}
@@ -329,7 +322,7 @@ export default function OrderDetail() {
                             {/* Walker Info */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Walker Info</Text>
-                                <Text style={styles.sectionDetail}>WalkerId: {order.walker.walkerId}</Text>
+                                <Text style={styles.sectionDetail}>Walker ID: {order.walker.walkerId}</Text>
                                 <Text style={styles.sectionDetail}>Phone: {order.walker.phoneNumber}</Text>
                                 <TouchableOpacity
                                     style={styles.callButton}
@@ -348,14 +341,14 @@ export default function OrderDetail() {
                                 <Text style={styles.sectionDetail}>Note: {order.address.note}</Text>
                             </View>
                         </View>
-                    </View>
-
-                    {/* Cancel Order Button at the bottom of Left Column */}
+                        </View>
+    
+                    {/* Cancel Order Button */}
                     <View style={styles.LeftDown}>
                         {showCancelButton && (
                             <TouchableOpacity
                                 style={styles.cancelButton}
-                                onPress={() => setConfirmModalVisible(true)} // Open confirmation modal
+                                onPress={() => setConfirmModalVisible(true)}
                             >
                                 <Text style={styles.cancelButtonText}>Cancel order</Text>
                             </TouchableOpacity>
@@ -363,12 +356,11 @@ export default function OrderDetail() {
                     </View>
                 </View>
 
-                {/* Right column */}
+
+                {/* Right Column */}
                 <View style={styles.rightColumn}>
                     {/* Order Info */}
                     <Text style={styles.orderTitle}>Order: {order.orderId}</Text>
-
-                    {/* Order Status */}
                     <Text style={styles.orderTitle}>Status: {order.orderStatus}</Text>
 
                     {/* Ordered Items */}
@@ -377,18 +369,13 @@ export default function OrderDetail() {
                         {order.orderItem.map((item, index) => (
                             <View key={item.orderItemId} style={styles.orderItem}>
                                 <Text style={styles.sectionDetail}>
-                                    {index + 1}. {item.menu.name}  ({item.quantity}) - {item.totalPrice} THB
+                                    {index + 1}. {item.menu.name} (Quantity: {item.quantity}) - {item.totalPrice} THB
                                 </Text>
-                                <Text style={styles.sectionDetail}>
-                                    Special Instructions: {item.specialInstructions || "None"}
-                                </Text>
+                                <Text style={styles.sectionDetail}>Special Instructions: {item.specialInstructions || "None"}</Text>
                                 <Text style={styles.sectionDetail}>Shop ID: {item.shopId}</Text>
                                 {item.orderItemExtra.length > 0 && (
                                     <Text style={styles.sectionDetail}>
-                                        Extra:{" "}
-                                        {item.orderItemExtra
-                                            .map((extra) => extra.optionItem.name)
-                                            .join(", ")}
+                                        Extras: {item.orderItemExtra.map((extra) => `${extra.name} (${extra.price} THB)`).join(", ")}
                                     </Text>
                                 )}
                             </View>
@@ -418,8 +405,8 @@ export default function OrderDetail() {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.confirmModalContainer}>
-                        <Text style={styles.modalTitle}>ยกเลิกออร์เดอร์</Text>
-                        <Text style={styles.modalSubtitle}>สาเหตุ :</Text>
+                        <Text style={styles.modalTitle}>Cancel Order</Text>
+                        <Text style={styles.modalSubtitle}>Reason:</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Enter reason"
@@ -431,15 +418,15 @@ export default function OrderDetail() {
                             <TouchableOpacity
                                 style={styles.approveButton}
                                 onPress={() => {
-                                    setConfirmModalVisible(false); // Close the modal
-                                    cancelOrder(); // Proceed to cancel the order
+                                    setConfirmModalVisible(false);
+                                    cancelOrder();
                                 }}
                             >
                                 <Text style={styles.approveButtonText}>Approve</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.disapproveButton}
-                                onPress={() => setConfirmModalVisible(false)} // Close modal without action
+                                onPress={() => setConfirmModalVisible(false)}
                             >
                                 <Text style={styles.disapproveButtonText}>Disapprove</Text>
                             </TouchableOpacity>
@@ -449,6 +436,8 @@ export default function OrderDetail() {
             </Modal>
         </View>
     );
+
+
 
 }
 
@@ -474,8 +463,18 @@ const styles = StyleSheet.create({
         justifyContent: "space-between", // Ensures the cancel button is at the bottom
     },
     leftColumnContainer: {
-        flexDirection: "row", // Divides the left column into two columns
-        justifyContent: "space-between", // Space between the two sections
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    leftColumnContainerLeft: {
+        flex: 1,
+        paddingRight: 8, // spacing between the left and right parts
+        flexDirection: "column",
+    },
+    leftColumnContainerRight: {
+        flex: 1,
+        paddingLeft: 8,
+        flexDirection: "column",
     },
     leftColumnPart: {
         flex: 1, // Each column takes up equal space

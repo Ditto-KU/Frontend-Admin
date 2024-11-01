@@ -93,12 +93,44 @@ export default function FilterOrder({
     fetchCanteenData(); // Fetch canteens on component mount
   }, []);
 
-  // Fetch restaurant data based on canteenId
   useEffect(() => {
-    if (!selectedCanteen) return; // Exit if no canteen is selected
+    const fetchCanteenData = async () => {
+      setLoading(true);
+      try {
+        let headersList = {
+          Accept: "*/*",
+          Authorization: `Bearer ${authToken}`,
+        };
+
+        let response = await fetch(`https://ku-man-api.vimforlanie.com/admin/canteen`, {
+          method: "GET",
+          headers: headersList,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched canteen data:", data); // Debugging line
+        setCanteens(data);
+      } catch (error) {
+        console.error("Error fetching canteen data:", error);
+        setError(error.message);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCanteenData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCanteen) return;
 
     const fetchRestaurantData = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       try {
         let headersList = {
           Accept: "*/*",
@@ -116,18 +148,19 @@ export default function FilterOrder({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json(); // Parse the response to JSON
-        setRestaurantList(data); // Update state with restaurant data
+        const data = await response.json();
+        console.log("Fetched restaurant data:", data); // Debugging line
+        setRestaurantList(data);
       } catch (error) {
         console.error("Error fetching restaurant data:", error);
-        setError(error.message); // Handle error
+        setError(error.message);
         Alert.alert("Error", error.message);
       } finally {
-        setLoading(false); // Stop loading after fetching the data
+        setLoading(false);
       }
     };
 
-    fetchRestaurantData(); // Fetch restaurants when selectedCanteen changes
+    fetchRestaurantData();
   }, [selectedCanteen]);
 
   // Function to reset filters and close the modal
@@ -176,13 +209,16 @@ export default function FilterOrder({
               <Text>โรงอาหาร</Text>
               <Picker
                 selectedValue={selectedCanteen}
-                onValueChange={(itemValue) => setSelectedCanteen(itemValue)}
+                onValueChange={(itemValue) => {
+                  setSelectedCanteen(itemValue);
+                  setSelectedRestaurant(""); // Clear restaurant selection when canteen changes
+                }}
                 style={styles.dropdownPicker}
               >
                 <Picker.Item label="Select Canteen" value="" />
                 {canteens.map((canteen) => (
                   <Picker.Item
-                    key={canteen.canteenId} // Ensure this is a unique identifier
+                    key={canteen.canteenId} // Unique identifier
                     label={canteen.name}
                     value={canteen.canteenId}
                   />
@@ -199,17 +235,16 @@ export default function FilterOrder({
                   <Picker.Item label="Select Restaurant" value="" />
                   {restaurantList.map((restaurant) => (
                     <Picker.Item
-                      key={restaurant.shopId} // Ensure this is unique for each item
+                      key={restaurant.shopId} // Ensure each item has a unique key
                       label={restaurant.shopName}
                       value={restaurant.shopId}
                     />
                   ))}
                 </Picker>
               ) : (
-                <Text style={styles.disabledText}>
-                  Please select a canteen first
-                </Text>
+                <Text style={styles.disabledText}>Please select a canteen first</Text>
               )}
+
 
 
               {/* Order Status Checkboxes */}
