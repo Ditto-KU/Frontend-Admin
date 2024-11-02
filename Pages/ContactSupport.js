@@ -15,155 +15,145 @@ import { useNavigation } from "@react-navigation/native";
 import Head from "../components/Header";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FilterCS from "../components/FilterCS";
 
 export default function ContactSupport() {
   const route = useRoute();
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [activeFilters, setActiveFilters] = useState(null); // Applied filters
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [supportRequests, setSupportRequests] = useState([]);
-  const [filteredRequests, setFilteredRequests] = useState([]); // State for filtered requests
-  const [searchQuery, setSearchQuery] = useState(""); // State for search input
-  const [filterStatus, setFilterStatus] = useState("all"); // State for filter by status
-  const [authAdmin, setAuthAdmin] = useState("");
+  const [supportRequests, setSupportRequests] = useState([]); // Original data from API
+  const [filteredRequests, setFilteredRequests] = useState([]); // Filtered data to display
+  const [searchQuery, setSearchQuery] = useState(""); // Search input state
+  const [authAdmin, setAuthAdmin] = useState(""); // Authentication token
 
   useEffect(() => {
     const fetchAuthToken = async () => {
       const token = await AsyncStorage.getItem("authAdmin");
       setAuthAdmin(token);
       if (token) {
-        fetchMessages(token); // Pass token to fetchMessages
+        fetchSupportRequests(token); // Fetch support requests using token
       } else {
         Alert.alert("Error", "Authentication token not found.");
       }
     };
-
     fetchAuthToken();
   }, []);
 
-
   // Fetch data from API
-  useEffect(() => {
-    const fetchSupportRequests = async () => {
-      if (!authAdmin) return;
-      try {
-        let headersList = {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${authAdmin}`,
-        };
+  const fetchSupportRequests = async (token) => {
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      };
 
-        let response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
-          method: "GET",
-          headers: headersList,
-        });
+      const response = await fetch("https://ku-man-api.vimforlanie.com/admin/chat", {
+        method: "GET",
+        headers: headers,
+      });
 
-        if (!response.ok) {
-          throw new Error(`Error fetching data: ${response.status}`);
-        }
+      if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
 
-        let data = await response.json();
-        console.log("API Response:", data);
+      const data = await response.json();
+      const combinedRequests = [
+        ...(Array.isArray(data.requester) ? data.requester.map((req) => ({
+          ...req,
+          targetRole: "requester",
+          userId: req.requesterId,
+        })) : []),
+        ...(Array.isArray(data.walker) ? data.walker.map((req) => ({
+          ...req,
+          targetRole: "walker",
+          userId: req.walkerId,
+        })) : []),
+      ];
 
-        // Combine requester and walker data into one array for easier mapping
-        const combinedRequests = [
-          ...(Array.isArray(data.requester) ? data.requester.map((req) => ({
-            ...req,
-            targetRole: "requester",  // Indicate that this is a requester
-            userId: req.requesterId,
-          })) : []),
-          ...(Array.isArray(data.walker) ? data.walker.map((req) => ({
-            ...req,
-            targetRole: "walker",  // Indicate that this is a walker
-            userId: req.walkerId,
-          })) : [])
-        ];
-        setSupportRequests(combinedRequests);
-        setFilteredRequests(combinedRequests); // Initialize filtered requests
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+      setSupportRequests(combinedRequests);
+      setFilteredRequests(combinedRequests); // Initialize filtered requests
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
-    fetchSupportRequests();
-  }, [authAdmin]);
-
-// Handle search input change
-const handleSearch = (text) => {
-  setSearchQuery(text);
-  setFilterStatus("all"); // รีเซ็ตการกรองสถานะทุกครั้งที่ค้นหา
-  filterRequests(text, "all");
-};
-
-
-// ฟังก์ชันในการกรองรายการตาม `orderId` และสถานะ
-const filterRequests = (query, status) => {
-  let filtered = supportRequests;
-
-  // กรองเฉพาะ `orderId` ที่ตรงกับค่าที่ค้นหาอย่างสมบูรณ์ (Exact match)
-  if (query) {
-    filtered = filtered.filter((item) => item.orderId.toString() === query.trim());
-  }
-
-  // กรองตามสถานะ หากเลือกสถานะใดสถานะหนึ่ง
-  if (status !== "all") {
-    filtered = filtered.filter((item) => item.orderStatus === status);
-  }
-
-  setFilteredRequests(filtered);
-};
-
-
-
-
-
-  // Sort the filtered requests by status
-  const sortedRequests = [...filteredRequests].sort((a, b) => {
-    const statusOrder = {
-      inProgress: 1,
-      lookingForWalker: 2,
-      completed: 3,
-      cancelled: 4,
-    };
-
-    return statusOrder[a.orderStatus] - statusOrder[b.orderStatus];
-  });
-
-  // Navigate to ContactSupportDetail with the orderId, userId, and role
+  // Handle search input change
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    applyFilter(activeFilters, text); // Apply filters with updated search text
+  };
+  
+  // Toggle modal visibility
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
+  };
+  
+  // Navigate to ContactSupportDetail screen
   const handleCSPress = (orderId, userId, targetRole) => {
     navigation.navigate("ContactSupportDetail", { orderId, userId, targetRole });
   };
 
-  const toggleModal = () => {
-    setModalVisible(!modalVisible);
-  };
+// Apply filters to the data
+const applyFilter = (filters) => {
+  console.log("Applying filters:", filters); // Debugging statement
+  setActiveFilters(filters); // Set the active filters
+  filterReports(filters, searchQuery); // Filter reports based on current searchText and filters
+};
+const filterReports = (filters, query) => {
+  let filtered = supportRequests;
+  console.log("Filters:", filters); // Debugging statement
 
-  const renderItem = ({ item }) => {
-    // Determine if the item is "completed" or "cancelled" to fade the button
-    const isCompletedOrCancelled = item.orderStatus === "completed" || item.orderStatus === "cancelled";
-
-    // Determine the correct ID to display based on the targetRole
-    const user = item.targetRole === "requester" ? "requester" : "walker";
-    const userId = item.targetRole === "requester" ? item.requesterId : item.walkerId;
-
-    return (
-      <TouchableOpacity
-        onPress={() => handleCSPress(item.orderId, userId, item.targetRole)}  // Pass userId depending on role
-        style={[styles.CS_listItem, isCompletedOrCancelled && styles.fadedButton]} // Apply faded style
-      >
-        <View>
-          <Text style={[styles.CS_listText, { fontWeight: "600" }]}>
-            Order ID: {item.orderId}  {user} ID: {userId}
-          </Text>
-          {/* <Text style={styles.CS_listText}>{user} ID: {userId}</Text> Display the correct ID */}
-          <Text style={styles.CS_listText}>Status: {item.orderStatus}</Text>
-        </View>
-      </TouchableOpacity>
+  // Apply search filter (partial match)
+  if (query) {
+    filtered = filtered.filter(
+      (item) =>
+        item.orderId.toString().includes(query.trim()) ||
+        (item.walkerId && item.walkerId.toString().includes(query.trim())) ||
+        (item.requesterId && item.requesterId.toString().includes(query.trim()))
     );
-  };
+  }
+
+  // Apply role filter based on `walker` or `requester` selection
+  if (filters && filters.role) {
+    const { walker, requester } = filters.role;
+    if (walker && !requester) {
+      filtered = filtered.filter((item) => item.targetRole === "walker");
+    } else if (requester && !walker) {
+      filtered = filtered.filter((item) => item.targetRole === "requester");
+    }
+  }
+
+  console.log("Filtered Requests:", filtered); // Debugging statement
+  setFilteredRequests(filtered); // Update filtered requests to display
+};
+
+const renderItem = ({ item }) => {
+  const isCompletedOrCancelled = item.orderStatus === "completed" || item.orderStatus === "cancelled";
+  
+  // Determine user ID based on role
+  const user = item.targetRole === "requester" ? "requester" : "walker";
+  const userId = item.targetRole === "requester" ? item.requesterId : item.walkerId;
+
+  return (
+    <TouchableOpacity
+      onPress={() => handleCSPress(item.orderId, userId, item.targetRole)}
+      style={[styles.CS_listItem, isCompletedOrCancelled && styles.fadedButton]}
+    >
+      <View>
+        <Text style={[styles.CS_listText, { fontWeight: "600" }]}>
+          Order ID: {item.orderId} {user} ID: {userId}
+        </Text>
+        <Text style={styles.CS_listText}>Status: {item.orderStatus}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+
 
   // If data is still loading
   if (loading) {
@@ -194,34 +184,31 @@ const filterRequests = (query, status) => {
             style={styles.CS_searchInput}
             placeholder="Search by Order ID"
             value={searchQuery}
-            onChangeText={handleSearch} // Handle search input change
+            onChangeText={handleSearch}
           />
-          <TouchableOpacity
-            onPress={toggleModal}
-            style={styles.CS_filterButton}
-          >
-            <Image
-              source={require("../Image/FilterIcon.png")}
-              style={styles.CS_filterIcon}
-            />
+          <TouchableOpacity onPress={toggleModal} style={styles.CS_filterButton}>
+            <Image source={require("../Image/FilterIcon.png")} style={styles.CS_filterIcon} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <FlatList
-          data={sortedRequests} // Display sorted requests
+          data={filteredRequests}
           renderItem={renderItem}
           keyExtractor={(item) => item.orderId.toString()}
           contentContainerStyle={styles.CS_requesterList}
         />
       </ScrollView>
 
-      {/* FilterComponent */}
+      <FilterCS
+        modalVisible={modalVisible}
+        toggleModal={toggleModal}
+        applyFilter={applyFilter}
+      />
     </View>
   );
 }
-
 // Styles for ContactSupport
 const styles = StyleSheet.create({
   CS_container: {
